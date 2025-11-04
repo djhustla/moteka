@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion des Genres Musicaux</title>
+  <style>
+    /* Reset et styles de base */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: #333;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    /* Écran de mot de passe */
+    .password-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .password-box {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+    }
+
+    .password-box h2 {
+        color: #667eea;
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+    }
+
+    .password-input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 1rem;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .password-input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .password-btn {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        width: 100%;
+        transition: background 0.3s ease;
+    }
+
+    .password-btn:hover {
+        background: #5a6fd8;
+    }
+
+    .password-error {
+        color: #e53935;
+        margin-top: 10px;
+        display: none;
+    }
+
+    /* En-tête */
+    .header {
+        background: #667eea;
+        color: white;
+        padding: 25px;
+        text-align: center;
+    }
+
+    .header h1 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+    }
+
+    .header p {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    /* Contenu principal */
+    .main-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        padding: 25px;
+    }
+
+    @media (max-width: 768px) {
+        .main-content {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+    }
+
+    /* Sections */
+    .table-section, .form-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #e9ecef;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        color: #495057;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #667eea;
+    }
+
+    /* Tableau */
+    .genres-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .genres-table th {
+        background: #667eea;
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .genres-table td {
+        padding: 12px;
+        border-bottom: 1px solid #e9ecef;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        font-size: 0.9rem;
+    }
+
+    .genres-table tr:hover td {
+        background: #f8f9fa;
+    }
+
+    .genres-table tr.selected td {
+        background: #e3f2fd;
+        border-left: 3px solid #667eea;
+    }
+
+    .genre-id {
+        font-weight: bold;
+        color: #667eea;
+    }
+
+    /* Formulaire */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #495057;
+        font-size: 1rem;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: border-color 0.2s ease;
+        background: white;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    /* Boutons */
+    .buttons-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    @media (max-width: 480px) {
+        .buttons-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .btn {
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-warning {
+        background: #ffa726;
+        color: white;
+    }
+
+    .btn-danger {
+        background: #ef5350;
+        color: white;
+    }
+
+    .btn-success {
+        background: #66bb6a;
+        color: white;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-finish {
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    /* Messages */
+    .message {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .message.success {
+        background: #e8f5e8;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
+    }
+
+    .message.error {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+    }
+
+    .message.info {
+        background: #e3f2fd;
+        color: #1565c0;
+        border: 1px solid #bbdefb;
+    }
+
+    /* États */
+    .loading {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .spinner {
+        width: 30px;
+        height: 30px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 30px 15px;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+        body {
+            padding: 10px;
+        }
+
+        .header h1 {
+            font-size: 1.7rem;
+        }
+
+        .main-content {
+            padding: 15px;
+        }
+
+        .table-section, .form-section {
+            padding: 15px;
+        }
+
+        .genres-table th,
+        .genres-table td {
+            padding: 10px 8px;
+        }
+    }
+  </style>
+</head>
+<body>
+<!-- Écran de mot de passe -->
+<div id="passwordScreen" class="password-screen">
+  <div class="password-box">
+    <h2>🔒 Accès Administrateur</h2>
+    <input type="password" id="passwordInput" class="password-input" placeholder="Entrez le mot de passe" autocomplete="off">
+    <button id="passwordBtn" class="password-btn">Accéder</button>
+    <div id="passwordError" class="password-error">Mot de passe incorrect</div>
+  </div>
+</div>
+
+<!-- Contenu principal (caché initialement) -->
+<div id="mainContent" style="display: none;">
+  <div class="container">
+    <!-- En-tête -->
+    <div class="header">
+      <h1>🎵 Gestion des Genres Musicaux</h1>
+      <p>Ajoutez, modifiez ou supprimez des styles musicaux</p>
+    </div>
+
+    <!-- Messages -->
+    <div id="messageContainer" style="display: none;"></div>
+
+    <!-- Contenu principal -->
+    <div class="main-content">
+      <!-- Section tableau -->
+      <div class="table-section">
+        <h2 class="section-title">Styles Musicaux Disponibles</h2>
+
+        <!-- État de chargement -->
+        <div id="loadingState" class="loading">
+          <div class="spinner"></div>
+          <p>Chargement des genres musicaux...</p>
+        </div>
+
+        <!-- État vide -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <i>🎵</i>
+          <h3>Aucun genre musical</h3>
+          <p>Commencez par ajouter votre premier style musical !</p>
+        </div>
+
+        <!-- Tableau -->
+        <div id="tableContainer" style="display: none;">
+          <table class="genres-table">
+            <thead>
+            <tr>
+              <th>ID</th>
+              <th>Description</th>
+            </tr>
+            </thead>
+            <tbody id="genresTableBody">
+            <!-- Les genres seront ajoutés ici dynamiquement -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section formulaire -->
+      <div class="form-section">
+        <h2 class="section-title">Gestion des Styles</h2>
+
+        <div class="form-group">
+          <label for="genreDescription">Genre musical</label>
+          <input
+                  type="text"
+                  id="genreDescription"
+                  class="input-field"
+                  placeholder="Ex: Rock, Jazz, Classique..."
+                  maxlength="255"
+          >
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="buttons-grid">
+          <button id="btnAdd" class="btn btn-primary">
+            ➕ Ajouter
+          </button>
+          <button id="btnEdit" class="btn btn-warning" disabled>
+            ✏️ Modifier
+          </button>
+          <button id="btnDelete" class="btn btn-danger" disabled>
+            🗑️ Supprimer
+          </button>
+        </div>
+
+        <!-- Bouton terminer -->
+        <button id="btnFinish" class="btn btn-success btn-finish">
+          ✅ Terminer
+        </button>
+
+        <!-- Sélection actuelle -->
+        <div id="currentSelection" class="message info" style="display: none; margin-top: 15px;">
+          Aucun genre sélectionné
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Mot de passe requis
+  const REQUIRED_PASSWORD = "ttmk";
+
+  // Configuration de l'API - ✅ CORRIGÉ
+  const API_BASE_URL = '/api';
+  const MUSIC_GENRES_ENDPOINT = `${API_BASE_URL}/music-genres`;
+
+  // Éléments DOM
+  const passwordScreen = document.getElementById('passwordScreen');
+  const passwordInput = document.getElementById('passwordInput');
+  const passwordBtn = document.getElementById('passwordBtn');
+  const passwordError = document.getElementById('passwordError');
+  const mainContent = document.getElementById('mainContent');
+
+  const loadingState = document.getElementById('loadingState');
+  const emptyState = document.getElementById('emptyState');
+  const tableContainer = document.getElementById('tableContainer');
+  const genresTableBody = document.getElementById('genresTableBody');
+  const messageContainer = document.getElementById('messageContainer');
+  const currentSelection = document.getElementById('currentSelection');
+
+  const genreDescriptionInput = document.getElementById('genreDescription');
+  const btnAdd = document.getElementById('btnAdd');
+  const btnEdit = document.getElementById('btnEdit');
+  const btnDelete = document.getElementById('btnDelete');
+  const btnFinish = document.getElementById('btnFinish');
+
+  // Variables globales
+  let genres = [];
+  let selectedGenreId = null;
+
+  // Gestion du mot de passe
+  function setupPasswordProtection() {
+      passwordBtn.addEventListener('click', checkPassword);
+      passwordInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+              checkPassword();
+          }
+      });
+
+      // Focus sur le champ mot de passe
+      passwordInput.focus();
+  }
+
+  function checkPassword() {
+      const enteredPassword = passwordInput.value.trim();
+
+      if (enteredPassword === REQUIRED_PASSWORD) {
+          passwordScreen.style.display = 'none';
+          mainContent.style.display = 'block';
+          loadGenres();
+          setupEventListeners();
+      } else {
+          passwordError.style.display = 'block';
+          passwordInput.value = '';
+          passwordInput.focus();
+      }
+  }
+
+  // Configuration des événements
+  function setupEventListeners() {
+      btnAdd.addEventListener('click', addGenre);
+      btnEdit.addEventListener('click', editGenre);
+      btnDelete.addEventListener('click', deleteGenre);
+      btnFinish.addEventListener('click', finish);
+
+      genreDescriptionInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+              addGenre();
+          }
+      });
+  }
+
+  // Charger les genres depuis l'API
+  async function loadGenres() {
+      showLoadingState();
+
+      try {
+          const response = await fetch(MUSIC_GENRES_ENDPOINT);
+
+          if (!response.ok) {
+              throw new Error(`Erreur HTTP: ${response.status}`);
+          }
+
+          genres = await response.json();
+          displayGenres();
+
+      } catch (error) {
+          console.error('Erreur lors du chargement des genres:', error);
+          showMessage('Erreur lors du chargement des genres musicaux', 'error');
+      }
+  }
+
+  // Afficher les genres dans le tableau
+  function displayGenres() {
+      loadingState.style.display = 'none';
+
+      if (!genres || genres.length === 0) {
+          emptyState.style.display = 'block';
+          tableContainer.style.display = 'none';
+          return;
+      }
+
+      emptyState.style.display = 'none';
+      tableContainer.style.display = 'block';
+
+      // Générer les lignes du tableau
+      const rowsHTML = genres.map(genre => `
+          <tr data-id="${genre.id}" onclick="selectGenre(${genre.id})" class="${selectedGenreId === genre.id ? 'selected' : ''}">
+              <td class="genre-id">#${genre.id}</td>
+              <td>${escapeHtml(genre.description)}</td>
+          </tr>
+      `).join('');
+
+      genresTableBody.innerHTML = rowsHTML;
+  }
+
+  // Sélectionner un genre
+  function selectGenre(genreId) {
+      selectedGenreId = genreId;
+
+      // Mettre à jour l'apparence des lignes
+      document.querySelectorAll('#genresTableBody tr').forEach(row => {
+          row.classList.toggle('selected', row.dataset.id == genreId);
+      });
+
+      // Activer les boutons et mettre à jour l'affichage
+      btnEdit.disabled = false;
+      btnDelete.disabled = false;
+
+      const selectedGenre = genres.find(g => g.id === genreId);
+      currentSelection.innerHTML = `Genre sélectionné : <strong>${escapeHtml(selectedGenre.description)}</strong> (ID: ${genreId})`;
+      currentSelection.style.display = 'block';
+
+      // Remplir le champ avec la description du genre sélectionné
+      genreDescriptionInput.value = selectedGenre.description;
+      genreDescriptionInput.focus();
+  }
+
+  // Ajouter un nouveau genre
+  async function addGenre() {
+      const description = genreDescriptionInput.value.trim();
+
+      if (!description) {
+          showMessage('Veuillez saisir un nom de genre musical', 'error');
+          genreDescriptionInput.focus();
+          return;
+      }
+
+      if (description.length > 255) {
+          showMessage('Le nom du genre ne peut pas dépasser 255 caractères', 'error');
+          return;
+      }
+
+      try {
+          btnAdd.disabled = true;
+          btnAdd.textContent = 'Ajout en cours...';
+
+          const response = await fetch(MUSIC_GENRES_ENDPOINT, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ description: description })
+          });
+
+          if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(errorText || `Erreur HTTP: ${response.status}`);
+          }
+
+          const newGenre = await response.json();
+
+          // Réinitialiser le champ
+          genreDescriptionInput.value = '';
+
+          // Recharger la liste
+          await loadGenres();
+
+          showMessage(`Genre "${description}" ajouté avec succès !`, 'success');
+
+      } catch (error) {
+          console.error('Erreur lors de l\'ajout:', error);
+          showMessage(error.message || 'Erreur lors de l\'ajout du genre musical', 'error');
+      } finally {
+          btnAdd.disabled = false;
+          btnAdd.textContent = '➕ Ajouter';
+      }
+  }
+
+  // Modifier un genre existant
+  async function editGenre() {
+      if (!selectedGenreId) {
+          showMessage('Veuillez sélectionner un genre à modifier', 'error');
+          return;
+      }
+
+      const newDescription = genreDescriptionInput.value.trim();
+
+      if (!newDescription) {
+          showMessage('Veuillez saisir un nouveau nom pour le genre', 'error');
+          genreDescriptionInput.focus();
+          return;
+      }
+
+      if (newDescription.length > 255) {
+          showMessage('Le nom du genre ne peut pas dépasser 255 caractères', 'error');
+          return;
+      }
+
+      try {
+          btnEdit.disabled = true;
+          btnEdit.textContent = 'Modification...';
+
+          const response = await fetch(`${MUSIC_GENRES_ENDPOINT}/${selectedGenreId}`, {
+              method: 'PUT',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ description: newDescription })
+          });
+
+          if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(errorText || `Erreur HTTP: ${response.status}`);
+          }
+
+          const updatedGenre = await response.json();
+
+          // Réinitialiser la sélection
+          resetSelection();
+
+          // Recharger la liste
+          await loadGenres();
+
+          showMessage(`Genre modifié avec succès en "${newDescription}" !`, 'success');
+
+      } catch (error) {
+          console.error('Erreur lors de la modification:', error);
+          showMessage(error.message || 'Erreur lors de la modification du genre musical', 'error');
+      } finally {
+          btnEdit.disabled = false;
+          btnEdit.textContent = '✏️ Modifier';
+      }
+  }
+
+  // Supprimer un genre
+  async function deleteGenre() {
+      if (!selectedGenreId) {
+          showMessage('Veuillez sélectionner un genre à supprimer', 'error');
+          return;
+      }
+
+      const selectedGenre = genres.find(g => g.id === selectedGenreId);
+
+      if (!confirm(`Êtes-vous sûr de vouloir supprimer le genre "${selectedGenre.description}" ?`)) {
+          return;
+      }
+
+      try {
+          btnDelete.disabled = true;
+          btnDelete.textContent = 'Suppression...';
+
+          const response = await fetch(`${MUSIC_GENRES_ENDPOINT}/${selectedGenreId}`, {
+              method: 'DELETE'
+          });
+
+          if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(errorText || `Erreur HTTP: ${response.status}`);
+          }
+
+          // Réinitialiser la sélection
+          resetSelection();
+
+          // Recharger la liste
+          await loadGenres();
+
+          showMessage(`Genre "${selectedGenre.description}" supprimé avec succès !`, 'success');
+
+      } catch (error) {
+          console.error('Erreur lors de la suppression:', error);
+          showMessage(error.message || 'Erreur lors de la suppression du genre musical', 'error');
+      } finally {
+          btnDelete.disabled = false;
+          btnDelete.textContent = '🗑️ Supprimer';
+      }
+  }
+
+  // Réinitialiser la sélection
+  function resetSelection() {
+      selectedGenreId = null;
+      genreDescriptionInput.value = '';
+      btnEdit.disabled = true;
+      btnDelete.disabled = true;
+      currentSelection.style.display = 'none';
+  }
+
+  // Terminer et retourner au menu
+  function finish() {
+      window.location.href = '/menu/menu.html';
+  }
+
+  // Afficher l'état de chargement
+  function showLoadingState() {
+      loadingState.style.display = 'block';
+      emptyState.style.display = 'none';
+      tableContainer.style.display = 'none';
+  }
+
+  // Afficher un message
+  function showMessage(text, type = 'info') {
+      messageContainer.innerHTML = `
+          <div class="message ${type}">
+              ${escapeHtml(text)}
+          </div>
+      `;
+      messageContainer.style.display = 'block';
+
+      // Masquer le message après 5 secondes
+      setTimeout(() => {
+          messageContainer.style.display = 'none';
+      }, 5000);
+  }
+
+  // Échapper le HTML pour la sécurité
+  function escapeHtml(unsafe) {
+      return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+  }
+
+  // Initialisation
+  document.addEventListener('DOMContentLoaded', function() {
+      setupPasswordProtection();
+  });
+</script>
+</body>
+</html>

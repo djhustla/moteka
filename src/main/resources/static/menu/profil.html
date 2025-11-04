@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Utilisateur</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; position:relative;
+        }
+
+        /* Boutons fixes en haut */
+        .buttons-container {
+          position: fixed; top:20px; right:20px;
+          display:flex; gap:10px; z-index:100;
+        }
+        .buttons-container button {
+          background:#fff; color:#667eea; border:none; padding:8px 16px; border-radius:10px;
+          font-size:0.95rem; font-weight:600; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.2); transition:all 0.2s;
+        }
+        .buttons-container button:hover { background:#667eea; color:#fff; }
+
+        .profile-container {
+          background:white; border-radius:24px; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+          overflow:hidden; width:100%; max-width:500px;
+        }
+        .header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          padding:40px 30px; text-align:center; color:white;
+          position: relative;
+        }
+        .profile-photo { width:120px; height:120px; border-radius:50%; border:4px solid white; margin-bottom:15px; object-fit:cover; }
+        h1 { font-size:2rem; font-weight:700; margin-bottom:5px; }
+        .profile-content { padding:30px; }
+        .info-group { margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #e5e7eb; }
+        .info-group:last-child { border-bottom:none; }
+        .info-label { font-size:0.85rem; color:#9ca3af; font-weight:600; margin-bottom:5px; }
+        .info-value { font-size:1.1rem; color:#374151; font-weight:500; }
+        .loading { text-align:center; padding:40px; color:#667eea; }
+        .error { text-align:center; padding:40px; color:#dc2626; }
+
+        /* Bouton discuter */
+        .chat-button {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 25px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin: 20px auto;
+          width: fit-content;
+        }
+        .chat-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        }
+        .chat-button:active {
+          transform: translateY(0);
+        }
+
+        /* Styles pour les favoris musicaux */
+        .favoris-section {
+          background:#f8f9ff;
+          border:2px solid #e0e7ff;
+          border-radius:12px;
+          padding:20px;
+          margin:20px 0;
+        }
+        .favoris-title {
+          font-weight:700;
+          color:#667eea;
+          margin-bottom:15px;
+          text-align:center;
+          font-size:1.1rem;
+        }
+        .favoris-item {
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          padding:12px 0;
+          border-bottom:1px solid #e5e7eb;
+        }
+        .favoris-item:last-child {
+          border-bottom:none;
+        }
+        .favoris-genre {
+          font-weight:600;
+          color:#374151;
+          font-size:1rem;
+        }
+        .favoris-cote {
+          font-size:0.9rem;
+          padding:6px 12px;
+          border-radius:8px;
+          font-weight:600;
+          min-width: 60px;
+          text-align: center;
+        }
+        .cote-10 { background:#dbeafe; color:#2563eb; border: 2px solid #2563eb; }
+        .cote-9 { background:#dbeafe; color:#2563eb; }
+        .cote-8 { background:#d1fae5; color:#059669; }
+        .cote-7 { background:#d1fae5; color:#059669; }
+        .cote-6 { background:#fef3c7; color:#d97706; }
+        .cote-5 { background:#fef3c7; color:#d97706; }
+        .cote-4 { background:#fef3c7; color:#d97706; }
+        .cote-3 { background:#fee2e2; color:#dc2626; }
+        .cote-2 { background:#fee2e2; color:#dc2626; }
+        .cote-1 { background:#fee2e2; color:#dc2626; border: 2px solid #dc2626; }
+        .no-favoris {
+          color:#6b7280;
+          font-style:italic;
+          text-align:center;
+          padding:15px;
+        }
+
+        /* Styles pour le son d'entrée (caché) */
+        .audio-player {
+          display: none;
+        }
+
+        /* Indicateur de son en cours */
+        .son-playing-indicator {
+          position: fixed;
+          top: 20px;
+          left: 20px;
+          background: rgba(16, 185, 129, 0.9);
+          color: white;
+          padding: 8px 16px;
+          border-radius: 20px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          z-index: 1000;
+          display: none;
+          align-items: center;
+          gap: 8px;
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Indicateur de son en cours -->
+<div id="sonPlayingIndicator" class="son-playing-indicator">
+    🔈 Son d'entrée en cours...
+</div>
+
+<div class="buttons-container">
+    <button onclick="window.location.href='/menu/afficherUserList.html'">⬅ Retour à la liste</button>
+    <button id="btnLogout">🚪 Déconnexion</button>
+</div>
+
+<div class="profile-container">
+    <div class="header">
+        <img id="profilePhoto" class="profile-photo" src="" alt="Photo de profil">
+        <h1 id="profileUsername">Chargement...</h1>
+    </div>
+
+    <div class="profile-content" id="profileContent">
+        <div class="loading">Chargement des informations...</div>
+    </div>
+</div>
+
+<!-- Lecteur audio caché -->
+<audio id="sonEntreePlayer" class="audio-player"></audio>
+
+<script>
+    const token = localStorage.getItem('accessToken');
+
+    // Vérifier si l'utilisateur est connecté
+    if (!token) {
+        alert('Vous devez être connecté pour voir les profils');
+        window.location.href = '/connection/connection.html';
+    }
+
+    // Variables pour stocker les données
+    let currentUserId = null;
+    let targetUserId = null;
+
+    // Récupérer l'ID depuis les paramètres d'URL
+    function getUserIdFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('userId');
+    }
+
+    // Récupérer l'ID de l'utilisateur courant
+    async function getCurrentUserId() {
+        try {
+            const response = await fetch('/api/users/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!response.ok) throw new Error('Erreur lors de la récupération du profil');
+            const userData = await response.json();
+            return userData.id;
+        } catch (error) {
+            console.error('Erreur:', error);
+            return null;
+        }
+    }
+
+    // Fonction pour charger les favoris musicaux
+    async function loadMusicFavoris(userId) {
+        try {
+            const response = await fetch(`/api/users/${userId}/music-favoris`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                return data.favoris || data; // Support des deux formats
+            } else {
+                return [];
+            }
+        } catch (err) {
+            console.error('Erreur chargement favoris:', err);
+            return [];
+        }
+    }
+
+    // Fonction pour nettoyer l'URL des sauts de ligne
+    function cleanUrl(url) {
+        if (!url) return '';
+        return url.replace(/\n/g, '').replace(/\r/g, '').trim();
+    }
+
+    // Fonction pour jouer le son d'entrée
+    function playSonEntree(sonUrl) {
+        if (!sonUrl) return;
+
+        const cleanedUrl = cleanUrl(sonUrl);
+        const audioPlayer = document.getElementById('sonEntreePlayer');
+        const indicator = document.getElementById('sonPlayingIndicator');
+
+        // Configurer le lecteur audio
+        audioPlayer.src = cleanedUrl;
+        audioPlayer.volume = 0.7; // Volume à 70%
+
+        // Afficher l'indicateur
+        indicator.style.display = 'flex';
+
+        // Événement quand la lecture commence
+        audioPlayer.onplay = function() {
+            console.log('🎵 Son d\'entrée en cours de lecture');
+        };
+
+        // Événement quand la lecture se termine
+        audioPlayer.onended = function() {
+            indicator.style.display = 'none';
+            console.log('🎵 Son d\'entrée terminé');
+        };
+
+        // Événement en cas d'erreur
+        audioPlayer.onerror = function() {
+            indicator.style.display = 'none';
+            console.error('❌ Erreur lors de la lecture du son');
+        };
+
+        // Démarrer la lecture
+        audioPlayer.play().catch(error => {
+            console.error('Erreur de lecture audio:', error);
+            indicator.style.display = 'none';
+        });
+    }
+
+    // Fonction pour afficher les favoris musicaux
+    function displayMusicFavoris(favoris) {
+        if (!favoris || favoris.length === 0) {
+            return `
+                <div class="favoris-section">
+                    <div class="favoris-title">🎵 Favoris Musicaux</div>
+                    <div class="no-favoris">Aucun favori musical défini</div>
+                </div>
+            `;
+        }
+
+        // Trier par cote décroissante
+        const sortedFavoris = [...favoris].sort((a, b) => b.cotePreference - a.cotePreference);
+
+        let html = `
+            <div class="favoris-section">
+                <div class="favoris-title">🎵 Favoris Musicaux</div>
+        `;
+
+        sortedFavoris.forEach(favori => {
+            const coteClass = `cote-${favori.cotePreference}`;
+
+            html += `
+                <div class="favoris-item">
+                    <span class="favoris-genre">${favori.musicGenreDescription}</span>
+                    <span class="favoris-cote ${coteClass}">${favori.cotePreference}/10</span>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        return html;
+    }
+
+    async function loadUserProfile() {
+        targetUserId = getUserIdFromURL();
+
+        if (!targetUserId) {
+            document.getElementById('profileContent').innerHTML = `
+                <div class="error">ID utilisateur manquant dans l'URL</div>
+            `;
+            return;
+        }
+
+        try {
+            // Récupérer l'ID de l'utilisateur courant
+            currentUserId = await getCurrentUserId();
+            if (!currentUserId) {
+                throw new Error('Impossible de récupérer votre profil');
+            }
+
+            // Charger les données du profil cible
+            const response = await fetch(`/api/users/${targetUserId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Utilisateur non trouvé');
+                }
+                throw new Error('Erreur lors du chargement du profil');
+            }
+
+            const user = await response.json();
+
+            // Mettre à jour l'interface
+            document.getElementById('profileUsername').textContent = user.username;
+            document.getElementById('profilePhoto').src = user.photoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&size=120&background=667eea&color=fff`;
+
+            // Gestion de l'erreur de chargement de l'image
+            document.getElementById('profilePhoto').onerror = function() {
+                this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&size=120&background=667eea&color=fff`;
+            };
+
+            // JOUER LE SON D'ENTRÉE IMMÉDIATEMENT
+            if (user.sonEntreeURL) {
+                playSonEntree(user.sonEntreeURL);
+            }
+
+            // Vérifier si c'est le profil de l'utilisateur courant
+            const isCurrentUser = (currentUserId.toString() === targetUserId.toString());
+
+            let favorisSection = '';
+
+            // Charger et afficher les favoris musicaux
+            const favoris = await loadMusicFavoris(targetUserId);
+            favorisSection = displayMusicFavoris(favoris);
+
+            // Afficher les informations du profil
+            document.getElementById('profileContent').innerHTML = `
+                <div class="info-group">
+                    <div class="info-label">Nom d'utilisateur</div>
+                    <div class="info-value">${user.username}</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">${user.email}</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Rôle</div>
+                    <div class="info-value">${user.role}</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Membre depuis</div>
+                    <div class="info-value">${new Date(user.createdAt).toLocaleDateString('fr-FR')}</div>
+                </div>
+
+                ${favorisSection}
+
+                <!-- Bouton Discuter - affiché seulement si ce n'est PAS l'utilisateur courant -->
+                ${!isCurrentUser ? `
+                    <button class="chat-button" onclick="startConversation('${user.id}', '${user.username}')">
+                        💬 Discuter avec ${user.username}
+                    </button>
+                ` : ''}
+            `;
+
+        } catch(error) {
+            console.error('Erreur:', error);
+            document.getElementById('profileContent').innerHTML = `
+                <div class="error">
+                    ${error.message}
+                    <br><br>
+                    <button onclick="loadUserProfile()" style="margin-top:10px; padding:8px 16px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer;">
+                        Réessayer
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // Fonction pour démarrer une conversation
+    function startConversation(userId, username) {
+        // Rediriger vers la page de conversation avec l'ID de l'utilisateur
+        window.location.href = `/menu/ma_communaute/conversation.html?userId=${userId}`;
+    }
+
+    // Déconnexion
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        try {
+            if (refreshToken) {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type':'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                });
+            }
+
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            alert('Déconnexion réussie');
+            window.location.href = '/connection/connection.html';
+
+        } catch(err) {
+            console.error('Erreur déconnexion:', err);
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            window.location.href = '/connection/connection.html';
+        }
+    });
+
+    // Charger le profil au démarrage
+    document.addEventListener('DOMContentLoaded', loadUserProfile);
+</script>
+
+</body>
+</html>

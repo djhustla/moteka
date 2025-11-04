@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Goûts Musicaux</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+          font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height:100vh;
+          display:flex;
+          justify-content:center;
+          align-items:center;
+          padding:20px;
+        }
+
+        .form-container {
+          background:white;
+          border-radius:24px;
+          box-shadow:0 20px 60px rgba(0,0,0,0.3);
+          width:100%;
+          max-width:500px;
+          overflow:hidden;
+        }
+
+        .header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          padding:40px 30px 30px 30px;
+          text-align:center;
+          color:white;
+          position:relative;
+        }
+
+        h1 {
+          font-size:2rem;
+          font-weight:700;
+          margin-bottom:8px;
+        }
+
+        .subtitle {
+          font-size:0.95rem;
+          opacity:0.9;
+        }
+
+        .back-btn {
+          position:absolute;
+          top:15px;
+          left:15px;
+          background:rgba(255,255,255,0.2);
+          color:white;
+          border:none;
+          padding:8px 14px;
+          border-radius:8px;
+          cursor:pointer;
+          font-weight:600;
+          transition:0.3s;
+        }
+
+        .back-btn:hover {
+          background:rgba(255,255,255,0.3);
+        }
+
+        .form-content {
+          padding:30px;
+        }
+
+        .preference-section {
+          margin-bottom:25px;
+          padding:20px;
+          background:#f8f9ff;
+          border-radius:12px;
+          border:2px solid #e5e7eb;
+          transition:all 0.3s;
+        }
+
+        .preference-section:hover {
+          border-color:#667eea;
+        }
+
+        .preference-title {
+          font-weight:600;
+          color:#374151;
+          margin-bottom:12px;
+          display:flex;
+          align-items:center;
+          gap:8px;
+          font-size:1.1rem;
+        }
+
+        select {
+          width:100%;
+          padding:12px 16px;
+          border:2px solid #e5e7eb;
+          border-radius:10px;
+          font-size:1rem;
+          font-family:inherit;
+          background:white;
+          cursor:pointer;
+          transition:all 0.3s;
+        }
+
+        select:focus {
+          outline:none;
+          border-color:#667eea;
+          box-shadow:0 0 0 4px rgba(102,126,234,0.1);
+        }
+
+        .error {
+          color:#dc2626;
+          font-size:0.85rem;
+          margin-top:5px;
+          display:none;
+        }
+
+        .duplicate-error {
+          background:#fee;
+          color:#dc2626;
+          padding:12px 16px;
+          border-radius:10px;
+          margin-bottom:20px;
+          border:1px solid #fecaca;
+          display:none;
+        }
+
+        .submit-btn {
+          width:100%;
+          padding:16px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color:white;
+          border:none;
+          border-radius:12px;
+          font-size:1.1rem;
+          font-weight:600;
+          cursor:pointer;
+          transition:all 0.3s;
+          margin-top:10px;
+          box-shadow:0 4px 12px rgba(102,126,234,0.3);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+          transform:translateY(-2px);
+          box-shadow:0 6px 20px rgba(102,126,234,0.4);
+        }
+
+        .submit-btn:disabled {
+          opacity:0.6;
+          cursor:not-allowed;
+          transform:none;
+        }
+
+        .success-message {
+          background:#d1fae5;
+          color:#059669;
+          padding:12px 16px;
+          border-radius:10px;
+          margin-bottom:20px;
+          border:1px solid #a7f3d0;
+          display:none;
+        }
+
+        .loading {
+          text-align:center;
+          padding:20px;
+          color:#667eea;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <div class="header">
+        <button class="back-btn" onclick="window.location.href='menu.html'">⬅️ Retour</button>
+        <h1>Mes Goûts Musicaux</h1>
+        <p class="subtitle">Classifiez vos genres musicaux préférés</p>
+    </div>
+
+    <div class="form-content">
+        <div class="duplicate-error" id="duplicateError">
+            ❌ Un genre musical ne peut pas être sélectionné dans plusieurs catégories
+        </div>
+
+        <div class="success-message" id="successMessage">
+            ✅ Vos préférences musicales ont été mises à jour avec succès !
+        </div>
+
+        <div class="loading" id="loadingGenres">
+            Chargement des genres musicaux...
+        </div>
+
+        <!-- Mon kiff! (Niveau 3 = Cote 10) -->
+        <div class="preference-section" style="display:none;" id="section1">
+            <div class="preference-title">❤️ Mon kiff! (Cote: 10/10)</div>
+            <select id="preference1">
+                <option value="">-- Choisissez votre genre préféré --</option>
+            </select>
+            <div class="error" id="error1"></div>
+        </div>
+
+        <!-- Ça passe bien (Niveau 2 = Cote 7) -->
+        <div class="preference-section" style="display:none;" id="section2">
+            <div class="preference-title">😊 Ça passe bien (Cote: 7/10)</div>
+            <select id="preference2">
+                <option value="">-- Choisissez un genre que vous appréciez --</option>
+            </select>
+            <div class="error" id="error2"></div>
+        </div>
+
+        <!-- Boff, sans plus (Niveau 1 = Cote 4) -->
+        <div class="preference-section" style="display:none;" id="section3">
+            <div class="preference-title">😐 Boff, sans plus (Cote: 4/10)</div>
+            <select id="preference3">
+                <option value="">-- Choisissez un genre neutre --</option>
+            </select>
+            <div class="error" id="error3"></div>
+        </div>
+
+        <!-- Ça me donne des boutons verts (Niveau 0 = Cote 1) -->
+        <div class="preference-section" style="display:none;" id="section4">
+            <div class="preference-title">🤢 Ça me donne des boutons verts (Cote: 1/10)</div>
+            <select id="preference4">
+                <option value="">-- Choisissez un genre que vous détestez --</option>
+            </select>
+            <div class="error" id="error4"></div>
+        </div>
+
+        <button class="submit-btn" id="submitBtn" style="display:none;">Enregistrer mes préférences</button>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      alert('Vous devez être connecté');
+      window.location.href = '/connection/connection.html';
+    }
+
+    const submitBtn = document.getElementById('submitBtn');
+    const duplicateError = document.getElementById('duplicateError');
+    const successMessage = document.getElementById('successMessage');
+    const loadingGenres = document.getElementById('loadingGenres');
+
+    let musicGenres = [];
+
+    // Charger les genres musicaux depuis l'API
+    async function loadMusicGenres() {
+        try {
+            const response = await fetch('/api/music-genres', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors du chargement des genres musicaux');
+            }
+
+            musicGenres = await response.json();
+            populateSelects();
+
+            // Afficher les sections et le bouton
+            document.querySelectorAll('.preference-section').forEach(section => {
+                section.style.display = 'block';
+            });
+            submitBtn.style.display = 'block';
+            loadingGenres.style.display = 'none';
+
+        } catch (err) {
+            console.error('Erreur:', err);
+            loadingGenres.innerHTML = `
+                <div style="color:#dc2626;">
+                    ❌ Erreur lors du chargement des genres musicaux
+                    <br>
+                    <small>Veuillez vérifier que l'endpoint /api/music-genres existe</small>
+                    <br>
+                    <button onclick="loadMusicGenres()" style="margin-top:10px; padding:8px 16px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer;">
+                        Réessayer
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // Remplir les listes déroulantes avec les genres
+    function populateSelects() {
+        const selects = [
+            document.getElementById('preference1'),
+            document.getElementById('preference2'),
+            document.getElementById('preference3'),
+            document.getElementById('preference4')
+        ];
+
+        selects.forEach(select => {
+            // Garder l'option par défaut
+            const defaultOption = select.options[0];
+            select.innerHTML = '';
+            select.appendChild(defaultOption);
+
+            // Ajouter toutes les options de genres
+            musicGenres.forEach(genre => {
+                const option = document.createElement('option');
+                option.value = genre.id; // Utiliser l'ID du genre
+                option.textContent = genre.description;
+                select.appendChild(option);
+            });
+        });
+    }
+
+    // Vérification des doublons en temps réel
+    function checkForDuplicates() {
+        const selects = [
+            document.getElementById('preference1'),
+            document.getElementById('preference2'),
+            document.getElementById('preference3'),
+            document.getElementById('preference4')
+        ];
+
+        const selectedValues = new Set();
+        let hasDuplicates = false;
+
+        // Réinitialiser les erreurs
+        document.querySelectorAll('.error').forEach(error => {
+            error.style.display = 'none';
+        });
+        duplicateError.style.display = 'none';
+
+        // Vérifier les doublons
+        selects.forEach((select, index) => {
+            const value = select.value;
+            if (value && value !== '') {
+                if (selectedValues.has(value)) {
+                    // Doublon détecté
+                    hasDuplicates = true;
+                    const errorElement = document.getElementById(`error${index + 1}`);
+                    errorElement.textContent = 'Ce genre est déjà sélectionné';
+                    errorElement.style.display = 'block';
+                    select.style.borderColor = '#dc2626';
+                } else {
+                    selectedValues.add(value);
+                    select.style.borderColor = '#e5e7eb';
+                }
+            } else {
+                select.style.borderColor = '#e5e7eb';
+            }
+        });
+
+        if (hasDuplicates) {
+            duplicateError.style.display = 'block';
+        }
+
+        return hasDuplicates;
+    }
+
+    // Écouteurs pour la vérification en temps réel
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', () => {
+                checkForDuplicates();
+            });
+        });
+    });
+
+    // Soumission du formulaire - UTILISE LES BONS ENDPOINTS
+    submitBtn.addEventListener('click', async () => {
+        // Vérifier les doublons
+        if (checkForDuplicates()) {
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Enregistrement...';
+
+        try {
+            // Récupérer les sélections avec leurs cotes
+            const favorisRequests = [];
+
+            const preference1 = document.getElementById('preference1').value;
+            const preference2 = document.getElementById('preference2').value;
+            const preference3 = document.getElementById('preference3').value;
+            const preference4 = document.getElementById('preference4').value;
+
+            // Ajouter seulement les préférences sélectionnées
+            if (preference1 && preference1 !== '') {
+                favorisRequests.push({
+                    musicGenreId: parseInt(preference1),
+                    cotePreference: 10  // Mon kiff!
+                });
+            }
+
+            if (preference2 && preference2 !== '') {
+                favorisRequests.push({
+                    musicGenreId: parseInt(preference2),
+                    cotePreference: 7   // Ça passe bien
+                });
+            }
+
+            if (preference3 && preference3 !== '') {
+                favorisRequests.push({
+                    musicGenreId: parseInt(preference3),
+                    cotePreference: 4   // Boff, sans plus
+                });
+            }
+
+            if (preference4 && preference4 !== '') {
+                favorisRequests.push({
+                    musicGenreId: parseInt(preference4),
+                    cotePreference: 1   // Boutons verts
+                });
+            }
+
+            // Utiliser l'endpoint POST /api/users/me/music-favoris qui EXISTE
+            const response = await fetch('/api/users/me/music-favoris', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(favorisRequests)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+
+                // Afficher le message de succès
+                successMessage.style.display = 'block';
+                successMessage.textContent = `✅ ${result.count} préférence(s) musicale(s) enregistrée(s) !`;
+
+                // Redirection après 2 secondes
+                setTimeout(() => {
+                    window.location.href = 'menu.html';
+                }, 2000);
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Erreur lors de l\'enregistrement');
+            }
+
+        } catch (err) {
+            console.error('Erreur:', err);
+            alert('Erreur lors de l\'enregistrement des préférences: ' + err.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Enregistrer mes préférences';
+        }
+    });
+
+    // Charger les préférences existantes - UTILISE LE BON ENDPOINT
+    async function loadExistingPreferences() {
+        try {
+            const response = await fetch('/api/users/me/music-favoris', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const favoris = data.favoris || [];
+
+                // Mapper les préférences existantes aux listes déroulantes
+                favoris.forEach(favori => {
+                    let targetSelect = null;
+
+                    // Déterminer la section en fonction de la cote
+                    if (favori.cotePreference >= 8) {
+                        targetSelect = document.getElementById('preference1'); // Mon kiff!
+                    } else if (favori.cotePreference >= 5) {
+                        targetSelect = document.getElementById('preference2'); // Ça passe bien
+                    } else if (favori.cotePreference >= 2) {
+                        targetSelect = document.getElementById('preference3'); // Boff, sans plus
+                    } else {
+                        targetSelect = document.getElementById('preference4'); // Boutons verts
+                    }
+
+                    if (targetSelect && favori.musicGenreId) {
+                        targetSelect.value = favori.musicGenreId.toString();
+                    }
+                });
+
+                // Vérifier les doublons après chargement
+                checkForDuplicates();
+            }
+        } catch (err) {
+            console.error('Erreur chargement préférences:', err);
+        }
+    }
+
+    // Chargement initial
+    async function initialize() {
+        await loadMusicGenres();
+        await loadExistingPreferences();
+    }
+
+    initialize();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu principal</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .menu-container {
+      text-align: center;
+      background: white;
+      padding: 0;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 450px;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 50px 30px;
+      color: white;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      opacity: 0.9;
+      font-weight: 400;
+    }
+
+    .menu-content {
+      padding: 40px 30px;
+    }
+
+    .menu-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    button {
+      padding: 16px 20px;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: inherit;
+    }
+
+    .btn-inscription {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-inscription:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-inscription:active {
+      transform: translateY(0);
+    }
+
+    .btn-connection {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .btn-connection:hover {
+      background: #f8f9ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-connection:active {
+      transform: translateY(0);
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+      margin: 25px 0;
+    }
+
+    .forgot-password {
+      padding: 12px 20px;
+      background: #f3f4f6;
+      color: #9ca3af;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: not-allowed;
+      opacity: 0.6;
+      border: none;
+      width: 100%;
+      font-family: inherit;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+
+      .menu-container {
+        max-width: 100%;
+        border-radius: 20px;
+      }
+
+      .header {
+        padding: 40px 25px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .menu-content {
+        padding: 30px 25px;
+      }
+
+      button {
+        font-size: 1rem;
+        padding: 14px 18px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
+        padding: 35px 20px;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      .subtitle {
+        font-size: 0.9rem;
+      }
+
+      .menu-content {
+        padding: 25px 20px;
+      }
+
+      button {
+        font-size: 0.95rem;
+        padding: 13px 16px;
+      }
+
+      .forgot-password {
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .header {
+        padding: 30px 15px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .menu-content {
+        padding: 20px 15px;
+      }
+
+      .menu-buttons {
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="menu-container">
+  <div class="header">
+    <h1>Bienvenue</h1>
+    <p class="subtitle">Accédez à votre espace</p>
+  </div>
+
+  <div class="menu-content">
+    <div class="menu-buttons">
+      <button class="btn-inscription" id="btnInscription">Inscription</button>
+      <button class="btn-connection" id="btnConnection">Connexion</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="forgot-password" disabled>Mot de passe perdu ??</button>
+  </div>
+</div>
+
+<script>
+  document.getElementById('btnInscription').addEventListener('click', function() {
+    window.location.href = "inscription/inscription.html";
+  });
+
+  document.getElementById('btnConnection').addEventListener('click', function() {
+    window.location.href = "connection/connection.html";
+  });
+</script>
+
+</body>
+</html>
