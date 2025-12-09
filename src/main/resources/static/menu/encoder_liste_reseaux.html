@@ -75,27 +75,32 @@
             padding: 30px;
         }
 
-        .instructions {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        .current-value {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 25px;
-            border-left: 5px solid #667eea;
+            border: 2px solid #bae6fd;
         }
 
-        .instructions h3 {
-            color: #4f46e5;
-            margin-bottom: 10px;
+        .current-value h3 {
+            color: #0369a1;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 10px;
             font-size: 1.1rem;
         }
 
-        .instructions p {
-            color: #64748b;
-            font-size: 0.95rem;
-            line-height: 1.5;
+        .current-value p {
+            color: #0c4a6e;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            background-color: white;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
             text-align: left;
         }
 
@@ -172,35 +177,19 @@
             color: #94a3b8;
         }
 
-        .add-btn {
+        /* Boutons d'action compactes */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .add-btn-compact {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
-            border-radius: 12px;
-            padding: 12px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-left: 10px;
-            white-space: nowrap;
-            flex-shrink: 0;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
-        }
-
-        .add-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.3);
-        }
-
-        .remove-btn {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
+            border-radius: 50%;
             width: 44px;
             height: 44px;
             display: flex;
@@ -208,14 +197,33 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-left: 10px;
-            font-size: 1rem;
-            flex-shrink: 0;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .add-btn-compact:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .remove-btn-compact {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.1rem;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
         }
 
-        .remove-btn:hover {
-            transform: translateY(-2px);
+        .remove-btn-compact:hover {
+            transform: translateY(-2px) scale(1.05);
             box-shadow: 0 6px 25px rgba(239, 68, 68, 0.3);
         }
 
@@ -303,38 +311,9 @@
             font-size: 1rem;
         }
 
-        .current-value {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 25px;
-            border: 2px solid #bae6fd;
-        }
-
-        .current-value h3 {
-            color: #0369a1;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.1rem;
-        }
-
-        .current-value p {
-            color: #0c4a6e;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            word-break: break-all;
-            background-color: white;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid #e5e7eb;
-            text-align: left;
-        }
-
         .url-status {
             position: absolute;
-            right: 15px;
+            right: 95px;
             top: 50%;
             transform: translateY(-50%);
             width: 12px;
@@ -426,11 +405,14 @@
         @media (max-width: 768px) {
             body {
                 padding: 15px;
+                min-height: 100vh;
+                align-items: flex-start;
             }
 
             .container {
                 max-width: 100%;
                 border-radius: 20px;
+                margin: 20px 0;
             }
 
             .header {
@@ -439,6 +421,8 @@
 
             .header h1 {
                 font-size: 1.75rem;
+                flex-direction: column;
+                gap: 8px;
             }
 
             .content {
@@ -448,17 +432,26 @@
             .reseau-item {
                 flex-direction: column;
                 align-items: stretch;
+                padding: 20px;
             }
 
             .reseau-item .input-container {
                 margin-bottom: 15px;
+                width: 100%;
             }
 
-            .add-btn, .remove-btn {
+            .action-buttons {
                 width: 100%;
                 margin-left: 0;
-                margin-top: 10px;
                 justify-content: center;
+                gap: 15px;
+            }
+
+            .add-btn-compact,
+            .remove-btn-compact {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
             }
 
             .actions {
@@ -472,13 +465,30 @@
             }
 
             .url-status {
-                right: 15px;
+                right: 20px;
                 top: 25px;
                 transform: none;
+            }
+
+            .current-value {
+                padding: 15px;
+            }
+
+            .current-value h3 {
+                font-size: 1rem;
+            }
+
+            .current-value p {
+                font-size: 0.85rem;
+                padding: 10px;
             }
         }
 
         @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
             .header {
                 padding: 25px 20px;
             }
@@ -487,12 +497,119 @@
                 font-size: 1.5rem;
             }
 
+            .header p {
+                font-size: 0.9rem;
+            }
+
             .content {
+                padding: 20px 15px;
+            }
+
+            .reseau-item {
+                padding: 15px;
+            }
+
+            .icon-container {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+                margin-right: 10px;
+            }
+
+            .reseau-item input {
+                padding: 10px 12px;
+                font-size: 0.95rem;
+            }
+
+            .action-buttons {
+                gap: 10px;
+            }
+
+            .add-btn-compact,
+            .remove-btn-compact {
+                width: 44px;
+                height: 44px;
+                font-size: 1.1rem;
+            }
+
+            .empty-state {
+                padding: 30px 15px;
+            }
+
+            .empty-state i {
+                font-size: 40px;
+            }
+
+            .empty-state p {
+                font-size: 0.9rem;
+            }
+
+            .back-btn, .validate-btn {
+                padding: 12px 20px;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .reseau-item {
+                padding: 12px;
+            }
+
+            .icon-container {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+
+            .reseau-item input {
+                font-size: 0.9rem;
+                padding: 8px 10px;
+            }
+
+            .action-buttons {
+                gap: 8px;
+            }
+
+            .add-btn-compact,
+            .remove-btn-compact {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Pour les très petits écrans */
+        @media (max-height: 600px) and (orientation: landscape) {
+            body {
+                align-items: flex-start;
+                padding: 10px;
+            }
+
+            .container {
+                margin: 10px 0;
+                max-width: 100%;
+            }
+
+            .header {
                 padding: 20px;
             }
 
-            .instructions, .current-value {
+            .content {
                 padding: 15px;
+            }
+
+            .reseau-item {
+                margin-bottom: 10px;
+                padding: 12px;
+            }
+
+            .actions {
+                margin-top: 20px;
+                padding-top: 15px;
             }
         }
     </style>
@@ -505,11 +622,6 @@
     </div>
 
     <div class="content">
-        <div class="instructions">
-            <h3><i class="fas fa-info-circle"></i> Instructions</h3>
-            <p>Ajoutez les liens complets vers vos profils (ex: https://twitter.com/votrepseudo). Chaque lien doit être valide et commencer par "http://" ou "https://". Les liens seront séparés par des points-virgules (;).</p>
-        </div>
-
         <div class="current-value" id="currentValueContainer" style="display: none;">
             <h3><i class="fas fa-link"></i> Valeur actuelle</h3>
             <p id="currentValue"></p>
@@ -523,7 +635,7 @@
 
             <div id="emptyState" class="empty-state">
                 <i class="fas fa-plus-circle"></i>
-                <p>Cliquez sur "Ajouter" pour insérer votre premier lien de réseau social</p>
+                <p>Cliquez sur "+" pour insérer votre premier lien de réseau social</p>
             </div>
         </div>
 
@@ -683,20 +795,22 @@
                            value="${value}">
                     ${value ? `<div class="url-status ${urlStatusClass}"></div>` : ''}
                 </div>
-                <button class="add-btn" type="button">
-                    <i class="fas fa-plus"></i> Ajouter
-                </button>
-                <button class="remove-btn" type="button">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <div class="action-buttons">
+                    <button class="add-btn-compact" type="button" title="Ajouter un autre réseau">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="remove-btn-compact" type="button" title="Supprimer ce réseau">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             `;
 
             // Ajouter l'élément au conteneur
             reseauxContainer.appendChild(reseauItem);
 
             // Ajouter les événements
-            const addBtn = reseauItem.querySelector('.add-btn');
-            const removeBtn = reseauItem.querySelector('.remove-btn');
+            const addBtn = reseauItem.querySelector('.add-btn-compact');
+            const removeBtn = reseauItem.querySelector('.remove-btn-compact');
             const input = reseauItem.querySelector('.reseau-input');
 
             // Événement pour ajouter un nouveau champ
@@ -740,6 +854,11 @@
 
             // Mettre à jour l'état du bouton Valider
             updateValidateButton();
+
+            // Focus sur le nouveau champ s'il est vide
+            if (!value) {
+                input.focus();
+            }
         }
 
         // Fonction pour valider une URL
