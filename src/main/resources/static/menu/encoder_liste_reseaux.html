@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes réseaux sociaux</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 0;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+
+        .instructions h3 {
+            color: #4f46e5;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+        }
+
+        .instructions p {
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .reseaux-list {
+            margin-bottom: 30px;
+        }
+
+        .reseaux-list h2 {
+            color: #334155;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+
+        .reseau-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            background-color: #f8fafc;
+            border-radius: 14px;
+            padding: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #e5e7eb;
+            position: relative;
+        }
+
+        .reseau-item:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+            border-color: #c7d2fe;
+        }
+
+        .reseau-item .input-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .icon-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .reseau-item input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .reseau-item input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .reseau-item input::placeholder {
+            color: #94a3b8;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 10px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .remove-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: 10px;
+            font-size: 1rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+        }
+
+        .remove-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .back-btn {
+            background: white;
+            color: #4b5563;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 14px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #f9fafb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .validate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .validate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .validate-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            color: #9ca3af;
+        }
+
+        .validate-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+            background: #f9fafb;
+            border-radius: 16px;
+            border: 2px dashed #d1d5db;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #d1d5db;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+        }
+
+        .current-value {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid #bae6fd;
+        }
+
+        .current-value h3 {
+            color: #0369a1;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+        }
+
+        .current-value p {
+            color: #0c4a6e;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            background-color: white;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        .url-status {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #d1d5db;
+        }
+
+        .url-status.valid {
+            background-color: #10b981;
+        }
+
+        .url-status.invalid {
+            background-color: #ef4444;
+        }
+
+        /* Popup d'erreur */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: popupFadeIn 0.3s ease-out;
+        }
+
+        @keyframes popupFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .popup-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .popup-message {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .popup-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .popup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .container {
+                max-width: 100%;
+                border-radius: 20px;
+            }
+
+            .header {
+                padding: 30px 25px;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .content {
+                padding: 25px;
+            }
+
+            .reseau-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .reseau-item .input-container {
+                margin-bottom: 15px;
+            }
+
+            .add-btn, .remove-btn {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 10px;
+                justify-content: center;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .back-btn, .validate-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .url-status {
+                right: 15px;
+                top: 25px;
+                transform: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 25px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .instructions, .current-value {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-share-alt"></i> Mes réseaux sociaux</h1>
+        <p>Ajoutez les liens vers vos profils</p>
+    </div>
+
+    <div class="content">
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Instructions</h3>
+            <p>Ajoutez les liens complets vers vos profils (ex: https://twitter.com/votrepseudo). Chaque lien doit être valide et commencer par "http://" ou "https://". Les liens seront séparés par des points-virgules (;).</p>
+        </div>
+
+        <div class="current-value" id="currentValueContainer" style="display: none;">
+            <h3><i class="fas fa-link"></i> Valeur actuelle</h3>
+            <p id="currentValue"></p>
+        </div>
+
+        <div class="reseaux-list">
+            <h2><i class="fas fa-plus-circle"></i> Ajouter des réseaux</h2>
+            <div id="reseauxContainer">
+                <!-- Les champs de saisie seront ajoutés ici dynamiquement -->
+            </div>
+
+            <div id="emptyState" class="empty-state">
+                <i class="fas fa-plus-circle"></i>
+                <p>Cliquez sur "Ajouter" pour insérer votre premier lien de réseau social</p>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/menu/menu.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Retour au menu
+            </a>
+            <button id="validateBtn" class="validate-btn" disabled>
+                <i class="fas fa-check-circle"></i> Valider
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Popup d'erreur -->
+<div class="popup-overlay" id="errorPopup">
+    <div class="popup-container">
+        <h2 class="popup-title"><i class="fas fa-exclamation-triangle"></i> Erreur</h2>
+        <p class="popup-message" id="errorMessage">Une erreur s'est produite.</p>
+        <button class="popup-btn" id="closePopup">OK</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const reseauxContainer = document.getElementById('reseauxContainer');
+        const emptyState = document.getElementById('emptyState');
+        const validateBtn = document.getElementById('validateBtn');
+        const errorPopup = document.getElementById('errorPopup');
+        const errorMessage = document.getElementById('errorMessage');
+        const closePopup = document.getElementById('closePopup');
+
+        // Vérification de la connexion via localStorage
+        function checkAuthentication() {
+            const accessToken = localStorage.getItem('accessToken');
+
+            if (!accessToken) {
+                // Non connecté, rediriger vers index.html
+                showError('Vous devez être connecté pour accéder à cette page');
+                setTimeout(() => {
+                    window.location.href = '/index.html';
+                }, 2000);
+                return false;
+            }
+
+            return true;
+        }
+
+        // Fonction pour afficher les erreurs
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorPopup.style.display = 'flex';
+        }
+
+        // Fermer la popup d'erreur
+        closePopup.addEventListener('click', function() {
+            errorPopup.style.display = 'none';
+        });
+
+        // Vérifier l'authentification au démarrage
+        if (!checkAuthentication()) {
+            return;
+        }
+
+        const token = localStorage.getItem('accessToken');
+
+        // Charger la valeur actuelle si elle existe
+        loadCurrentReseaux();
+
+        // Créer le premier champ vide
+        addReseauField();
+
+        // Fonction pour charger les réseaux actuels
+        function loadCurrentReseaux() {
+            fetch('/api/users/me', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        // Token invalide ou expiré
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('refreshToken');
+                        showError('Votre session a expiré. Veuillez vous reconnecter.');
+                        setTimeout(() => {
+                            window.location.href = '/index.html';
+                        }, 2000);
+                        throw new Error('Session expirée');
+                    }
+                    throw new Error('Erreur lors de la récupération des données');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.listeReseaux) {
+                    document.getElementById('currentValueContainer').style.display = 'block';
+                    document.getElementById('currentValue').textContent = data.listeReseaux;
+
+                    // Si des réseaux existent déjà, les afficher
+                    if (data.listeReseaux.trim()) {
+                        const reseauxArray = data.listeReseaux.split(';').filter(item => item.trim() !== '');
+
+                        if (reseauxArray.length > 0) {
+                            // Effacer le conteneur
+                            reseauxContainer.innerHTML = '';
+                            emptyState.style.display = 'none';
+
+                            // Ajouter chaque réseau
+                            reseauxArray.forEach(reseau => {
+                                addReseauField(reseau.trim());
+                            });
+
+                            // Ajouter un champ vide à la fin
+                            addReseauField();
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                if (error.message !== 'Session expirée') {
+                    showError('Impossible de charger vos réseaux actuels: ' + error.message);
+                }
+            });
+        }
+
+        // Fonction pour ajouter un champ de saisie
+        function addReseauField(value = '') {
+            // Masquer le message d'état vide
+            emptyState.style.display = 'none';
+
+            // Créer un nouvel élément de réseau
+            const reseauItem = document.createElement('div');
+            reseauItem.className = 'reseau-item';
+
+            // Générer un ID unique
+            const itemId = 'reseau_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            reseauItem.id = itemId;
+
+            // Déterminer l'icône en fonction de l'URL
+            const icon = getIconForUrl(value);
+            const isValidUrl = validateUrl(value);
+            const urlStatusClass = value ? (isValidUrl ? 'valid' : 'invalid') : '';
+
+            reseauItem.innerHTML = `
+                <div class="input-container">
+                    <div class="icon-container">
+                        <i class="${icon}"></i>
+                    </div>
+                    <input type="text"
+                           class="reseau-input"
+                           placeholder="https://exemple.com/votrepseudo"
+                           value="${value}">
+                    ${value ? `<div class="url-status ${urlStatusClass}"></div>` : ''}
+                </div>
+                <button class="add-btn" type="button">
+                    <i class="fas fa-plus"></i> Ajouter
+                </button>
+                <button class="remove-btn" type="button">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+
+            // Ajouter l'élément au conteneur
+            reseauxContainer.appendChild(reseauItem);
+
+            // Ajouter les événements
+            const addBtn = reseauItem.querySelector('.add-btn');
+            const removeBtn = reseauItem.querySelector('.remove-btn');
+            const input = reseauItem.querySelector('.reseau-input');
+
+            // Événement pour ajouter un nouveau champ
+            addBtn.addEventListener('click', function() {
+                if (validateUrl(input.value.trim())) {
+                    addReseauField();
+                } else if (input.value.trim() === '') {
+                    showError('Veuillez d\'abord saisir un lien valide avant d\'ajouter un nouveau champ.');
+                    input.focus();
+                } else {
+                    showError('Le lien n\'est pas valide. Il doit commencer par "http://" ou "https://".');
+                    input.focus();
+                }
+            });
+
+            // Événement pour supprimer ce champ
+            removeBtn.addEventListener('click', function() {
+                // Ne pas supprimer s'il ne reste qu'un seul champ vide
+                const inputs = document.querySelectorAll('.reseau-input');
+                const filledInputs = Array.from(inputs).filter(input => input.value.trim() !== '');
+
+                if (inputs.length > 1) {
+                    reseauItem.remove();
+
+                    // Si plus aucun champ n'existe, afficher le message d'état vide
+                    if (document.querySelectorAll('.reseau-item').length === 0) {
+                        emptyState.style.display = 'block';
+                        validateBtn.disabled = true;
+                    }
+                } else {
+                    showError('Vous devez avoir au moins un champ de saisie.');
+                }
+            });
+
+            // Événement pour mettre à jour l'icône et le statut quand l'URL change
+            input.addEventListener('input', function() {
+                updateIcon(itemId, this.value);
+                updateUrlStatus(itemId, this.value);
+                updateValidateButton();
+            });
+
+            // Mettre à jour l'état du bouton Valider
+            updateValidateButton();
+        }
+
+        // Fonction pour valider une URL
+        function validateUrl(url) {
+            if (!url.trim()) return false;
+            return url.startsWith('http://') || url.startsWith('https://');
+        }
+
+        // Fonction pour déterminer l'icône en fonction de l'URL
+        function getIconForUrl(url) {
+            url = url.toLowerCase();
+
+            const iconMap = {
+                'twitter.com': 'fab fa-twitter',
+                'x.com': 'fab fa-twitter',
+                'facebook.com': 'fab fa-facebook',
+                'instagram.com': 'fab fa-instagram',
+                'linkedin.com': 'fab fa-linkedin',
+                'github.com': 'fab fa-github',
+                'youtube.com': 'fab fa-youtube',
+                'tiktok.com': 'fab fa-tiktok',
+                'discord.com': 'fab fa-discord',
+                'discord.gg': 'fab fa-discord',
+                'twitch.tv': 'fab fa-twitch',
+                'reddit.com': 'fab fa-reddit',
+                'pinterest.com': 'fab fa-pinterest',
+                'snapchat.com': 'fab fa-snapchat',
+                'whatsapp.com': 'fab fa-whatsapp',
+                'telegram.org': 'fab fa-telegram',
+                't.me': 'fab fa-telegram',
+                'spotify.com': 'fab fa-spotify'
+            };
+
+            for (const [domain, icon] of Object.entries(iconMap)) {
+                if (url.includes(domain)) {
+                    return icon;
+                }
+            }
+
+            return url.startsWith('http') ? 'fas fa-link' : 'fas fa-globe';
+        }
+
+        // Fonction pour mettre à jour l'icône
+        function updateIcon(itemId, url) {
+            const item = document.getElementById(itemId);
+            if (item) {
+                const iconContainer = item.querySelector('.icon-container i');
+                if (iconContainer) {
+                    iconContainer.className = getIconForUrl(url);
+                }
+            }
+        }
+
+        // Fonction pour mettre à jour le statut de l'URL
+        function updateUrlStatus(itemId, url) {
+            const item = document.getElementById(itemId);
+            if (item) {
+                let statusDiv = item.querySelector('.url-status');
+
+                if (!statusDiv && url.trim()) {
+                    // Créer le div s'il n'existe pas
+                    const inputContainer = item.querySelector('.input-container');
+                    statusDiv = document.createElement('div');
+                    statusDiv.className = 'url-status';
+                    inputContainer.appendChild(statusDiv);
+                } else if (statusDiv && !url.trim()) {
+                    // Supprimer le div si l'URL est vide
+                    statusDiv.remove();
+                    return;
+                }
+
+                if (statusDiv) {
+                    statusDiv.className = 'url-status ' + (validateUrl(url) ? 'valid' : 'invalid');
+                }
+            }
+        }
+
+        // Fonction pour mettre à jour l'état du bouton Valider
+        function updateValidateButton() {
+            const inputs = document.querySelectorAll('.reseau-input');
+            let hasValidInput = false;
+            let hasInvalidInput = false;
+
+            inputs.forEach(input => {
+                const value = input.value.trim();
+                if (value) {
+                    if (validateUrl(value)) {
+                        hasValidInput = true;
+                    } else {
+                        hasInvalidInput = true;
+                    }
+                }
+            });
+
+            validateBtn.disabled = !hasValidInput || hasInvalidInput;
+        }
+
+        // Événement pour le bouton Valider
+        validateBtn.addEventListener('click', function() {
+            // Récupérer toutes les valeurs
+            const inputs = document.querySelectorAll('.reseau-input');
+            const reseaux = [];
+            let hasInvalidUrl = false;
+
+            inputs.forEach(input => {
+                const value = input.value.trim();
+                if (value) {
+                    if (validateUrl(value)) {
+                        reseaux.push(value);
+                    } else {
+                        hasInvalidUrl = true;
+                        showError(`Le lien "${value}" n'est pas valide. Il doit commencer par "http://" ou "https://".`);
+                        input.focus();
+                    }
+                }
+            });
+
+            if (hasInvalidUrl) {
+                return;
+            }
+
+            // Vérifier qu'au moins un réseau a été saisi
+            if (reseaux.length === 0) {
+                showError('Veuillez saisir au moins un lien de réseau social.');
+                return;
+            }
+
+            // Créer la chaîne séparée par des points-virgules
+            const listeReseaux = reseaux.join(';');
+
+            // Afficher un indicateur de chargement
+            validateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+            validateBtn.disabled = true;
+
+            // Envoyer la requête au serveur
+            fetch('/api/users/me/updateListeReseaux', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'listeReseaux=' + encodeURIComponent(listeReseaux)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('refreshToken');
+                        throw new Error('Votre session a expiré. Veuillez vous reconnecter.');
+                    }
+                    throw new Error('Erreur lors de l\'enregistrement');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Afficher un message de succès
+                    showError('Vos réseaux sociaux ont été mis à jour avec succès !');
+
+                    // Rediriger vers le menu après 1.5 secondes
+                    setTimeout(() => {
+                        window.location.href = '/menu/menu.html';
+                    }, 1500);
+                } else {
+                    throw new Error(data.error || 'Erreur inconnue');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showError('Erreur lors de l\'enregistrement: ' + error.message);
+
+                // Réinitialiser le bouton
+                validateBtn.innerHTML = '<i class="fas fa-check-circle"></i> Valider';
+                updateValidateButton();
+
+                // Si session expirée, rediriger après 2 secondes
+                if (error.message.includes('session a expiré')) {
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 2000);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

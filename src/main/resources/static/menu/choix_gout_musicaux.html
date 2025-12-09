@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Goûts Musicaux</title>
+    <style>
+        /* Reset et styles de base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Container principal */
+        .main-container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* En-tête */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 30px 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* Bouton retour */
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Contenu du formulaire */
+        .form-content {
+            padding: 30px;
+        }
+
+        /* Messages */
+        .message {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            border: 2px solid;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #059669;
+            border-color: #a7f3d0;
+        }
+
+        .loading-message {
+            background: #e0f2fe;
+            color: #0369a1;
+            border-color: #bae6fd;
+            text-align: center;
+        }
+
+        /* Sections de préférence */
+        .preference-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .preference-section.active {
+            display: block;
+        }
+
+        .preference-section:hover {
+            border-color: #667eea;
+        }
+
+        .preference-title {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* Sélecteurs */
+        .genre-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+        }
+
+        .genre-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .genre-select.error {
+            border-color: #dc2626;
+        }
+
+        /* Messages d'erreur sous les selects */
+        .field-error {
+            color: #dc2626;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: none;
+        }
+
+        /* Bouton de soumission */
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn.active {
+            display: block;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Badge pour les cotes */
+        .rating-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        /* Icônes pour les sections */
+        .section-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Animation de chargement */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <!-- En-tête -->
+    <div class="header">
+        <a href="/menu/menu.html" class="back-btn">
+            ← Retour
+        </a>
+        <h1>Mes Goûts Musicaux</h1>
+        <p class="subtitle">Classifiez vos genres musicaux préférés</p>
+    </div>
+
+    <!-- Contenu du formulaire -->
+    <div class="form-content">
+        <!-- Message d'erreur pour les doublons -->
+        <div class="message error-message" id="duplicateError">
+            ❌ Un genre musical ne peut pas être sélectionné dans plusieurs catégories
+        </div>
+
+        <!-- Message de succès -->
+        <div class="message success-message" id="successMessage">
+            ✅ Vos préférences musicales ont été enregistrées avec succès !
+        </div>
+
+        <!-- Message de chargement -->
+        <div class="message loading-message" id="loadingMessage">
+            <div class="loading-spinner"></div>
+            Chargement des genres musicaux...
+        </div>
+
+        <!-- Section 1 : Mon kiff! (10/10) -->
+        <div class="preference-section" id="section1">
+            <div class="preference-title">
+                <span class="section-icon">❤️</span>
+                Mon kiff!
+                <span class="rating-badge">10/10</span>
+            </div>
+            <select class="genre-select" id="preference1">
+                <option value="">-- Choisissez votre genre préféré --</option>
+            </select>
+            <div class="field-error" id="error1">Ce genre est déjà sélectionné</div>
+        </div>
+
+        <!-- Section 2 : Ça passe bien (7/10) -->
+        <div class="preference-section" id="section2">
+            <div class="preference-title">
+                <span class="section-icon">😊</span>
+                Ça passe bien
+                <span class="rating-badge">7/10</span>
+            </div>
+            <select class="genre-select" id="preference2">
+                <option value="">-- Choisissez un genre que vous appréciez --</option>
+            </select>
+            <div class="field-error" id="error2">Ce genre est déjà sélectionné</div>
+        </div>
+
+        <!-- Section 3 : Boff, sans plus (4/10) -->
+        <div class="preference-section" id="section3">
+            <div class="preference-title">
+                <span class="section-icon">😐</span>
+                Boff, sans plus
+                <span class="rating-badge">4/10</span>
+            </div>
+            <select class="genre-select" id="preference3">
+                <option value="">-- Choisissez un genre neutre --</option>
+            </select>
+            <div class="field-error" id="error3">Ce genre est déjà sélectionné</div>
+        </div>
+
+        <!-- Section 4 : Ça me donne des boutons verts (1/10) -->
+        <div class="preference-section" id="section4">
+            <div class="preference-title">
+                <span class="section-icon">🤢</span>
+                Ça me donne des boutons verts
+                <span class="rating-badge">1/10</span>
+            </div>
+            <select class="genre-select" id="preference4">
+                <option value="">-- Choisissez un genre que vous détestez --</option>
+            </select>
+            <div class="field-error" id="error4">Ce genre est déjà sélectionné</div>
+        </div>
+
+        <!-- Bouton de soumission -->
+        <button class="submit-btn" id="submitBtn" disabled>
+            Enregistrer mes préférences
+        </button>
+    </div>
+</div>
+
+<script>
+    // Vérification de l'authentification
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+        alert('Vous devez être connecté pour accéder à cette page');
+        window.location.href = '/connection/connection.html';
+    }
+
+    // Éléments DOM
+    const loadingMessage = document.getElementById('loadingMessage');
+    const duplicateError = document.getElementById('duplicateError');
+    const successMessage = document.getElementById('successMessage');
+    const submitBtn = document.getElementById('submitBtn');
+    const sections = [
+        document.getElementById('section1'),
+        document.getElementById('section2'),
+        document.getElementById('section3'),
+        document.getElementById('section4')
+    ];
+    const selects = [
+        document.getElementById('preference1'),
+        document.getElementById('preference2'),
+        document.getElementById('preference3'),
+        document.getElementById('preference4')
+    ];
+    const errors = [
+        document.getElementById('error1'),
+        document.getElementById('error2'),
+        document.getElementById('error3'),
+        document.getElementById('error4')
+    ];
+
+    // Données
+    let musicGenres = [];
+    const coteMapping = {
+        0: 10, // Mon kiff!
+        1: 7,  // Ça passe bien
+        2: 4,  // Boff, sans plus
+        3: 1   // Boutons verts
+    };
+
+    // Initialisation
+    async function initialize() {
+        try {
+            await loadMusicGenres();
+            await loadExistingPreferences();
+            setupEventListeners();
+            updateSubmitButton();
+        } catch (error) {
+            console.error('Erreur lors de l\'initialisation:', error);
+            loadingMessage.innerHTML = `
+                <div style="color: #dc2626;">
+                    ❌ Erreur lors du chargement des données
+                    <br>
+                    <small>${error.message}</small>
+                    <br>
+                    <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Réessayer
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // Charger les genres musicaux
+    async function loadMusicGenres() {
+        try {
+            const response = await fetch('/api/music-genres', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+            }
+
+            musicGenres = await response.json();
+            populateSelects();
+
+            // Afficher les sections
+            sections.forEach(section => section.classList.add('active'));
+            submitBtn.classList.add('active');
+            loadingMessage.style.display = 'none';
+
+        } catch (error) {
+            throw new Error('Impossible de charger les genres musicaux: ' + error.message);
+        }
+    }
+
+    // Remplir les sélecteurs
+    function populateSelects() {
+        selects.forEach(select => {
+            // Garder l'option par défaut
+            const defaultOption = select.options[0];
+            select.innerHTML = '';
+            select.appendChild(defaultOption);
+
+            // Ajouter les genres
+            musicGenres.forEach(genre => {
+                const option = document.createElement('option');
+                option.value = genre.id;
+                option.textContent = genre.description;
+                select.appendChild(option);
+            });
+
+            // Événement de changement
+            select.addEventListener('change', () => {
+                checkForDuplicates();
+                updateSubmitButton();
+            });
+        });
+    }
+
+    // Charger les préférences existantes
+    async function loadExistingPreferences() {
+        try {
+            const response = await fetch('/api/users/me/music-favoris', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const favoris = data.favoris || [];
+
+                favoris.forEach(favori => {
+                    let targetIndex = -1;
+
+                    // Trouver l'index basé sur la cote
+                    if (favori.cotePreference >= 8) targetIndex = 0; // Mon kiff!
+                    else if (favori.cotePreference >= 5) targetIndex = 1; // Ça passe bien
+                    else if (favori.cotePreference >= 2) targetIndex = 2; // Boff, sans plus
+                    else targetIndex = 3; // Boutons verts
+
+                    if (targetIndex >= 0 && favori.musicGenreId) {
+                        selects[targetIndex].value = favori.musicGenreId.toString();
+                    }
+                });
+
+                checkForDuplicates();
+            }
+        } catch (error) {
+            console.warn('Aucune préférence existante trouvée');
+        }
+    }
+
+    // Vérifier les doublons
+    function checkForDuplicates() {
+        const selectedValues = new Set();
+        let hasDuplicates = false;
+
+        // Réinitialiser les erreurs
+        errors.forEach(error => error.style.display = 'none');
+        selects.forEach(select => select.classList.remove('error'));
+        duplicateError.style.display = 'none';
+
+        // Vérifier chaque sélecteur
+        selects.forEach((select, index) => {
+            const value = select.value;
+
+            if (value && value !== '') {
+                if (selectedValues.has(value)) {
+                    // Doublon détecté
+                    hasDuplicates = true;
+                    errors[index].style.display = 'block';
+                    select.classList.add('error');
+                } else {
+                    selectedValues.add(value);
+                }
+            }
+        });
+
+        if (hasDuplicates) {
+            duplicateError.style.display = 'block';
+            return true;
+        }
+
+        return false;
+    }
+
+    // Mettre à jour l'état du bouton de soumission
+    function updateSubmitButton() {
+        const hasSelections = selects.some(select => select.value && select.value !== '');
+        const hasDuplicates = checkForDuplicates();
+
+        submitBtn.disabled = !hasSelections || hasDuplicates;
+    }
+
+    // Configurer les écouteurs d'événements
+    function setupEventListeners() {
+        // Vérification en temps réel
+        selects.forEach(select => {
+            select.addEventListener('change', updateSubmitButton);
+        });
+    }
+
+    // Soumettre le formulaire
+    submitBtn.addEventListener('click', async () => {
+        if (submitBtn.disabled) return;
+
+        // Vérifier les doublons une dernière fois
+        if (checkForDuplicates()) {
+            return;
+        }
+
+        // Préparer les données
+        const favorisRequests = [];
+
+        selects.forEach((select, index) => {
+            if (select.value && select.value !== '') {
+                favorisRequests.push({
+                    musicGenreId: parseInt(select.value),
+                    cotePreference: coteMapping[index]
+                });
+            }
+        });
+
+        // Désactiver le bouton et afficher l'état de chargement
+        submitBtn.disabled = true;
+        const originalText = submitBtn.textContent;
+        submitBtn.innerHTML = '<span class="loading-spinner"></span>Enregistrement...';
+
+        try {
+            // Envoyer les données
+            const response = await fetch('/api/users/me/music-favoris', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(favorisRequests)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Erreur ${response.status}`);
+            }
+
+            // Succès
+            successMessage.style.display = 'block';
+            successMessage.textContent = `✅ ${favorisRequests.length} préférence(s) enregistrée(s) avec succès !`;
+
+            // Redirection vers /menu/menu.html après 1.5 secondes
+            setTimeout(() => {
+                window.location.href = '/menu/menu.html';
+            }, 1500);
+
+        } catch (error) {
+            console.error('Erreur d\'enregistrement:', error);
+            alert(`Erreur lors de l'enregistrement: ${error.message}`);
+
+            // Réactiver le bouton
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+
+    // Lancer l'application
+    document.addEventListener('DOMContentLoaded', initialize);
+</script>
+
+</body>
+</html>

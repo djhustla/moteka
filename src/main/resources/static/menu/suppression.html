@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suppression d'Utilisateurs</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        width: 100%;
+        max-width: 800px;
+        text-align: center;
+    }
+
+    .header {
+        margin-bottom: 30px;
+    }
+
+    .header h1 {
+        color: #333;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .header p {
+        color: #666;
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+
+    .users-list {
+        max-height: 400px;
+        overflow-y: auto;
+        margin-bottom: 25px;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        padding: 15px;
+        background: #f8f9fa;
+    }
+
+    .user-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #e1e5e9;
+        transition: background-color 0.3s ease;
+    }
+
+    .user-item:hover {
+        background-color: #e9ecef;
+    }
+
+    .user-item:last-child {
+        border-bottom: none;
+    }
+
+    .user-checkbox {
+        margin-right: 15px;
+        transform: scale(1.2);
+    }
+
+    .user-info {
+        flex: 1;
+        text-align: left;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+
+    .user-details {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .user-role {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+
+    .user-role.admin {
+        background: #ff6b6b;
+        color: white;
+    }
+
+    .user-role.user {
+        background: #667eea;
+        color: white;
+    }
+
+    .selection-info {
+        background: #e7f3ff;
+        border: 1px solid #b3d9ff;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: 600;
+        color: #0066cc;
+    }
+
+    .delete-btn {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        color: white;
+        border: none;
+        padding: 16px 32px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .delete-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    }
+
+    .delete-btn:active {
+        transform: translateY(0);
+    }
+
+    .delete-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .secondary-btn {
+        flex: 1;
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .secondary-btn:hover {
+        background: #5a6268;
+        transform: translateY(-1px);
+    }
+
+    .logout-btn {
+        flex: 1;
+        background: #495057;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+        background: #343a40;
+        transform: translateY(-1px);
+    }
+
+    .message {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-weight: 500;
+        display: none;
+    }
+
+    .message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        display: block;
+    }
+
+    .message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        display: block;
+    }
+
+    .loading {
+        display: none;
+        margin: 10px 0;
+    }
+
+    .loading-spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .danger-zone {
+        border: 2px solid #ff6b6b;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        background: #fff5f5;
+    }
+
+    .danger-zone h2 {
+        color: #dc3545;
+        margin-bottom: 15px;
+        font-size: 1.4rem;
+    }
+
+    .select-all {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #e7f3ff;
+        border-radius: 8px;
+    }
+
+    .select-all-checkbox {
+        margin-right: 10px;
+        transform: scale(1.1);
+    }
+
+    .select-all-label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Styles pour la protection par mot de passe */
+    .password-protection {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .password-container {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+    }
+
+    .password-container h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.8rem;
+    }
+
+    .password-input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+        text-align: center;
+        letter-spacing: 2px;
+    }
+
+    .password-input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .password-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .password-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .password-error {
+        color: #dc3545;
+        margin-top: 10px;
+        font-weight: 500;
+        display: none;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container {
+            padding: 30px 25px;
+            margin: 10px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .secondary-btn, .logout-btn {
+            width: 100%;
+        }
+
+        .user-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .user-checkbox {
+            margin-bottom: 10px;
+        }
+
+        .password-container {
+            padding: 30px 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 20px 15px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+        }
+
+        .delete-btn {
+            padding: 14px 28px;
+        }
+    }
+  </style>
+</head>
+<body>
+<!-- Protection par mot de passe -->
+<div class="password-protection" id="passwordProtection">
+  <div class="password-container">
+    <h2>🔒 Accès Protégé</h2>
+    <p style="color: #666; margin-bottom: 20px; line-height: 1.5;">
+      Cette page est protégée par un mot de passe. Veuillez entrer le mot de passe pour continuer.
+    </p>
+    <input type="password" class="password-input" id="passwordInput" placeholder="Entrez le mot de passe" autocomplete="off">
+    <button class="password-submit" id="passwordSubmit">Accéder</button>
+    <div class="password-error" id="passwordError">
+      ❌ Mot de passe incorrect. Veuillez réessayer.
+    </div>
+  </div>
+</div>
+
+<!-- Contenu principal (caché initialement) -->
+<div class="container" id="mainContent" style="display: none;">
+  <div class="header">
+    <h1>🔧 Administration</h1>
+    <p>Suppression d'utilisateurs</p>
+  </div>
+
+  <div class="message" id="message"></div>
+
+  <div class="selection-info" id="selectionInfo">
+    Aucun utilisateur sélectionné
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+    <p style="margin-top: 10px; color: #666;">Chargement des utilisateurs...</p>
+  </div>
+
+  <div class="users-list" id="usersList">
+    <!-- Les utilisateurs seront chargés ici -->
+  </div>
+
+  <div class="danger-zone">
+    <h2>⚠️ Zone de Danger</h2>
+    <p style="color: #666; margin-bottom: 15px;">
+      Cette action supprimera définitivement les utilisateurs sélectionnés et toutes leurs données.
+      Cette action est irréversible.
+    </p>
+    <button class="delete-btn" id="deleteBtn" disabled>
+      🗑️ Supprimer les Utilisateurs Sélectionnés
+    </button>
+  </div>
+
+  <div class="action-buttons">
+    <a href="menu.html" class="secondary-btn">
+      ↩️ Retour au Menu
+    </a>
+    <button class="logout-btn" id="logoutBtn">
+      🚪 Déconnexion
+    </button>
+  </div>
+</div>
+
+<script>
+  // Mot de passe de protection
+  const ADMIN_PASSWORD = "ttmk";
+
+  class PasswordProtection {
+      constructor() {
+          this.attempts = 0;
+          this.maxAttempts = 3;
+          this.init();
+      }
+
+      init() {
+          this.bindEvents();
+
+          // Vérifier si l'utilisateur est déjà authentifié
+          if (this.isAuthenticated()) {
+              this.showMainContent();
+          } else {
+              this.showPasswordProtection();
+          }
+      }
+
+      bindEvents() {
+          const passwordInput = document.getElementById('passwordInput');
+          const passwordSubmit = document.getElementById('passwordSubmit');
+          const passwordError = document.getElementById('passwordError');
+
+          passwordSubmit.addEventListener('click', () => {
+              this.checkPassword();
+          });
+
+          passwordInput.addEventListener('keypress', (e) => {
+              if (e.key === 'Enter') {
+                  this.checkPassword();
+              }
+          });
+
+          // Effacer l'erreur quand l'utilisateur commence à taper
+          passwordInput.addEventListener('input', () => {
+              passwordError.style.display = 'none';
+          });
+      }
+
+      checkPassword() {
+          const passwordInput = document.getElementById('passwordInput');
+          const passwordError = document.getElementById('passwordError');
+          const enteredPassword = passwordInput.value.trim();
+
+          if (enteredPassword === ADMIN_PASSWORD) {
+              this.authenticate();
+              this.showMainContent();
+          } else {
+              this.attempts++;
+              passwordError.style.display = 'block';
+              passwordInput.value = '';
+              passwordInput.focus();
+
+              if (this.attempts >= this.maxAttempts) {
+                  this.handleMaxAttempts();
+              }
+          }
+      }
+
+      authenticate() {
+          // Créer un token d'authentification simple
+          const authToken = btoa(ADMIN_PASSWORD + '_' + Date.now());
+          sessionStorage.setItem('adminAuth', authToken);
+      }
+
+      isAuthenticated() {
+          const authToken = sessionStorage.getItem('adminAuth');
+          if (!authToken) return false;
+
+          try {
+              const decoded = atob(authToken);
+              const [password, timestamp] = decoded.split('_');
+
+              // Vérifier que le token n'est pas trop vieux (8 heures)
+              const isRecent = Date.now() - parseInt(timestamp) < 8 * 60 * 60 * 1000;
+
+              return password === ADMIN_PASSWORD && isRecent;
+          } catch (e) {
+              return false;
+          }
+      }
+
+      showMainContent() {
+          document.getElementById('passwordProtection').style.display = 'none';
+          document.getElementById('mainContent').style.display = 'block';
+
+          // Initialiser le gestionnaire de suppression après authentification
+          new UserDeletionManager();
+      }
+
+      showPasswordProtection() {
+          document.getElementById('passwordProtection').style.display = 'flex';
+          document.getElementById('passwordInput').focus();
+      }
+
+      handleMaxAttempts() {
+          const passwordSubmit = document.getElementById('passwordSubmit');
+          const passwordError = document.getElementById('passwordError');
+
+          passwordSubmit.disabled = true;
+          passwordError.textContent = '❌ Trop de tentatives échouées. Veuillez actualiser la page.';
+          passwordError.style.display = 'block';
+      }
+  }
+
+  class UserDeletionManager {
+      constructor() {
+          this.users = [];
+          this.selectedUsers = new Set();
+          this.init();
+      }
+
+      init() {
+          this.bindEvents();
+          this.loadUsers();
+      }
+
+      bindEvents() {
+          const deleteBtn = document.getElementById('deleteBtn');
+          const logoutBtn = document.getElementById('logoutBtn');
+
+          deleteBtn.addEventListener('click', () => {
+              this.deleteSelectedUsers();
+          });
+
+          logoutBtn.addEventListener('click', () => {
+              this.logout();
+          });
+      }
+
+      async loadUsers() {
+          this.showLoading(true);
+          this.hideMessage();
+
+          try {
+              const token = localStorage.getItem('accessToken');
+              if (!token) {
+                  throw new Error('Token d\'authentification manquant');
+              }
+
+              const response = await fetch('/api/users/all', {
+                  headers: {
+                      'Authorization': `Bearer ${token}`
+                  }
+              });
+
+              if (!response.ok) {
+                  throw new Error('Erreur lors du chargement des utilisateurs');
+              }
+
+              const data = await response.json();
+              this.users = data.users || [];
+              this.renderUsersList();
+
+          } catch (error) {
+              this.showMessage('Erreur lors du chargement: ' + error.message, 'error');
+          } finally {
+              this.showLoading(false);
+          }
+      }
+
+      renderUsersList() {
+          const usersList = document.getElementById('usersList');
+
+          if (this.users.length === 0) {
+              usersList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Aucun utilisateur trouvé</p>';
+              return;
+          }
+
+          let html = `
+              <div class="select-all">
+                  <input type="checkbox" id="selectAll" class="select-all-checkbox">
+                  <label for="selectAll" class="select-all-label">Sélectionner tous les utilisateurs</label>
+              </div>
+          `;
+
+          this.users.forEach(user => {
+              const createdDate = new Date(user.createdAt).toLocaleDateString('fr-FR');
+              const isAdmin = user.role === 'ADMIN';
+
+              html += `
+                  <div class="user-item">
+                      <input type="checkbox" class="user-checkbox" data-user-id="${user.id}" id="user-${user.id}">
+                      <div class="user-info">
+                          <div class="user-name">
+                              ${user.username}
+                              <span class="user-role ${isAdmin ? 'admin' : 'user'}">
+                                  ${isAdmin ? 'ADMIN' : 'USER'}
+                              </span>
+                          </div>
+                          <div class="user-details">
+                              📧 ${user.email} | 📅 Créé le ${createdDate}
+                              ${user.photoUrl ? ' | 📷 Photo' : ''}
+                              ${user.sonEntreeURL ? ' | 🔊 Son' : ''}
+                          </div>
+                      </div>
+                  </div>
+              `;
+          });
+
+          usersList.innerHTML = html;
+
+          // Ajouter les événements pour les checkboxes
+          this.bindCheckboxEvents();
+      }
+
+      bindCheckboxEvents() {
+          // Événement pour "Sélectionner tout"
+          const selectAll = document.getElementById('selectAll');
+          selectAll.addEventListener('change', (e) => {
+              const checkboxes = document.querySelectorAll('.user-checkbox');
+              checkboxes.forEach(checkbox => {
+                  checkbox.checked = e.target.checked;
+                  this.toggleUserSelection(checkbox.dataset.userId, e.target.checked);
+              });
+              this.updateSelectionInfo();
+          });
+
+          // Événements pour les checkboxes individuelles
+          const checkboxes = document.querySelectorAll('.user-checkbox');
+          checkboxes.forEach(checkbox => {
+              checkbox.addEventListener('change', (e) => {
+                  this.toggleUserSelection(checkbox.dataset.userId, e.target.checked);
+                  this.updateSelectAllState();
+                  this.updateSelectionInfo();
+              });
+          });
+      }
+
+      toggleUserSelection(userId, isSelected) {
+          if (isSelected) {
+              this.selectedUsers.add(userId);
+          } else {
+              this.selectedUsers.delete(userId);
+          }
+          this.updateDeleteButton();
+      }
+
+      updateSelectAllState() {
+          const selectAll = document.getElementById('selectAll');
+          const checkboxes = document.querySelectorAll('.user-checkbox');
+          const allChecked = checkboxes.length > 0 && Array.from(checkboxes).every(cb => cb.checked);
+          const someChecked = Array.from(checkboxes).some(cb => cb.checked);
+
+          selectAll.checked = allChecked;
+          selectAll.indeterminate = someChecked && !allChecked;
+      }
+
+      updateSelectionInfo() {
+          const selectionInfo = document.getElementById('selectionInfo');
+          const count = this.selectedUsers.size;
+
+          if (count === 0) {
+              selectionInfo.textContent = 'Aucun utilisateur sélectionné';
+          } else if (count === 1) {
+              selectionInfo.textContent = '1 utilisateur sélectionné';
+          } else {
+              selectionInfo.textContent = `${count} utilisateurs sélectionnés`;
+          }
+      }
+
+      updateDeleteButton() {
+          const deleteBtn = document.getElementById('deleteBtn');
+          deleteBtn.disabled = this.selectedUsers.size === 0;
+      }
+
+      async deleteSelectedUsers() {
+          const selectedCount = this.selectedUsers.size;
+          if (selectedCount === 0) {
+              this.showMessage('Veuillez sélectionner au moins un utilisateur', 'error');
+              return;
+          }
+
+          const userList = Array.from(this.selectedUsers).map(id => {
+              const user = this.users.find(u => u.id == id);
+              return user ? user.username : `ID: ${id}`;
+          }).join(', ');
+
+          if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedCount} utilisateur(s) ?\n\nUtilisateurs concernés : ${userList}\n\nCette action est irréversible !`)) {
+              return;
+          }
+
+          this.showLoading(true);
+          document.getElementById('deleteBtn').disabled = true;
+
+          try {
+              const token = localStorage.getItem('accessToken');
+              const deletePromises = Array.from(this.selectedUsers).map(userId =>
+                  fetch(`/api/users/${userId}`, {
+                      method: 'DELETE',
+                      headers: {
+                          'Authorization': `Bearer ${token}`
+                      }
+                  })
+              );
+
+              const results = await Promise.allSettled(deletePromises);
+
+              let successCount = 0;
+              let errorCount = 0;
+
+              results.forEach((result, index) => {
+                  if (result.status === 'fulfilled' && result.value.ok) {
+                      successCount++;
+                  } else {
+                      errorCount++;
+                  }
+              });
+
+              if (errorCount === 0) {
+                  this.showMessage(`${successCount} utilisateur(s) supprimé(s) avec succès !`, 'success');
+              } else if (successCount === 0) {
+                  this.showMessage(`Erreur lors de la suppression de tous les utilisateurs`, 'error');
+              } else {
+                  this.showMessage(`${successCount} utilisateur(s) supprimé(s), ${errorCount} erreur(s)`, 'success');
+              }
+
+              // Recharger la liste des utilisateurs
+              this.selectedUsers.clear();
+              await this.loadUsers();
+
+          } catch (error) {
+              this.showMessage('Erreur lors de la suppression: ' + error.message, 'error');
+          } finally {
+              this.showLoading(false);
+              this.updateDeleteButton();
+          }
+      }
+
+      logout() {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          sessionStorage.removeItem('adminAuth');
+          window.location.href = '/connection/connection.html';
+      }
+
+      showMessage(message, type) {
+          const messageEl = document.getElementById('message');
+          messageEl.textContent = message;
+          messageEl.className = `message ${type}`;
+          messageEl.style.display = 'block';
+
+          if (type === 'success') {
+              setTimeout(() => {
+                  messageEl.style.display = 'none';
+              }, 5000);
+          }
+      }
+
+      hideMessage() {
+          document.getElementById('message').style.display = 'none';
+      }
+
+      showLoading(show) {
+          document.getElementById('loading').style.display = show ? 'block' : 'none';
+      }
+  }
+
+  // Initialisation de la protection par mot de passe
+  document.addEventListener('DOMContentLoaded', () => {
+      new PasswordProtection();
+  });
+</script>
+</body>
+</html>

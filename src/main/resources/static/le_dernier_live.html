@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Hustla - Lecteur Audio</title>
+    <style>
+        /* ==================================== */
+        /* BASE & LAYOUT                        */
+        /* ==================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        /* --- ARRIÈRE-PLAN MAUVE TRANSPARENT --- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* ==================================== */
+        /* NOUVEAU LECTEUR SOBRE & STYLÉ        */
+        /* ==================================== */
+        .media-player {
+            width: 100%;
+            background: rgba(20, 20, 30, 0.7);
+            border-radius: 20px;
+            padding: 30px 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(100, 126, 234, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .track-info {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .track-title {
+            color: #FFFFFF;
+            font-size: 1.4rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .artist-name {
+            color: #667eea;
+            font-size: 1rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        /* BARRE DE LECTURE ONDULÉE */
+        .waveform-container {
+            width: 100%;
+            height: 120px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            background: rgba(10, 10, 20, 0.6);
+            padding: 20px 0;
+            cursor: pointer;
+        }
+
+        .waveform {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 0 5px;
+        }
+
+        .wave-line {
+            flex: 1;
+            max-width: 4px;
+            margin: 0 2px;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 2px 2px 0 0;
+            transition: height 0.1s ease-out;
+            opacity: 0.7;
+            min-height: 10%;
+        }
+
+        .progress-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: rgba(102, 126, 234, 0.15);
+            pointer-events: none;
+            border-right: 2px solid #667eea;
+            transition: width 0.1s linear;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        /* CONTROLES DU LECTEUR */
+        .player-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 0 10px;
+        }
+
+        .control-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #FFFFFF;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 50%;
+        }
+
+        .control-btn:hover::before {
+            opacity: 0.3;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .control-btn:active {
+            transform: translateY(-2px);
+        }
+
+        .control-btn svg {
+            width: 24px;
+            height: 24px;
+            position: relative;
+            z-index: 1;
+            fill: #FFFFFF;
+        }
+
+        /* ==================================== */
+        /* ICÔNES SOCIALES (GRILLE 2X2) - LOGOS PLUS GROS */
+        /* ==================================== */
+        .icons-grid-container {
+            width: 100%;
+            max-width: 320px; /* Un peu plus large pour les logos plus gros */
+        }
+
+        .follow-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 2rem;
+            margin-bottom: 30px;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            text-align: center;
+            font-weight: 300;
+            text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 50px; /* Plus d'espace pour les logos plus gros */
+            justify-items: center;
+            align-items: center;
+            width: 100%;
+            padding: 10px;
+        }
+
+        /* LOGOS BEAUCOUP PLUS GROS - CERCLES AGRANDIS */
+        .icon-wrapper {
+            width: 100%;
+            max-width: 130px; /* Augmenté de 100px à 130px */
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+
+        /* LOGOS PRENNENT 100% DU CERCLE - IMAGE PLUS GROSSE */
+        .icon-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Couvre tout l'espace disponible */
+            display: block;
+            filter: brightness(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .icon-wrapper:hover {
+            transform: scale(1.25);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.4), 0 15px 40px rgba(0, 0, 0, 0.9);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .icon-wrapper:hover img {
+            filter: brightness(1.2);
+            transform: scale(1.05);
+        }
+
+        /* Effets de couleur au survol */
+        .icon-wrapper[data-network="instagram"]:hover {
+            border-color: #E4405F;
+            box-shadow: 0 0 50px #E4405F, 0 0 70px rgba(228, 64, 95, 0.6);
+        }
+
+        .icon-wrapper[data-network="tiktok"]:hover {
+            border-color: #00F2EA;
+            box-shadow: 0 0 50px #00F2EA, 0 0 70px rgba(0, 242, 234, 0.6);
+        }
+
+        .icon-wrapper[data-network="snapchat"]:hover {
+            border-color: #FFFC00;
+            box-shadow: 0 0 50px #FFFC00, 0 0 70px rgba(255, 252, 0, 0.6);
+        }
+
+        .icon-wrapper[data-network="facebook"]:hover {
+            border-color: #1877F2;
+            box-shadow: 0 0 50px #1877F2, 0 0 70px rgba(24, 119, 242, 0.6);
+        }
+
+        /* États de chargement et d'erreur */
+        .loading-state {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 20px;
+            color: #E4405F;
+            font-size: 1rem;
+            font-weight: 300;
+            background: rgba(228, 64, 95, 0.1);
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        /* ==================================== */
+        /* RESPONSIVE - ÉCRAN TÉLÉPHONE         */
+        /* ==================================== */
+        @media (max-width: 768px) {
+            .main-content {
+                gap: 40px;
+            }
+
+            .media-player {
+                padding: 25px 20px;
+            }
+
+            .waveform-container {
+                height: 100px;
+                margin-bottom: 15px;
+            }
+
+            .player-controls {
+                padding: 0 5px;
+            }
+
+            .control-btn {
+                width: 55px;
+                height: 55px;
+            }
+
+            .control-btn svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .follow-text {
+                font-size: 1.8rem;
+                letter-spacing: 6px;
+                margin-bottom: 25px;
+            }
+
+            .icons-grid {
+                gap: 40px;
+            }
+
+            .icon-wrapper {
+                max-width: 110px; /* Adapté pour tablette */
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .media-player {
+                padding: 20px 15px;
+            }
+
+            .track-title {
+                font-size: 1.2rem;
+            }
+
+            .waveform-container {
+                height: 80px;
+                margin-bottom: 15px;
+            }
+
+            .wave-line {
+                max-width: 3px;
+            }
+
+            .player-controls {
+                padding: 0;
+            }
+
+            .control-btn {
+                width: 50px;
+                height: 50px;
+            }
+
+            .control-btn svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .follow-text {
+                font-size: 1.5rem;
+                letter-spacing: 4px;
+                margin-bottom: 20px;
+            }
+
+            .icons-grid {
+                gap: 30px;
+            }
+
+            .icon-wrapper {
+                max-width: 90px; /* Adapté pour mobile */
+            }
+        }
+
+        /* Pour les très petits écrans */
+        @media (max-width: 360px) {
+            .icons-grid {
+                gap: 25px;
+            }
+
+            .icon-wrapper {
+                max-width: 80px;
+            }
+
+            .player-controls {
+                gap: 5px;
+            }
+
+            .control-btn {
+                width: 45px;
+                height: 45px;
+            }
+
+            .control-btn svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .control-btn {
+                width: 42px;
+                height: 42px;
+            }
+
+            .control-btn svg {
+                width: 15px;
+                height: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="main-content">
+
+    <!-- NOUVEAU LECTEUR -->
+    <div class="media-player" id="mediaPlayer">
+        <div class="track-info">
+            <div class="track-title" id="trackTitle">Chargement du mix...</div>
+            <div class="artist-name">DJ HUSTLA</div>
+        </div>
+
+        <!-- BARRE DE LECTURE ONDULÉE -->
+        <div class="waveform-container" id="waveformContainer">
+            <div class="waveform" id="waveform">
+                <!-- Les barres d'onde sont générées par JavaScript -->
+            </div>
+            <div class="progress-overlay" id="progressOverlay"></div>
+        </div>
+
+        <div class="time-display">
+            <span class="current-time" id="currentTime">0:00</span>
+            <span class="total-time" id="totalTime">0:00</span>
+        </div>
+
+        <!-- CONTROLES -->
+        <div class="player-controls">
+            <button class="control-btn play-btn" id="playBtn" title="Play" disabled>
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            </button>
+
+            <button class="control-btn pause-btn" id="pauseBtn" title="Pause" disabled>
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+            </button>
+
+            <button class="control-btn stop-btn" id="stopBtn" title="Stop" disabled>
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6h12v12H6z"/>
+                </svg>
+            </button>
+
+            <button class="control-btn download-btn" id="downloadBtn" title="Télécharger" disabled>
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Lecteur audio caché -->
+        <audio id="audioPlayer" preload="metadata" playsinline crossorigin="anonymous"></audio>
+    </div>
+
+    <!-- RÉSEAUX SOCIAUX - LOGOS PLUS GROS -->
+    <div class="icons-grid-container">
+        <div class="follow-text">FOLLOW ME</div>
+        <div class="icons-grid">
+            <!-- Instagram -->
+            <a href="javascript:void(0)" class="icon-wrapper" data-network="instagram" id="instagramBtn" title="Instagram">
+                <img src="https://github.com/djhustla/music-storage/raw/main/logos_reseaux/instagram.png" alt="Instagram">
+            </a>
+
+            <!-- TikTok -->
+            <a href="javascript:void(0)" class="icon-wrapper" data-network="tiktok" id="tiktokBtn" title="TikTok">
+                <img src="https://github.com/djhustla/music-storage/raw/main/logos_reseaux/tiktok.png" alt="TikTok">
+            </a>
+
+            <!-- Snapchat -->
+            <a href="javascript:void(0)" class="icon-wrapper" data-network="snapchat" id="snapchatBtn" title="Snapchat">
+                <img src="https://github.com/djhustla/music-storage/raw/main/logos_reseaux/snap.png" alt="Snapchat">
+            </a>
+
+            <!-- Facebook -->
+            <a href="javascript:void(0)" class="icon-wrapper" data-network="facebook" id="facebookBtn" title="Facebook">
+                <img src="https://github.com/djhustla/music-storage/raw/main/logos_reseaux/facebook.png" alt="Facebook">
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // URL de votre API Dropbox
+    const API_URL = '/api/dropbox/liens';
+
+    // Configuration des réseaux sociaux - URL Snapchat mise à jour
+    const socialConfig = {
+        instagram: {
+            webUrl: "https://www.instagram.com/djhustla32",
+            appUrl: "instagram://user?username=djhustla32",
+            logoUrl: "https://github.com/djhustla/music-storage/raw/main/logos_reseaux/instagram.png"
+        },
+        tiktok: {
+            webUrl: "https://www.tiktok.com/@djhustla32",
+            appUrl: "tiktok://@djhustla32",
+            logoUrl: "https://github.com/djhustla/music-storage/raw/main/logos_reseaux/tiktok.png"
+        },
+        facebook: {
+            webUrl: "https://www.facebook.com/djhustla.kumbo",
+            appUrl: "fb://profile/djhustla.kumbo",
+            logoUrl: "https://github.com/djhustla/music-storage/raw/main/logos_reseaux/facebook.png"
+        },
+        snapchat: {
+            webUrl: "https://www.snapchat.com/@djhustla.bel", // URL mise à jour
+            appUrl: "snapchat://add/djhustla.bel", // URL d'app mise à jour
+            logoUrl: "https://github.com/djhustla/music-storage/raw/main/logos_reseaux/snap.png"
+        }
+    };
+
+    // Variables globales
+    let currentAudio = null;
+    let isPlaying = false;
+    let currentMixUrl = '';
+    let currentDownloadUrl = '';
+    let audioContext = null;
+    let analyser = null;
+    let dataArray = null;
+    let source = null;
+    let waveBars = [];
+
+    // Fonction pour ouvrir les réseaux sociaux
+    function openSocialApp(network) {
+        const config = socialConfig[network];
+        if (!config) return;
+
+        // Vérifier si c'est un mobile
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // Sur mobile : essayer d'abord l'app, puis fallback au web
+        if (isMobile && config.appUrl) {
+            // Essayer d'ouvrir l'application
+            window.location.href = config.appUrl;
+
+            // Si l'application n'est pas installée, revenir au site web après un délai
+            setTimeout(() => {
+                // Vérifier si la page est toujours visible (non détournée vers l'app)
+                if (!document.hidden) {
+                    window.location.href = config.webUrl;
+                }
+            }, 500);
+        } else {
+            // Sur desktop : ouvrir directement le site web
+            window.open(config.webUrl, '_blank');
+        }
+    }
+
+    // Fonction pour convertir l'URL Dropbox en URL streamable ET téléchargeable
+    function fixDropboxUrl(url) {
+        let cleanUrl = url.replace(/&e=\d+/g, '').replace(/&st=[^&]+/g, '');
+        if (cleanUrl.includes('/scl/fi/')) {
+            const streamUrl = cleanUrl
+                .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                .replace('?dl=0', '').replace('&dl=0', '');
+
+            // Créer l'URL de téléchargement direct
+            // Pour Dropbox, l'URL avec ?dl=1 déclenche le téléchargement
+            const downloadUrl = cleanUrl.replace('?dl=0', '?dl=1').replace('&dl=0', '?dl=1');
+
+            return { streamUrl, downloadUrl };
+        }
+        return {
+            streamUrl: cleanUrl.replace('?dl=0', '?raw=1'),
+            downloadUrl: cleanUrl.replace('?dl=0', '?dl=1')
+        };
+    }
+
+    // Fonction pour extraire le nom du fichier depuis l'URL
+    function getFileNameFromUrl(url) {
+        try {
+            const urlObj = new URL(url);
+            const pathParts = urlObj.pathname.split('/');
+            let filename = pathParts[pathParts.length - 1];
+            filename = decodeURIComponent(filename.split('?')[0]);
+            return filename || 'mix_dj_hustla.mp3';
+        } catch {
+            return 'mix_dj_hustla.mp3';
+        }
+    }
+
+    // Fonction pour déclencher le téléchargement du fichier
+    function triggerFileDownload(downloadUrl, filename) {
+        // Créer un élément <a> temporaire pour le téléchargement[citation:4][citation:6]
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = filename;
+
+        // Ajouter temporairement au DOM, déclencher le clic, puis le retirer[citation:6]
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Fonction pour formater le temps
+    function formatTime(seconds) {
+        if (isNaN(seconds) || seconds < 0) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    // Fonction pour récupérer le premier lien depuis l'API
+    async function fetchFirstMixUrl() {
+        try {
+            console.log('🔄 Récupération des liens depuis l\'API...');
+            const response = await fetch(API_URL);
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message || 'Erreur de l\'API');
+            }
+
+            if (!data.liens || data.liens.length === 0) {
+                throw new Error('Aucun mix trouvé dans la liste');
+            }
+
+            console.log(`✅ ${data.liens.length} liens récupérés`);
+            console.log('Premier lien:', data.liens[0]);
+
+            return data.liens[0];
+
+        } catch (error) {
+            console.error('❌ Erreur lors de la récupération des liens:', error);
+            throw error;
+        }
+    }
+
+    // Créer les barres d'onde
+    function createWaveform() {
+        const waveform = document.getElementById('waveform');
+        const width = waveform.offsetWidth;
+        const barCount = Math.floor(width / 8);
+
+        waveform.innerHTML = '';
+        waveBars = [];
+
+        for (let i = 0; i < barCount; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'wave-line';
+            waveform.appendChild(bar);
+            waveBars.push(bar);
+        }
+    }
+
+    // Initialiser l'analyseur audio
+    function setupAudioAnalyser(audio) {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+
+            source = audioContext.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+
+            const bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+
+            console.log('✅ Analyseur audio initialisé');
+        } catch (error) {
+            console.error('❌ Erreur initialisation analyseur:', error);
+        }
+    }
+
+    // Animer les barres selon la musique
+    function animateWaveform() {
+        if (!analyser || !isPlaying) {
+            requestAnimationFrame(animateWaveform);
+            return;
+        }
+
+        analyser.getByteFrequencyData(dataArray);
+
+        const barCount = waveBars.length;
+        const step = Math.floor(dataArray.length / barCount);
+
+        waveBars.forEach((bar, i) => {
+            const dataIndex = i * step;
+            const value = dataArray[dataIndex];
+            const percent = (value / 255) * 100;
+            const height = Math.max(10, percent);
+
+            bar.style.height = `${height}%`;
+        });
+
+        requestAnimationFrame(animateWaveform);
+    }
+
+    // Fonction pour initialiser le lecteur audio avec un lien
+    function initAudioPlayer(dropboxUrl) {
+        const audio = document.getElementById('audioPlayer');
+        const trackTitle = document.getElementById('trackTitle');
+        const progressOverlay = document.getElementById('progressOverlay');
+        const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const waveformContainer = document.getElementById('waveformContainer');
+
+        // Convertir l'URL Dropbox
+        const urls = fixDropboxUrl(dropboxUrl);
+        const fileName = getFileNameFromUrl(dropboxUrl);
+        const displayName = fileName.replace('.mp3', '').replace(/_/g, ' ');
+
+        // Mettre à jour l'interface
+        trackTitle.textContent = displayName;
+
+        // Configurer la source audio
+        audio.innerHTML = '';
+        const sourceEl = document.createElement('source');
+        sourceEl.src = urls.streamUrl;
+        sourceEl.type = 'audio/mpeg';
+        audio.appendChild(sourceEl);
+        audio.load();
+
+        // Stocker les URLs pour le téléchargement
+        currentMixUrl = dropboxUrl;
+        currentDownloadUrl = urls.downloadUrl;
+        currentAudio = audio;
+
+        // Activer les boutons
+        playBtn.disabled = false;
+        pauseBtn.disabled = false;
+        stopBtn.disabled = false;
+        downloadBtn.disabled = false;
+
+        playBtn.style.opacity = '1';
+        pauseBtn.style.opacity = '1';
+        stopBtn.style.opacity = '1';
+        downloadBtn.style.opacity = '1';
+
+        // Mettre à jour l'état des boutons
+        function updateButtonState() {
+            playBtn.style.opacity = isPlaying ? '0.5' : '1';
+            pauseBtn.style.opacity = isPlaying ? '1' : '0.5';
+        }
+
+        // Mettre à jour la progression
+        function updateProgress() {
+            if (!audio || isNaN(audio.duration)) return;
+
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressOverlay.style.width = `${progress}%`;
+
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+            totalTimeEl.textContent = formatTime(audio.duration);
+        }
+
+        // Navigation dans le mix par clic
+        waveformContainer.addEventListener('click', function(e) {
+            if (!audio || isNaN(audio.duration)) return;
+
+            const rect = waveformContainer.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percentClick = clickX / rect.width;
+            const newTime = percentClick * audio.duration;
+
+            audio.currentTime = newTime;
+            console.log('⏩ Navigation vers:', formatTime(newTime));
+        });
+
+        // Événements de l'audio
+        audio.addEventListener('loadedmetadata', function() {
+            totalTimeEl.textContent = formatTime(audio.duration);
+            console.log('✅ Audio chargé, durée:', formatTime(audio.duration));
+        });
+
+        audio.addEventListener('timeupdate', updateProgress);
+
+        audio.addEventListener('play', function() {
+            isPlaying = true;
+            updateButtonState();
+
+            // Initialiser l'analyseur si pas encore fait
+            if (!audioContext) {
+                setupAudioAnalyser(audio);
+                animateWaveform();
+            } else if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
+            console.log('▶️ Lecture démarrée');
+        });
+
+        audio.addEventListener('pause', function() {
+            isPlaying = false;
+            updateButtonState();
+            console.log('⏸️ Lecture en pause');
+        });
+
+        audio.addEventListener('ended', function() {
+            isPlaying = false;
+            updateButtonState();
+            console.log('⏹️ Lecture terminée');
+        });
+
+        audio.addEventListener('error', function(e) {
+            console.error('❌ Erreur audio:', e);
+            trackTitle.textContent = 'Erreur de chargement';
+            isPlaying = false;
+            updateButtonState();
+        });
+
+        // Contrôles
+        playBtn.addEventListener('click', function() {
+            if (!isPlaying) {
+                audio.play().catch(e => {
+                    console.error('❌ Erreur de lecture:', e);
+                    trackTitle.textContent = 'Erreur de lecture';
+                });
+            }
+        });
+
+        pauseBtn.addEventListener('click', function() {
+            if (isPlaying) {
+                audio.pause();
+            }
+        });
+
+        stopBtn.addEventListener('click', function() {
+            audio.pause();
+            audio.currentTime = 0;
+            updateProgress();
+            isPlaying = false;
+            updateButtonState();
+        });
+
+        // Bouton de téléchargement modifié
+        downloadBtn.addEventListener('click', function() {
+            const filename = getFileNameFromUrl(currentMixUrl);
+
+            // Utiliser la fonction de téléchargement
+            triggerFileDownload(currentDownloadUrl, filename);
+
+            console.log('⬇️ Téléchargement déclenché pour:', filename);
+        });
+
+        // Initialiser l'état
+        updateButtonState();
+    }
+
+    // Fonction pour charger et jouer le premier mix
+    async function loadAndPlayFirstMix() {
+        const trackTitle = document.getElementById('trackTitle');
+
+        try {
+            // Afficher l'état de chargement
+            trackTitle.textContent = 'Chargement des mixes...';
+
+            // Récupérer le premier lien depuis l'API
+            const firstMixUrl = await fetchFirstMixUrl();
+
+            // Initialiser le lecteur avec ce lien
+            initAudioPlayer(firstMixUrl);
+
+            console.log('✅ Lecteur initialisé avec succès');
+
+        } catch (error) {
+            console.error('❌ Erreur:', error);
+            trackTitle.textContent = 'Erreur de chargement';
+
+            // Afficher un message d'erreur
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-state';
+            errorDiv.innerHTML = `
+                <p>Impossible de charger le mix</p>
+                <p><small>${error.message}</small></p>
+                <button onclick="window.location.reload()" style="
+                    margin-top: 10px;
+                    padding: 8px 16px;
+                    background: #667eea;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                ">Réessayer</button>
+            `;
+
+            const mediaPlayer = document.getElementById('mediaPlayer');
+            mediaPlayer.appendChild(errorDiv);
+        }
+    }
+
+    // Initialiser la page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Créer la waveform
+        createWaveform();
+
+        // Configurer les boutons réseaux sociaux
+        document.getElementById('instagramBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            openSocialApp('instagram');
+        });
+
+        document.getElementById('tiktokBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            openSocialApp('tiktok');
+        });
+
+        document.getElementById('snapchatBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            openSocialApp('snapchat');
+        });
+
+        document.getElementById('facebookBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            openSocialApp('facebook');
+        });
+
+        // Charger et jouer le premier mix
+        loadAndPlayFirstMix();
+
+        // Redimensionner les barres d'onde quand la fenêtre change de taille
+        window.addEventListener('resize', createWaveform);
+    });
+</script>
+</body>
+</html>

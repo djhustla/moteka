@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Utilisateur</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; position:relative;
+    }
+
+    /* Boutons fixes en haut */
+    .buttons-container {
+      position: fixed; top:20px; right:20px;
+      display:flex; gap:10px; z-index:100;
+    }
+    .buttons-container button {
+      background:#fff; color:#667eea; border:none; padding:8px 16px; border-radius:10px;
+      font-size:0.95rem; font-weight:600; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.2); transition:all 0.2s;
+    }
+    .buttons-container button:hover { background:#667eea; color:#fff; }
+
+    .profile-container {
+      background:white; border-radius:24px; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+      overflow:hidden; width:100%; max-width:600px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding:50px 30px;
+      text-align:center; color:white;
+      position: relative;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* PHOTO DE PROFIL CARRÉE - TRÈS GRANDE ET VISIBLE */
+    .profile-photo-container {
+      position: relative;
+      margin-bottom: 30px;
+      width: 280px;
+      height: 280px;
+    }
+
+    .profile-photo {
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      border: 6px solid rgba(255, 255, 255, 0.9);
+      object-fit: cover;
+      box-shadow:
+        0 0 0 4px rgba(255, 255, 255, 0.4),
+        0 15px 40px rgba(0, 0, 0, 0.4),
+        0 0 60px rgba(102, 126, 234, 0.6);
+      transition: all 0.4s ease;
+      position: relative;
+      z-index: 2;
+    }
+
+    .profile-photo:hover {
+      transform: scale(1.03);
+      box-shadow:
+        0 0 0 6px rgba(255, 255, 255, 0.5),
+        0 20px 50px rgba(0, 0, 0, 0.5),
+        0 0 80px rgba(102, 126, 234, 0.8);
+    }
+
+    /* Effet de halo derrière la photo */
+    .profile-photo-container::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      height: 320px;
+      border-radius: 25px;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(255, 255, 255, 0.25) 0%,
+        rgba(255, 255, 255, 0.08) 40%,
+        transparent 70%
+      );
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* PHOTO CACHÉE - VERSION CARRÉE */
+    .profile-photo-hidden {
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      border: 6px solid rgba(255, 255, 255, 0.3);
+      object-fit: cover;
+      filter: grayscale(100%) blur(6px) brightness(0.3);
+      position: relative;
+      box-shadow:
+        0 0 0 4px rgba(255, 255, 255, 0.1),
+        0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .photo-hidden-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 15px 30px;
+      border-radius: 15px;
+      z-index: 3;
+      text-align: center;
+      width: 200px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .default-photo {
+      background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 5rem;
+      letter-spacing: 2px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 5px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      letter-spacing: 0.5px;
+    }
+
+    .profile-content { padding:30px; }
+    .loading { text-align:center; padding:40px; color:#667eea; }
+    .error { text-align:center; padding:40px; color:#dc2626; }
+
+    /* Bouton discuter */
+    .chat-button {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 25px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 25px auto;
+      width: fit-content;
+    }
+    .chat-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
+    }
+    .chat-button:active {
+      transform: translateY(0);
+    }
+
+    /* Styles pour les favoris musicaux */
+    .favoris-section {
+      background:#f8f9ff;
+      border:2px solid #e0e7ff;
+      border-radius:15px;
+      padding:25px;
+      margin:25px 0;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+    }
+    .favoris-title {
+      font-weight:800;
+      color:#667eea;
+      margin-bottom:20px;
+      text-align:center;
+      font-size:1.3rem;
+      letter-spacing: 0.5px;
+    }
+    .favoris-item {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:14px 0;
+      border-bottom:2px solid #e5e7eb;
+    }
+    .favoris-item:last-child {
+      border-bottom:none;
+    }
+    .favoris-genre {
+      font-weight:700;
+      color:#374151;
+      font-size:1.1rem;
+    }
+    .favoris-cote {
+      font-size:1rem;
+      padding:8px 15px;
+      border-radius:10px;
+      font-weight:700;
+      min-width: 70px;
+      text-align: center;
+    }
+    .cote-10 { background:#dbeafe; color:#2563eb; border: 3px solid #2563eb; }
+    .cote-9 { background:#dbeafe; color:#2563eb; }
+    .cote-8 { background:#d1fae5; color:#059669; }
+    .cote-7 { background:#d1fae5; color:#059669; }
+    .cote-6 { background:#fef3c7; color:#d97706; }
+    .cote-5 { background:#fef3c7; color:#d97706; }
+    .cote-4 { background:#fef3c7; color:#d97706; }
+    .cote-3 { background:#fee2e2; color:#dc2626; }
+    .cote-2 { background:#fee2e2; color:#dc2626; }
+    .cote-1 { background:#fee2e2; color:#dc2626; border: 3px solid #dc2626; }
+    .no-favoris {
+      color:#6b7280;
+      font-style:italic;
+      text-align:center;
+      padding:20px;
+      font-size: 1.1rem;
+    }
+
+    /* NOUVEAU STYLE POUR LES RÉSEAUX SOCIAUX */
+    .reseaux-section {
+      background: rgba(20, 20, 30, 0.7);
+      border-radius: 25px;
+      padding: 30px;
+      margin: 30px 0;
+      border: 2px solid rgba(100, 126, 234, 0.4);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .reseaux-title {
+      color: #FFFFFF;
+      font-size: 2rem;
+      margin-bottom: 35px;
+      letter-spacing: 10px;
+      text-transform: uppercase;
+      text-align: center;
+      font-weight: 400;
+      text-shadow: 0 0 15px rgba(102, 126, 234, 0.7);
+    }
+
+    .icons-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 50px;
+      justify-items: center;
+      align-items: center;
+      width: 100%;
+      padding: 20px;
+    }
+
+    .reseau-icon-wrapper {
+      width: 100%;
+      max-width: 140px;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: rgba(255, 255, 255, 0.1);
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+      position: relative;
+    }
+
+    .reseau-icon-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.95);
+      transition: all 0.3s ease;
+    }
+
+    .reseau-icon-wrapper:hover {
+      transform: scale(1.35);
+      box-shadow: 0 0 60px rgba(255, 255, 255, 0.5), 0 20px 50px rgba(0, 0, 0, 1);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .reseau-icon-wrapper:hover img {
+      filter: brightness(1.3);
+      transform: scale(1.1);
+    }
+
+    /* Effets de couleur au survol */
+    .reseau-icon-wrapper[data-network="twitter"]:hover {
+      border-color: #1DA1F2;
+      box-shadow: 0 0 70px #1DA1F2, 0 0 90px rgba(29, 161, 242, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="instagram"]:hover {
+      border-color: #E4405F;
+      box-shadow: 0 0 70px #E4405F, 0 0 90px rgba(228, 64, 95, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="facebook"]:hover {
+      border-color: #1877F2;
+      box-shadow: 0 0 70px #1877F2, 0 0 90px rgba(24, 119, 242, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="linkedin"]:hover {
+      border-color: #0A66C2;
+      box-shadow: 0 0 70px #0A66C2, 0 0 90px rgba(10, 102, 194, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="github"]:hover {
+      border-color: #181717;
+      box-shadow: 0 0 70px #181717, 0 0 90px rgba(24, 23, 23, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="youtube"]:hover {
+      border-color: #FF0000;
+      box-shadow: 0 0 70px #FF0000, 0 0 90px rgba(255, 0, 0, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="tiktok"]:hover {
+      border-color: #00F2EA;
+      box-shadow: 0 0 70px #00F2EA, 0 0 90px rgba(0, 242, 234, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="discord"]:hover {
+      border-color: #5865F2;
+      box-shadow: 0 0 70px #5865F2, 0 0 90px rgba(88, 101, 242, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="twitch"]:hover {
+      border-color: #9146FF;
+      box-shadow: 0 0 70px #9146FF, 0 0 90px rgba(145, 70, 255, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="reddit"]:hover {
+      border-color: #FF4500;
+      box-shadow: 0 0 70px #FF4500, 0 0 90px rgba(255, 69, 0, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="snapchat"]:hover {
+      border-color: #FFFC00;
+      box-shadow: 0 0 70px #FFFC00, 0 0 90px rgba(255, 252, 0, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="whatsapp"]:hover {
+      border-color: #25D366;
+      box-shadow: 0 0 70px #25D366, 0 0 90px rgba(37, 211, 102, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="telegram"]:hover {
+      border-color: #26A5E4;
+      box-shadow: 0 0 70px #26A5E4, 0 0 90px rgba(38, 165, 228, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="spotify"]:hover {
+      border-color: #1DB954;
+      box-shadow: 0 0 70px #1DB954, 0 0 90px rgba(29, 185, 84, 0.8);
+    }
+
+    .reseau-icon-wrapper[data-network="default"]:hover {
+      border-color: #667eea;
+      box-shadow: 0 0 70px #667eea, 0 0 90px rgba(102, 126, 234, 0.8);
+    }
+
+    .no-reseaux {
+      color:#6b7280;
+      font-style:italic;
+      text-align:center;
+      padding:25px;
+      font-size: 1.1rem;
+    }
+
+    /* Styles pour le son d'entrée (caché) */
+    .audio-player {
+      display: none;
+    }
+
+    /* Indicateur de son en cours */
+    .son-playing-indicator {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(16, 185, 129, 0.95);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 700;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      animation: pulse 1.5s infinite;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    /* Message d'information sur les paramètres de visibilité */
+    .visibility-info {
+      background: #fef3c7;
+      border: 2px solid #fbbf24;
+      border-radius: 15px;
+      padding: 18px;
+      margin: 20px 0;
+      font-size: 1rem;
+      color: #92400e;
+      text-align: center;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);
+    }
+
+    /* Informations admin uniquement */
+    .admin-info {
+      background: #f8f9ff;
+      border: 3px solid #d1d5db;
+      border-radius: 15px;
+      padding: 25px;
+      margin: 25px 0;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+    .admin-title {
+      font-weight: 800;
+      color: #374151;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+    .admin-info-item {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .admin-info-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .admin-label {
+      font-size: 0.95rem;
+      color: #6b7280;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    .admin-value {
+      font-size: 1.1rem;
+      color: #374151;
+      font-weight: 600;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .buttons-container {
+        top: 10px;
+        right: 10px;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .buttons-container button {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+      }
+      .profile-container {
+        margin-top: 60px;
+        max-width: 95%;
+      }
+      .reseaux-title {
+        font-size: 1.5rem;
+        letter-spacing: 6px;
+      }
+      .icons-grid {
+        gap: 30px;
+      }
+      .reseau-icon-wrapper {
+        max-width: 120px;
+      }
+
+      /* PHOTO MOBILE */
+      .profile-photo-container {
+        width: 240px;
+        height: 240px;
+      }
+      .profile-photo-container::before {
+        width: 270px;
+        height: 270px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .reseaux-title {
+        font-size: 1.3rem;
+        letter-spacing: 4px;
+        margin-bottom: 25px;
+      }
+      .icons-grid {
+        gap: 25px;
+      }
+      .reseau-icon-wrapper {
+        max-width: 100px;
+      }
+
+      /* PHOTO MOBILE PETIT ÉCRAN */
+      .profile-photo-container {
+        width: 200px;
+        height: 200px;
+      }
+      .profile-photo {
+        border-width: 4px;
+        border-radius: 15px;
+      }
+      .profile-photo-hidden {
+        border-width: 4px;
+        border-radius: 15px;
+      }
+      .profile-photo-container::before {
+        width: 230px;
+        height: 230px;
+        border-radius: 20px;
+      }
+      .photo-hidden-label {
+        font-size: 1rem;
+        padding: 12px 24px;
+        width: 180px;
+      }
+      h1 {
+        font-size: 1.8rem;
+      }
+      .default-photo {
+        font-size: 4rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .icons-grid {
+        gap: 20px;
+      }
+      .reseau-icon-wrapper {
+        max-width: 85px;
+      }
+      .profile-photo-container {
+        width: 180px;
+        height: 180px;
+      }
+      .profile-photo-container::before {
+        width: 210px;
+        height: 210px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Indicateur de son en cours -->
+<div id="sonPlayingIndicator" class="son-playing-indicator">
+  🔈 Son d'entrée en cours...
+</div>
+
+<div class="buttons-container">
+  <button onclick="window.location.href='/menu/afficherUserList.html'">⬅ Retour à la liste</button>
+  <button id="btnLogout">🚪 Déconnexion</button>
+</div>
+
+<div class="profile-container">
+  <div class="header">
+    <div class="profile-photo-container" id="profilePhotoContainer">
+      <!-- La photo sera insérée ici par JavaScript -->
+    </div>
+    <h1 id="profileUsername">Chargement...</h1>
+  </div>
+
+  <div class="profile-content" id="profileContent">
+    <div class="loading">Chargement des informations...</div>
+  </div>
+</div>
+
+<!-- Lecteur audio caché -->
+<audio id="sonEntreePlayer" class="audio-player"></audio>
+
+<script>
+  const token = localStorage.getItem('accessToken');
+
+  if (!token) {
+      alert('Vous devez être connecté pour voir les profils');
+      window.location.href = '/connection/connection.html';
+  }
+
+  let currentUserId = null;
+  let targetUserId = null;
+  let currentUserUsername = null;
+
+  function getUserIdFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('userId');
+  }
+
+  async function getCurrentUserInfo() {
+      try {
+          const response = await fetch('/api/users/me', {
+              headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (!response.ok) throw new Error('Erreur lors de la récupération du profil');
+          const userData = await response.json();
+          return {
+              id: userData.id,
+              username: userData.username,
+              donneeVisible: userData.donneeVisible || "111"
+          };
+      } catch (error) {
+          console.error('Erreur:', error);
+          return null;
+      }
+  }
+
+  function hasSpecialPrivileges(username) {
+      return username === 'doka' || username === 'administrateur';
+  }
+
+  async function loadMusicFavoris(userId) {
+      try {
+          const response = await fetch(`/api/users/${userId}/music-favoris`, {
+              headers: { 'Authorization': 'Bearer ' + token }
+          });
+
+          if (response.ok) {
+              const data = await response.json();
+              return data.favoris || data;
+          } else {
+              return [];
+          }
+      } catch (err) {
+          console.error('Erreur chargement favoris:', err);
+          return [];
+      }
+  }
+
+  function cleanUrl(url) {
+      if (!url) return '';
+      return url.replace(/\n/g, '').replace(/\r/g, '').trim();
+  }
+
+  function playSonEntree(sonUrl, showSon) {
+      if (!sonUrl || !showSon) return;
+
+      const cleanedUrl = cleanUrl(sonUrl);
+      const audioPlayer = document.getElementById('sonEntreePlayer');
+      const indicator = document.getElementById('sonPlayingIndicator');
+
+      audioPlayer.src = cleanedUrl;
+      audioPlayer.volume = 0.7;
+      indicator.style.display = 'flex';
+
+      audioPlayer.onplay = function() {
+          console.log('🎵 Son d\'entrée en cours de lecture');
+      };
+
+      audioPlayer.onended = function() {
+          indicator.style.display = 'none';
+          console.log('🎵 Son d\'entrée terminé');
+      };
+
+      audioPlayer.onerror = function() {
+          indicator.style.display = 'none';
+          console.error('❌ Erreur lors de la lecture du son');
+      };
+
+      audioPlayer.play().catch(error => {
+          console.error('Erreur de lecture audio:', error);
+          indicator.style.display = 'none';
+      });
+  }
+
+  function getReseauIconInfo(url) {
+      url = url.toLowerCase();
+
+      const platformMap = {
+          'twitter.com': { network: 'twitter', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/twitter.png' },
+          'x.com': { network: 'twitter', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/twitter.png' },
+          'facebook.com': { network: 'facebook', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/facebook.png' },
+          'instagram.com': { network: 'instagram', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/instagram.png' },
+          'linkedin.com': { network: 'linkedin', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/linkedin.png' },
+          'github.com': { network: 'github', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/github.png' },
+          'youtube.com': { network: 'youtube', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/youtube.png' },
+          'tiktok.com': { network: 'tiktok', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/tiktok.png' },
+          'discord.com': { network: 'discord', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/discord.png' },
+          'discord.gg': { network: 'discord', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/discord.png' },
+          'twitch.tv': { network: 'twitch', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/twitch.png' },
+          'reddit.com': { network: 'reddit', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/reddit.png' },
+          'snapchat.com': { network: 'snapchat', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/snap.png' },
+          'whatsapp.com': { network: 'whatsapp', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/whatsapp.png' },
+          'telegram.org': { network: 'telegram', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/telegram.png' },
+          't.me': { network: 'telegram', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/telegram.png' },
+          'spotify.com': { network: 'spotify', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/spotify.png' }
+      };
+
+      for (const [domain, info] of Object.entries(platformMap)) {
+          if (url.includes(domain)) {
+              return info;
+          }
+      }
+
+      return {
+          network: 'default',
+          logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/default.png'
+      };
+  }
+
+  function displayProfilePhoto(photoUrl, username, showPhoto, isAdmin) {
+      const container = document.getElementById('profilePhotoContainer');
+
+      if (isAdmin) {
+          container.innerHTML = `
+              <img class="profile-photo" src="${photoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&size=280&background=667eea&color=fff`}"
+                   alt="Photo de profil"
+                   onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&size=280&background=667eea&color=fff'">
+          `;
+          return;
+      }
+
+      if (showPhoto === '1' && photoUrl) {
+          container.innerHTML = `
+              <img class="profile-photo" src="${photoUrl}"
+                   alt="Photo de profil de ${username}"
+                   onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&size=280&background=667eea&color=fff'">
+          `;
+      } else {
+          container.innerHTML = `
+              <div class="profile-photo profile-photo-hidden default-photo">
+                  <div class="photo-hidden-label">Photo cachée</div>
+              </div>
+          `;
+      }
+  }
+
+  function displayMusicFavoris(favoris) {
+      if (!favoris || favoris.length === 0) {
+          return `
+              <div class="favoris-section">
+                  <div class="favoris-title">🎵 Favoris Musicaux</div>
+                  <div class="no-favoris">Aucun favori musical défini</div>
+              </div>
+          `;
+      }
+
+      const sortedFavoris = [...favoris].sort((a, b) => b.cotePreference - a.cotePreference);
+
+      let html = `
+          <div class="favoris-section">
+              <div class="favoris-title">🎵 Favoris Musicaux</div>
+      `;
+
+      sortedFavoris.forEach(favori => {
+          const coteClass = `cote-${favori.cotePreference}`;
+
+          html += `
+              <div class="favoris-item">
+                  <span class="favoris-genre">${favori.musicGenreDescription}</span>
+                  <span class="favoris-cote ${coteClass}">${favori.cotePreference}/10</span>
+              </div>
+          `;
+      });
+
+      html += `</div>`;
+      return html;
+  }
+
+  function displayReseaux(reseauxList, showNetworks, isAdmin) {
+      if (!isAdmin && showNetworks !== '1') {
+          return '';
+      }
+
+      if (!reseauxList || reseauxList.trim() === '') {
+          return `
+              <div class="reseaux-section">
+                  <div class="reseaux-title">FOLLOW ME</div>
+                  <div class="no-reseaux">Aucun réseau social ajouté</div>
+              </div>
+          `;
+      }
+
+      const reseauxArray = reseauxList.split(';').filter(url => url.trim() !== '');
+
+      if (reseauxArray.length === 0) {
+          return `
+              <div class="reseaux-section">
+                  <div class="reseaux-title">FOLLOW ME</div>
+                  <div class="no-reseaux">Aucun réseau social ajouté</div>
+              </div>
+          `;
+      }
+
+      let html = `
+          <div class="reseaux-section">
+              <div class="reseaux-title">FOLLOW ME</div>
+              <div class="icons-grid">
+      `;
+
+      reseauxArray.forEach((url) => {
+          const cleanedUrl = cleanUrl(url);
+          const reseauInfo = getReseauIconInfo(cleanedUrl);
+
+          html += `
+              <a href="${cleanedUrl}" target="_blank" class="reseau-icon-wrapper" data-network="${reseauInfo.network}" title="Visiter le profil">
+                  <img src="${reseauInfo.logo}" alt="Logo ${reseauInfo.network}" onerror="this.src='https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/default.png'">
+              </a>
+          `;
+      });
+
+      if (reseauxArray.length % 2 !== 0) {
+          html += `<div style="max-width: 140px; aspect-ratio: 1 / 1;"></div>`;
+      }
+
+      html += `
+              </div>
+          </div>
+      `;
+      return html;
+  }
+
+  function displayAdminInfo(user) {
+      return `
+          <div class="admin-info">
+              <div class="admin-title">👑 Informations Administrateur</div>
+              <div class="admin-info-item">
+                  <div class="admin-label">Nom d'utilisateur</div>
+                  <div class="admin-value">${user.username}</div>
+              </div>
+              <div class="admin-info-item">
+                  <div class="admin-label">Email</div>
+                  <div class="admin-value">${user.email}</div>
+              </div>
+              <div class="admin-info-item">
+                  <div class="admin-label">Rôle</div>
+                  <div class="admin-value">${user.role}</div>
+              </div>
+              <div class="admin-info-item">
+                  <div class="admin-label">Membre depuis</div>
+                  <div class="admin-value">${new Date(user.createdAt).toLocaleDateString('fr-FR')}</div>
+              </div>
+              <div class="admin-info-item">
+                  <div class="admin-label">Paramètres de visibilité</div>
+                  <div class="admin-value">${user.donneeVisible || "111"} (Photo: ${user.donneeVisible?.[0] || '1'}, Son: ${user.donneeVisible?.[1] || '1'}, Réseaux: ${user.donneeVisible?.[2] || '1'})</div>
+              </div>
+          </div>
+      `;
+  }
+
+  async function loadUserProfile() {
+      targetUserId = getUserIdFromURL();
+
+      if (!targetUserId) {
+          document.getElementById('profileContent').innerHTML = `
+              <div class="error">ID utilisateur manquant dans l'URL</div>
+          `;
+          return;
+      }
+
+      try {
+          const currentUserInfo = await getCurrentUserInfo();
+          if (!currentUserInfo) {
+              throw new Error('Impossible de récupérer votre profil');
+          }
+
+          currentUserId = currentUserInfo.id;
+          currentUserUsername = currentUserInfo.username;
+
+          const isAdmin = hasSpecialPrivileges(currentUserUsername);
+
+          const response = await fetch(`/api/users/${targetUserId}`, {
+              method: 'GET',
+              headers: {
+                  'Authorization': 'Bearer ' + token,
+                  'Content-Type': 'application/json'
+              }
+          });
+
+          if (!response.ok) {
+              if (response.status === 404) {
+                  throw new Error('Utilisateur non trouvé');
+              }
+              throw new Error('Erreur lors du chargement du profil');
+          }
+
+          const user = await response.json();
+
+          const donneeVisible = user.donneeVisible || "111";
+          const showPhoto = donneeVisible[0] || '1';
+          const showSound = donneeVisible[1] || '1';
+          const showNetworks = donneeVisible[2] || '1';
+
+          document.getElementById('profileUsername').textContent = user.username;
+          displayProfilePhoto(user.photoUrl, user.username, showPhoto, isAdmin);
+
+          if (isAdmin) {
+              if (user.sonEntreeURL) {
+                  playSonEntree(user.sonEntreeURL, true);
+              }
+          } else {
+              if (user.sonEntreeURL && showSound === '1') {
+                  playSonEntree(user.sonEntreeURL, true);
+              }
+          }
+
+          const isCurrentUser = (currentUserId.toString() === targetUserId.toString());
+
+          let favorisSection = '';
+          let reseauxSection = '';
+          let adminInfo = '';
+
+          if (isAdmin) {
+              const favoris = await loadMusicFavoris(targetUserId);
+              favorisSection = displayMusicFavoris(favoris);
+              adminInfo = displayAdminInfo(user);
+          }
+
+          reseauxSection = displayReseaux(user.listeReseaux, showNetworks, isAdmin);
+
+          let visibilityMessage = '';
+          if (!isAdmin) {
+              visibilityMessage = `
+                  <div class="visibility-info">
+                      🔒 Affichage limité selon les paramètres de visibilité de l'utilisateur
+                  </div>
+              `;
+          }
+
+          const chatButton = !isCurrentUser ? `
+              <button class="chat-button" onclick="startConversation('${user.id}', '${user.username}')">
+                  💬 Discuter avec ${user.username}
+              </button>
+          ` : '';
+
+          document.getElementById('profileContent').innerHTML = `
+              ${adminInfo}
+              ${favorisSection}
+              ${reseauxSection}
+              ${visibilityMessage}
+              ${chatButton}
+          `;
+
+      } catch(error) {
+          console.error('Erreur:', error);
+          document.getElementById('profileContent').innerHTML = `
+              <div class="error">
+                  ${error.message}
+                  <br><br>
+                  <button onclick="loadUserProfile()" style="margin-top:10px; padding:8px 16px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer;">
+                      Réessayer
+                  </button>
+              </div>
+          `;
+      }
+  }
+
+  function startConversation(userId, username) {
+      window.location.href = `/menu/ma_communaute/conversation.html?userId=${userId}`;
+  }
+
+  document.getElementById('btnLogout').addEventListener('click', async () => {
+      const refreshToken = localStorage.getItem('refreshToken');
+
+      try {
+          if (refreshToken) {
+              await fetch('/api/auth/logout', {
+                  method: 'POST',
+                  headers: { 'Content-Type':'application/json' },
+                  body: JSON.stringify({ refreshToken })
+              });
+          }
+
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          alert('Déconnexion réussie');
+          window.location.href = '/connection/connection.html';
+
+      } catch(err) {
+          console.error('Erreur déconnexion:', err);
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          window.location.href = '/connection/connection.html';
+      }
+  });
+
+  document.addEventListener('DOMContentLoaded', loadUserProfile);
+</script>
+
+</body>
+</html>
