@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profil Utilisateur</title>
   <style>
+    /* [Tous vos styles CSS restent inchangés] */
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -12,7 +13,6 @@
       min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; position:relative;
     }
 
-    /* Boutons fixes en haut */
     .buttons-container {
       position: fixed; top:20px; right:20px;
       display:flex; gap:10px; z-index:100;
@@ -40,7 +40,6 @@
       justify-content: center;
     }
 
-    /* PHOTO DE PROFIL CARRÉE - TRÈS GRANDE ET VISIBLE */
     .profile-photo-container {
       position: relative;
       margin-bottom: 30px;
@@ -71,7 +70,6 @@
         0 0 80px rgba(102, 126, 234, 0.8);
     }
 
-    /* Effet de halo derrière la photo */
     .profile-photo-container::before {
       content: '';
       position: absolute;
@@ -91,7 +89,6 @@
       pointer-events: none;
     }
 
-    /* PHOTO CACHÉE - VERSION CARRÉE */
     .profile-photo-hidden {
       width: 100%;
       height: 100%;
@@ -146,7 +143,6 @@
     .loading { text-align:center; padding:40px; color:#667eea; }
     .error { text-align:center; padding:40px; color:#dc2626; }
 
-    /* Bouton discuter */
     .chat-button {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: white;
@@ -172,7 +168,6 @@
       transform: translateY(0);
     }
 
-    /* Styles pour les favoris musicaux */
     .favoris-section {
       background:#f8f9ff;
       border:2px solid #e0e7ff;
@@ -230,7 +225,6 @@
       font-size: 1.1rem;
     }
 
-    /* NOUVEAU STYLE POUR LES RÉSEAUX SOCIAUX */
     .reseaux-section {
       background: rgba(20, 20, 30, 0.7);
       border-radius: 25px;
@@ -380,12 +374,10 @@
       font-size: 1.1rem;
     }
 
-    /* Styles pour le son d'entrée (caché) */
     .audio-player {
       display: none;
     }
 
-    /* Indicateur de son en cours */
     .son-playing-indicator {
       position: fixed;
       top: 20px;
@@ -411,7 +403,6 @@
       100% { transform: scale(1); }
     }
 
-    /* Message d'information sur les paramètres de visibilité */
     .visibility-info {
       background: #fef3c7;
       border: 2px solid #fbbf24;
@@ -425,7 +416,6 @@
       box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);
     }
 
-    /* Informations admin uniquement */
     .admin-info {
       background: #f8f9ff;
       border: 3px solid #d1d5db;
@@ -467,7 +457,6 @@
       font-weight: 600;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .buttons-container {
         top: 10px;
@@ -493,8 +482,6 @@
       .reseau-icon-wrapper {
         max-width: 120px;
       }
-
-      /* PHOTO MOBILE */
       .profile-photo-container {
         width: 240px;
         height: 240px;
@@ -517,8 +504,6 @@
       .reseau-icon-wrapper {
         max-width: 100px;
       }
-
-      /* PHOTO MOBILE PETIT ÉCRAN */
       .profile-photo-container {
         width: 200px;
         height: 200px;
@@ -569,7 +554,6 @@
 </head>
 <body>
 
-<!-- Indicateur de son en cours -->
 <div id="sonPlayingIndicator" class="son-playing-indicator">
   🔈 Son d'entrée en cours...
 </div>
@@ -581,9 +565,7 @@
 
 <div class="profile-container">
   <div class="header">
-    <div class="profile-photo-container" id="profilePhotoContainer">
-      <!-- La photo sera insérée ici par JavaScript -->
-    </div>
+    <div class="profile-photo-container" id="profilePhotoContainer"></div>
     <h1 id="profileUsername">Chargement...</h1>
   </div>
 
@@ -592,7 +574,6 @@
   </div>
 </div>
 
-<!-- Lecteur audio caché -->
 <audio id="sonEntreePlayer" class="audio-player"></audio>
 
 <script>
@@ -607,6 +588,154 @@
   let targetUserId = null;
   let currentUserUsername = null;
 
+  // ================================================
+  // FONCTION DÉTECTION MOBILE
+  // ================================================
+  function isMobileDevice() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
+  // ================================================
+  // FONCTION POUR OUVRIR RÉSEAUX SOCIAUX
+  // ================================================
+  function openSocialLink(url, network = null) {
+      if (!url || url === 'hidden') return;
+
+      const cleanedUrl = cleanUrl(url);
+
+      // Vérifier si c'est un téléphone
+      if (isMobileDevice() && network) {
+          // Essayer d'ouvrir l'application native
+          const appUrl = getAppUrl(cleanedUrl, network);
+
+          if (appUrl) {
+              // Essayer d'ouvrir l'application native
+              window.location.href = appUrl;
+
+              // Fallback vers l'URL web après un délai
+              setTimeout(() => {
+                  // Vérifier si la page est toujours visible
+                  if (!document.hidden) {
+                      window.open(cleanedUrl, '_blank');
+                  }
+              }, 500);
+              return;
+          }
+      }
+
+      // Sur desktop ou si pas d'appli : ouvrir directement le site web
+      window.open(cleanedUrl, '_blank');
+  }
+
+  // ================================================
+  // MAPPING DES URLS D'APPLICATIONS NATIVES
+  // ================================================
+  function getAppUrl(webUrl, network) {
+      webUrl = webUrl.toLowerCase();
+
+      // Extraire l'identifiant utilisateur/profil depuis l'URL
+      function extractUsername(url, domain) {
+          const regex = new RegExp(`${domain}/([^/?#]+)`);
+          const match = url.match(regex);
+          return match ? match[1] : null;
+      }
+
+      // Facebook
+      if (webUrl.includes('facebook.com') || webUrl.includes('fb.com')) {
+          const username = extractUsername(webUrl, 'facebook.com') || extractUsername(webUrl, 'fb.com');
+          if (username) {
+              return `fb://profile/${username}`;
+          }
+          return 'fb://';
+      }
+
+      // Instagram
+      if (webUrl.includes('instagram.com')) {
+          const username = extractUsername(webUrl, 'instagram.com');
+          if (username) {
+              return `instagram://user?username=${username}`;
+          }
+          return 'instagram://';
+      }
+
+      // Twitter/X
+      if (webUrl.includes('twitter.com') || webUrl.includes('x.com')) {
+          const username = extractUsername(webUrl, 'twitter.com') || extractUsername(webUrl, 'x.com');
+          if (username) {
+              return `twitter://user?screen_name=${username}`;
+          }
+          return 'twitter://';
+      }
+
+      // LinkedIn
+      if (webUrl.includes('linkedin.com')) {
+          return 'linkedin://';
+      }
+
+      // TikTok
+      if (webUrl.includes('tiktok.com')) {
+          const username = extractUsername(webUrl, 'tiktok.com');
+          if (username && username.startsWith('@')) {
+              return `tiktok://@${username.substring(1)}`;
+          }
+          return 'tiktok://';
+      }
+
+      // Snapchat
+      if (webUrl.includes('snapchat.com')) {
+          const username = extractUsername(webUrl, 'snapchat.com');
+          if (username && username.startsWith('@')) {
+              return `snapchat://add/${username.substring(1)}`;
+          }
+          return 'snapchat://';
+      }
+
+      // YouTube
+      if (webUrl.includes('youtube.com')) {
+          return 'youtube://';
+      }
+
+      // WhatsApp
+      if (webUrl.includes('whatsapp.com')) {
+          return 'whatsapp://';
+      }
+
+      // Telegram
+      if (webUrl.includes('telegram.org') || webUrl.includes('t.me')) {
+          return 'tg://';
+      }
+
+      // Discord
+      if (webUrl.includes('discord.com') || webUrl.includes('discord.gg')) {
+          return 'discord://';
+      }
+
+      // Twitch
+      if (webUrl.includes('twitch.tv')) {
+          return 'twitch://';
+      }
+
+      // Reddit
+      if (webUrl.includes('reddit.com')) {
+          return 'reddit://';
+      }
+
+      // Spotify
+      if (webUrl.includes('spotify.com')) {
+          return 'spotify://';
+      }
+
+      // GitHub
+      if (webUrl.includes('github.com')) {
+          return 'github://';
+      }
+
+      return null;
+  }
+
+  // ================================================
+  // FONCTIONS EXISTANTES
+  // ================================================
   function getUserIdFromURL() {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get('userId');
@@ -818,7 +947,9 @@
           const reseauInfo = getReseauIconInfo(cleanedUrl);
 
           html += `
-              <a href="${cleanedUrl}" target="_blank" class="reseau-icon-wrapper" data-network="${reseauInfo.network}" title="Visiter le profil">
+              <a href="javascript:void(0)" class="reseau-icon-wrapper" data-network="${reseauInfo.network}"
+                 onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', '${reseauInfo.network}')"
+                 title="Visiter le profil">
                   <img src="${reseauInfo.logo}" alt="Logo ${reseauInfo.network}" onerror="this.src='https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/default.png'">
               </a>
           `;
