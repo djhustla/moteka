@@ -576,6 +576,22 @@
 
 <audio id="sonEntreePlayer" class="audio-player"></audio>
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Utilisateur</title>
+  <style>
+    /* [Tous les styles CSS restent inchangés] */
+    /* ... */
+  </style>
+</head>
+<body>
+
+<!-- [Le HTML reste inchangé] -->
+<!-- ... -->
+
 <script>
   const token = localStorage.getItem('accessToken');
 
@@ -587,6 +603,51 @@
   let currentUserId = null;
   let targetUserId = null;
   let currentUserUsername = null;
+
+  // ================================================
+  // CONFIGURATION DES RÉSEAUX SOCIAUX (UNIQUEMENT CEUX QUE TU AS)
+  // ================================================
+  const socialAppsConfig = {
+      // Instagram - deux options
+      'instagram.com': {
+          webUrl: (url, username) => `https://www.instagram.com/${username}`,
+          appUrl: (url, username) => `instagram://user?username=${username}`,
+          extractUsername: (url) => {
+              const match = url.match(/instagram\.com\/([^/?#]+)/);
+              return match ? match[1] : null;
+          }
+      },
+
+      // TikTok - deux options
+      'tiktok.com': {
+          webUrl: (url, username) => `https://www.tiktok.com/@${username}`,
+          appUrl: (url, username) => `tiktok://@${username}`,
+          extractUsername: (url) => {
+              const match = url.match(/tiktok\.com\/@([^/?#]+)/);
+              return match ? match[1] : null;
+          }
+      },
+
+      // Snapchat - deux options
+      'snapchat.com': {
+          webUrl: (url, username) => `https://www.snapchat.com/add/${username}`,
+          appUrl: (url, username) => `snapchat://add/${username}`,
+          extractUsername: (url) => {
+              const match = url.match(/snapchat\.com\/add\/([^/?#]+)/);
+              return match ? match[1] : null;
+          }
+      },
+
+      // Facebook - deux options
+      'facebook.com': {
+          webUrl: (url, username) => `https://www.facebook.com/${username}`,
+          appUrl: (url, username) => `fb://profile/${username}`,
+          extractUsername: (url) => {
+              const match = url.match(/facebook\.com\/([^/?#]+)/);
+              return match ? match[1] : null;
+          }
+      }
+  };
 
   // ================================================
   // FONCTION DÉTECTION MOBILE
@@ -603,138 +664,90 @@
 
       const cleanedUrl = cleanUrl(url);
 
-      // Vérifier si c'est un téléphone
-      if (isMobileDevice() && network) {
-          // Essayer d'ouvrir l'application native
-          const appUrl = getAppUrl(cleanedUrl, network);
+      // Extraire le domaine pour déterminer la plateforme
+      let platformConfig = null;
+      let username = null;
 
-          if (appUrl) {
-              // Essayer d'ouvrir l'application native
-              window.location.href = appUrl;
-
-              // Fallback vers l'URL web après un délai
-              setTimeout(() => {
-                  // Vérifier si la page est toujours visible
-                  if (!document.hidden) {
-                      window.open(cleanedUrl, '_blank');
-                  }
-              }, 500);
-              return;
+      for (const domain in socialAppsConfig) {
+          if (cleanedUrl.includes(domain)) {
+              platformConfig = socialAppsConfig[domain];
+              username = platformConfig.extractUsername(cleanedUrl);
+              break;
           }
       }
 
-      // Sur desktop ou si pas d'appli : ouvrir directement le site web
+      // Si on a trouvé une configuration pour cette plateforme
+      if (platformConfig && username) {
+          // Si c'est un mobile : essayer l'app d'abord
+          if (isMobileDevice()) {
+              // Essayer d'ouvrir l'application native
+              const appUrl = platformConfig.appUrl(cleanedUrl, username);
+
+              if (appUrl) {
+                  window.location.href = appUrl;
+
+                  // Fallback vers l'URL web après un délai
+                  setTimeout(() => {
+                      if (!document.hidden) {
+                          const webUrl = platformConfig.webUrl(cleanedUrl, username);
+                          window.open(webUrl, '_blank');
+                      }
+                  }, 500);
+                  return;
+              }
+          }
+
+          // Sur desktop, ou si pas d'application mobile configurée
+          const webUrl = platformConfig.webUrl(cleanedUrl, username);
+          window.open(webUrl, '_blank');
+          return;
+      }
+
+      // Pour les autres réseaux non configurés, ouvrir directement l'URL
       window.open(cleanedUrl, '_blank');
   }
 
   // ================================================
-  // MAPPING DES URLS D'APPLICATIONS NATIVES
+  // MAP DES LOGOS (UNIQUEMENT CEUX QUE TU AS)
   // ================================================
-  function getAppUrl(webUrl, network) {
-      webUrl = webUrl.toLowerCase();
+  function getReseauIconInfo(url) {
+      url = url.toLowerCase();
 
-      // Extraire l'identifiant utilisateur/profil depuis l'URL
-      function extractUsername(url, domain) {
-          const regex = new RegExp(`${domain}/([^/?#]+)`);
-          const match = url.match(regex);
-          return match ? match[1] : null;
-      }
-
-      // Facebook
-      if (webUrl.includes('facebook.com') || webUrl.includes('fb.com')) {
-          const username = extractUsername(webUrl, 'facebook.com') || extractUsername(webUrl, 'fb.com');
-          if (username) {
-              return `fb://profile/${username}`;
+      // Seulement les logos que tu possèdes dans ton GitHub
+      const platformMap = {
+          'facebook.com': {
+              network: 'facebook',
+              logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/facebook.png'
+          },
+          'instagram.com': {
+              network: 'instagram',
+              logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/instagram.png'
+          },
+          'tiktok.com': {
+              network: 'tiktok',
+              logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/tiktok.png'
+          },
+          'snapchat.com': {
+              network: 'snapchat',
+              logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/snap.png'
           }
-          return 'fb://';
-      }
+      };
 
-      // Instagram
-      if (webUrl.includes('instagram.com')) {
-          const username = extractUsername(webUrl, 'instagram.com');
-          if (username) {
-              return `instagram://user?username=${username}`;
+      for (const [domain, info] of Object.entries(platformMap)) {
+          if (url.includes(domain)) {
+              return info;
           }
-          return 'instagram://';
       }
 
-      // Twitter/X
-      if (webUrl.includes('twitter.com') || webUrl.includes('x.com')) {
-          const username = extractUsername(webUrl, 'twitter.com') || extractUsername(webUrl, 'x.com');
-          if (username) {
-              return `twitter://user?screen_name=${username}`;
-          }
-          return 'twitter://';
-      }
-
-      // LinkedIn
-      if (webUrl.includes('linkedin.com')) {
-          return 'linkedin://';
-      }
-
-      // TikTok
-      if (webUrl.includes('tiktok.com')) {
-          const username = extractUsername(webUrl, 'tiktok.com');
-          if (username && username.startsWith('@')) {
-              return `tiktok://@${username.substring(1)}`;
-          }
-          return 'tiktok://';
-      }
-
-      // Snapchat
-      if (webUrl.includes('snapchat.com')) {
-          const username = extractUsername(webUrl, 'snapchat.com');
-          if (username && username.startsWith('@')) {
-              return `snapchat://add/${username.substring(1)}`;
-          }
-          return 'snapchat://';
-      }
-
-      // YouTube
-      if (webUrl.includes('youtube.com')) {
-          return 'youtube://';
-      }
-
-      // WhatsApp
-      if (webUrl.includes('whatsapp.com')) {
-          return 'whatsapp://';
-      }
-
-      // Telegram
-      if (webUrl.includes('telegram.org') || webUrl.includes('t.me')) {
-          return 'tg://';
-      }
-
-      // Discord
-      if (webUrl.includes('discord.com') || webUrl.includes('discord.gg')) {
-          return 'discord://';
-      }
-
-      // Twitch
-      if (webUrl.includes('twitch.tv')) {
-          return 'twitch://';
-      }
-
-      // Reddit
-      if (webUrl.includes('reddit.com')) {
-          return 'reddit://';
-      }
-
-      // Spotify
-      if (webUrl.includes('spotify.com')) {
-          return 'spotify://';
-      }
-
-      // GitHub
-      if (webUrl.includes('github.com')) {
-          return 'github://';
-      }
-
-      return null;
+      // Pour tous les autres réseaux, utiliser un logo par défaut
+      return {
+          network: 'default',
+          logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/default.png'
+      };
   }
 
   // ================================================
-  // FONCTIONS EXISTANTES
+  // FONCTIONS EXISTANTES (RESTENT INCHANGÉES)
   // ================================================
   function getUserIdFromURL() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -815,41 +828,6 @@
           console.error('Erreur de lecture audio:', error);
           indicator.style.display = 'none';
       });
-  }
-
-  function getReseauIconInfo(url) {
-      url = url.toLowerCase();
-
-      const platformMap = {
-          'twitter.com': { network: 'twitter', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/twitter.png' },
-          'x.com': { network: 'twitter', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/twitter.png' },
-          'facebook.com': { network: 'facebook', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/facebook.png' },
-          'instagram.com': { network: 'instagram', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/instagram.png' },
-          'linkedin.com': { network: 'linkedin', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/linkedin.png' },
-          'github.com': { network: 'github', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/github.png' },
-          'youtube.com': { network: 'youtube', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/youtube.png' },
-          'tiktok.com': { network: 'tiktok', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/tiktok.png' },
-          'discord.com': { network: 'discord', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/discord.png' },
-          'discord.gg': { network: 'discord', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/discord.png' },
-          'twitch.tv': { network: 'twitch', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/twitch.png' },
-          'reddit.com': { network: 'reddit', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/reddit.png' },
-          'snapchat.com': { network: 'snapchat', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/snap.png' },
-          'whatsapp.com': { network: 'whatsapp', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/whatsapp.png' },
-          'telegram.org': { network: 'telegram', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/telegram.png' },
-          't.me': { network: 'telegram', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/telegram.png' },
-          'spotify.com': { network: 'spotify', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/spotify.png' }
-      };
-
-      for (const [domain, info] of Object.entries(platformMap)) {
-          if (url.includes(domain)) {
-              return info;
-          }
-      }
-
-      return {
-          network: 'default',
-          logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/default.png'
-      };
   }
 
   function displayProfilePhoto(photoUrl, username, showPhoto, isAdmin) {
@@ -1135,3 +1113,4 @@
 
 </body>
 </html>
+ 
