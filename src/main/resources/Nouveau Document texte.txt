@@ -1,0 +1,130 @@
+DEV
+
+
+
+# application-dev.properties
+server.port=${PORT:8080}
+
+
+
+# Configuration H2 (base persistante)
+spring.datasource.url=jdbc:h2:file:./data/securitydb
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# JPA
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+###################################################################################
+
+
+# H2 Console
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+# Logging
+logging.level.root=INFO
+logging.level.org.springframework.security=DEBUG
+logging.level.org.springframework.web=DEBUG
+
+# Upload fichiers
+server.servlet.multipart.max-file-size=10MB
+server.servlet.multipart.max-request-size=10MB
+
+# JWT
+jwt.secret=${JWT_SECRET}
+jwt.access-expiration=900000
+jwt.refresh-expiration=604800000
+
+# GitHub
+github.token=${GITHUB_TOKEN}
+github.username=${GITHUB_USERNAME}
+github.repo=${GITHUB_REPO}
+
+
+PROD
+
+
+# application-prod.properties
+server.port=${PORT:8080}
+
+# Configuration Neon.tech
+spring.datasource.url=${DATABASE_URL}
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.username=${DATABASE_USERNAME}
+spring.datasource.password=${DATABASE_PASSWORD}
+
+# JPA
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# Upload fichiers
+#server.servlet.multipart.max-file-size=10MB
+#server.servlet.multipart.max-request-size=10MB
+
+# Augmenter les limites de multipart
+# spring.servlet.multipart.max-file-size=100MB
+# spring.servlet.multipart.max-request-size=100MB
+spring.servlet.multipart.enabled=true
+
+# Alternative avec tomcat si nécessaire
+server.tomcat.max-swallow-size=100MB
+
+
+
+
+
+
+
+# Taille maximale par fichier (légèrement plus que 1,08 GB pour être sûr)
+spring.servlet.multipart.max-file-size=1200MB
+# spring.servlet.multipart.max-request-size=1200MB
+
+# Configuration Tomcat
+server.tomcat.max-http-form-post-size=1200MB
+
+# Délai d'attente pour upload lent (en millisecondes)
+spring.servlet.multipart.max-request-size=1200MB
+server.connection-timeout=300000  # 5 minutes
+
+
+
+
+
+
+
+
+
+# Logging
+logging.level.root=INFO
+logging.level.org.springframework.security=DEBUG
+logging.level.org.springframework.web=DEBUG
+logging.level.main=DEBUG
+
+# H2 Console désactivée
+spring.h2.console.enabled=false
+
+# JWT
+jwt.secret=${JWT_SECRET}
+jwt.access-expiration=900000
+jwt.refresh-expiration=604800000
+
+# GitHub
+github.token=${GITHUB_TOKEN}
+github.username=${GITHUB_USERNAME}
+github.repo=${GITHUB_REPO}
+
+
+
+
+
+
+
+
+
+

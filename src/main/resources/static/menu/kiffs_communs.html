@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kiffs Communs</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+    .main-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        overflow: hidden;
+        min-height: 90vh;
+        display: flex;
+        flex-direction: column;
+    }
+    .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 25px 30px;
+        color: white;
+        text-align: center;
+        border-bottom: 2px solid rgba(255,255,255,0.2);
+    }
+    .header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    .header .subtitle {
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 30px;
+        background: #f8f9ff;
+        border-bottom: 2px solid #e5e7eb;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .btn {
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        border: 2px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+    .btn-menu {
+        background: #667eea;
+        color: white;
+    }
+    .btn-menu:hover {
+        background: #5a67d8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    .btn-logout {
+        background: #ef4444;
+        color: white;
+        border: none;
+        font-family: inherit;
+    }
+    .btn-logout:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    .content {
+        padding: 30px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .message {
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border: 2px solid;
+        text-align: center;
+        width: 100%;
+        max-width: 800px;
+    }
+    .loading-message {
+        background: #e0f2fe;
+        color: #0369a1;
+        border-color: #bae6fd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    .error-message {
+        background: #fee;
+        color: #dc2626;
+        border-color: #fecaca;
+        display: none;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6b7280;
+    }
+    .empty-state-icon { font-size: 3.5rem; margin-bottom: 20px; opacity: 0.5; }
+    .empty-state-title { font-size: 1.4rem; margin-bottom: 10px; color: #374151; }
+    .empty-state-text { margin-bottom: 25px; line-height: 1.5; max-width: 500px; }
+    .refresh-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .refresh-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s linear infinite;
+    }
+    .users-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+        width: 100%;
+        max-width: 1200px;
+    }
+    .user-card {
+        background: #f8f9ff;
+        border-radius: 16px;
+        padding: 25px;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .user-card:hover {
+        border-color: #667eea;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+    }
+    .user-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #667eea;
+        margin-bottom: 20px;
+    }
+    .avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: white;
+        border: 4px solid #667eea;
+        margin-bottom: 20px;
+    }
+    .user-name {
+        font-weight: 700;
+        font-size: 1.4rem;
+        color: #374151;
+        margin-bottom: 15px;
+        word-break: break-word;
+    }
+    .common-kiff {
+        background: white;
+        padding: 12px 20px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        font-weight: 600;
+        color: #059669;
+        margin-bottom: 20px;
+        width: 100%;
+        text-align: center;
+        font-size: 1rem;
+    }
+    .profile-link {
+        display: inline-block;
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        font-size: 1rem;
+    }
+    .profile-link:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #68428f 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    .footer {
+        text-align: center;
+        padding: 15px;
+        color: #6b7280;
+        font-size: 0.85rem;
+        border-top: 2px solid #e5e7eb;
+        margin-top: auto;
+    }
+    @media (max-width: 768px) {
+        .users-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .user-card { padding: 20px; }
+        .action-buttons { flex-direction: column; align-items: stretch; }
+        .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="main-container">
+  <div class="header">
+    <h1>🎵 Kiffs Communs</h1>
+    <p class="subtitle">Les utilisateurs qui partagent votre passion musicale</p>
+  </div>
+  <div class="action-buttons">
+    <a href="/menu/menu.html" class="btn btn-menu">← Retour au menu</a>
+    <button id="logoutBtn" class="btn btn-logout">🚪 Déconnexion</button>
+  </div>
+  <div class="content">
+    <div class="message loading-message" id="loadingMessage">
+      <div class="loading-spinner"></div>
+      Recherche des utilisateurs avec les mêmes kiffs...
+    </div>
+    <div class="message error-message" id="errorMessage">
+      ❌ <span id="errorText"></span>
+    </div>
+    <div class="users-grid" id="usersGrid"></div>
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <div class="empty-state-icon">🎵</div>
+      <div class="empty-state-title">Aucun kiff commun trouvé</div>
+      <div class="empty-state-text">
+        Vous n'avez pas encore défini vos kiffs (10/10) ou personne ne partage vos goûts musicaux pour le moment.
+      </div>
+      <button class="refresh-btn" id="refreshBtn">🔄 Actualiser</button>
+    </div>
+  </div>
+  <div class="footer">
+    <p>Connecté par la musique • Mis à jour: <span id="lastUpdate">--:--</span></p>
+  </div>
+</div>
+
+<script>
+  const CONFIG = {
+      apiBaseUrl: '/api/music-favoris',
+      token: localStorage.getItem('accessToken'),
+      currentUser: JSON.parse(localStorage.getItem('userData') || '{}')
+  };
+  const DOM = {
+      loadingMessage: document.getElementById('loadingMessage'),
+      errorMessage: document.getElementById('errorMessage'),
+      errorText: document.getElementById('errorText'),
+      usersGrid: document.getElementById('usersGrid'),
+      emptyState: document.getElementById('emptyState'),
+      refreshBtn: document.getElementById('refreshBtn'),
+      logoutBtn: document.getElementById('logoutBtn'),
+      lastUpdate: document.getElementById('lastUpdate')
+  };
+  class SimilarUsersManager {
+      constructor() {
+          this.similarUsers = [];
+          this.commonKiffsData = {};
+      }
+      async init() {
+          this.checkAuthentication();
+          this.setupEventListeners();
+          await this.loadSimilarUsers();
+          this.updateLastUpdateTime();
+      }
+      checkAuthentication() {
+          if (!CONFIG.token || !CONFIG.currentUser) {
+              alert('Vous devez être connecté pour accéder à cette page');
+              window.location.href = '/connection/connection.html';
+          }
+      }
+      async loadSimilarUsers() {
+          try {
+              this.showLoading();
+              const response = await fetch(`${CONFIG.apiBaseUrl}/me/same-top-kiff`, {
+                  headers: {
+                      'Authorization': 'Bearer ' + CONFIG.token,
+                      'Content-Type': 'application/json'
+                  }
+              });
+              if (response.status === 401) {
+                  this.handleAuthError();
+                  return;
+              }
+              if (!response.ok) throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+              const data = await response.json();
+              if (!data.success) throw new Error(data.message || 'Erreur inconnue');
+              this.similarUsers = data.similarUsers || [];
+              if (this.similarUsers.length > 0) {
+                  await this.loadCommonKiffsDetails(data.currentUserId);
+              }
+              this.renderUsers();
+          } catch (error) {
+              this.handleError('Impossible de charger les utilisateurs similaires', error);
+          } finally {
+              DOM.loadingMessage.style.display = 'none';
+          }
+      }
+      async loadCommonKiffsDetails(currentUserId) {
+          try {
+              const currentUserKiffsResponse = await fetch(`${CONFIG.apiBaseUrl}/users/me`, {
+                  headers: { 'Authorization': 'Bearer ' + CONFIG.token }
+              });
+              if (currentUserKiffsResponse.ok) {
+                  const currentUserKiffs = await currentUserKiffsResponse.json();
+                  const currentTopKiffs = currentUserKiffs.filter(kiff => kiff.cotePreference === 10);
+                  const currentGenres = this.extractGenres(currentTopKiffs);
+                  for (const user of this.similarUsers) {
+                      const userKiffsResponse = await fetch(`${CONFIG.apiBaseUrl}/users/${user.id}`, {
+                          headers: { 'Authorization': 'Bearer ' + CONFIG.token }
+                      });
+                      if (userKiffsResponse.ok) {
+                          const userKiffs = await userKiffsResponse.json();
+                          const userTopKiffs = userKiffs.filter(kiff => kiff.cotePreference === 10);
+                          const userGenres = this.extractGenres(userTopKiffs);
+                          const commonGenres = currentGenres.filter(genre =>
+                              userGenres.some(g => g.id === genre.id)
+                          );
+                          this.commonKiffsData[user.id] = {
+                              genres: commonGenres
+                          };
+                      }
+                  }
+              }
+          } catch (error) {
+              console.warn('Détails des kiffs non disponibles:', error);
+          }
+      }
+      extractGenres(kiffs) {
+          const genres = new Map();
+          kiffs.forEach(kiff => {
+              if (kiff.genres) {
+                  kiff.genres.forEach(genre => {
+                      if (!genres.has(genre.id)) genres.set(genre.id, genre);
+                  });
+              }
+          });
+          return Array.from(genres.values());
+      }
+      renderUsers() {
+          DOM.usersGrid.innerHTML = '';
+          if (this.similarUsers.length === 0) {
+              DOM.emptyState.style.display = 'block';
+              DOM.usersGrid.style.display = 'none';
+              return;
+          }
+          DOM.emptyState.style.display = 'none';
+          DOM.usersGrid.style.display = 'grid';
+          this.similarUsers.forEach(user => {
+              const commonData = this.commonKiffsData[user.id] || { genres: [] };
+              const commonGenre = commonData.genres.length > 0 ? commonData.genres[0].description : 'Genre similaire';
+              const card = document.createElement('div');
+              card.className = 'user-card';
+              let avatarHtml = '';
+              if (user.photoUrl) {
+                  avatarHtml = `<img src="${this.escapeHtml(user.photoUrl)}" alt="${this.escapeHtml(user.username)}" class="user-avatar" onerror="this.replaceWith(this.parentElement.querySelector('.avatar-placeholder') || document.createElement('div'))">`;
+              } else {
+                  const initials = user.username ? user.username.charAt(0).toUpperCase() : '?';
+                  avatarHtml = `<div class="avatar-placeholder">${initials}</div>`;
+              }
+              card.innerHTML = `
+                  ${avatarHtml}
+                  <div class="user-name">${this.escapeHtml(user.username || 'Utilisateur')}</div>
+                  <div class="common-kiff">🎵 ${this.escapeHtml(commonGenre)}</div>
+                  <a href="/menu/profil_user.html?userId=${user.id}" class="profile-link">👤 Voir le profil</a>
+              `;
+              if (!user.photoUrl) {
+                  const placeholder = card.querySelector('.avatar-placeholder');
+                  if (placeholder) {
+                      const initials = user.username ? user.username.charAt(0).toUpperCase() : '?';
+                      placeholder.textContent = initials;
+                  }
+              }
+              DOM.usersGrid.appendChild(card);
+          });
+      }
+      setupEventListeners() {
+          DOM.logoutBtn.addEventListener('click', () => {
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('userData');
+              window.location.href = '/connection/connection.html';
+          });
+          DOM.refreshBtn.addEventListener('click', () => this.refreshData());
+          setInterval(() => this.updateLastUpdateTime(), 60000);
+      }
+      async refreshData() {
+          await this.loadSimilarUsers();
+          this.updateLastUpdateTime();
+      }
+      updateLastUpdateTime() {
+          const now = new Date();
+          DOM.lastUpdate.textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      }
+      showLoading() {
+          DOM.loadingMessage.style.display = 'flex';
+          DOM.errorMessage.style.display = 'none';
+          DOM.usersGrid.style.display = 'none';
+          DOM.emptyState.style.display = 'none';
+      }
+      handleError(context, error) {
+          console.error(context, error);
+          DOM.errorText.textContent = `${context}: ${error.message}`;
+          DOM.errorMessage.style.display = 'block';
+      }
+      handleAuthError() {
+          localStorage.clear();
+          setTimeout(() => window.location.href = '/connection/connection.html', 1000);
+      }
+      escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+      }
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+      const manager = new SimilarUsersManager();
+      manager.init();
+  });
+</script>
+</body>
+</html>

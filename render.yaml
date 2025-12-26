@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: motekk
+    env: java
+    build:
+      command: mvn clean package -DskipTests
+    start:
+      command: java -jar target/security-learning-1.0.0.jar
+    envVars:
+      - key: PORT
+        value: 8080
+    # AUTORISATION FTP VERS INFINITYFREE
+    network:
+      outbound:
+        - protocol: tcp
+          port: 21
+          target: ftpupload.net

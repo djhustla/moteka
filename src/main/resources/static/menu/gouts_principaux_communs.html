@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Utilisateurs Similaires</title>
+  <style>
+    /* Reset et styles de base */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: #333;
+    }
+
+    /* Container principal */
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        min-height: 90vh;
+    }
+
+    /* En-tête */
+    .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 30px;
+        color: white;
+        text-align: center;
+        position: relative;
+    }
+
+    .header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .header p {
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+
+    /* Boutons d'action */
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        padding: 20px 30px;
+        background: #f8f9ff;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid transparent;
+    }
+
+    .btn-menu {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-menu:hover {
+        background: #5a67d8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-logout {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-logout:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Contenu principal */
+    .main-content {
+        padding: 30px;
+    }
+
+    /* Section des statistiques */
+    .stats-section {
+        background: #f0f9ff;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border: 2px solid #bae6fd;
+        text-align: center;
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #0369a1;
+        margin-bottom: 10px;
+    }
+
+    .stats-text {
+        color: #374151;
+        font-size: 1.1rem;
+    }
+
+    /* Liste des utilisateurs */
+    .users-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    @media (max-width: 768px) {
+        .users-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Carte utilisateur */
+    .user-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .user-card:hover {
+        border-color: #667eea;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+    }
+
+    /* Avatar utilisateur */
+    .user-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin-bottom: 20px;
+        object-fit: cover;
+        border: 4px solid #667eea;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: white;
+        overflow: hidden;
+    }
+
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Info utilisateur */
+    .user-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 8px;
+    }
+
+    .user-email {
+        color: #6b7280;
+        margin-bottom: 15px;
+        font-size: 0.95rem;
+        word-break: break-all;
+    }
+
+    /* Bouton profil */
+    .btn-profile {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        width: 100%;
+        text-align: center;
+        margin-top: 15px;
+        transition: all 0.3s;
+    }
+
+    .btn-profile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    /* État vide */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6b7280;
+        grid-column: 1 / -1;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state-title {
+        font-size: 1.5rem;
+        color: #374151;
+        margin-bottom: 10px;
+    }
+
+    .empty-state-text {
+        margin-bottom: 25px;
+        line-height: 1.5;
+        max-width: 500px;
+        margin: 0 auto 30px;
+    }
+
+    .btn-refresh {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 1rem;
+    }
+
+    .btn-refresh:hover {
+        background: #5a67d8;
+        transform: translateY(-2px);
+    }
+
+    /* Messages */
+    .message {
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border: 2px solid;
+    }
+
+    .error-message {
+        background: #fee;
+        color: #dc2626;
+        border-color: #fecaca;
+        display: none;
+    }
+
+    .loading-message {
+        background: #e0f2fe;
+        color: #0369a1;
+        border-color: #bae6fd;
+        text-align: center;
+        display: none;
+    }
+
+    /* Animation de chargement */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+    }
+
+    /* Pied de page */
+    .footer {
+        text-align: center;
+        padding: 20px;
+        color: #6b7280;
+        font-size: 0.9rem;
+        border-top: 2px solid #e5e7eb;
+        margin-top: 30px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header h1 {
+            font-size: 1.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- En-tête -->
+  <div class="header">
+    <h1>🎵 Utilisateurs Similaires</h1>
+    <p>Découvrez les personnes qui partagent vos goûts musicaux</p>
+  </div>
+
+  <!-- Boutons d'action -->
+  <div class="action-buttons">
+    <a href="/menu/menu.html" class="btn btn-menu">
+      ← Retour au menu
+    </a>
+    <button id="logoutBtn" class="btn btn-logout">
+      🚪 Déconnexion
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div class="message error-message" id="errorMessage"></div>
+  <div class="message loading-message" id="loadingMessage">
+    <div class="loading-spinner"></div>
+    Recherche des utilisateurs similaires...
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="main-content" id="mainContent">
+    <!-- Statistiques -->
+    <div class="stats-section" id="statsSection">
+      <div class="stats-number" id="usersCount">0</div>
+      <div class="stats-text" id="statsText">Personne avec vos goûts</div>
+    </div>
+
+    <!-- Liste des utilisateurs -->
+    <div class="users-grid" id="usersGrid">
+      <!-- Les cartes utilisateurs seront ajoutées ici -->
+    </div>
+
+    <!-- État vide -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-state-icon">🎵</div>
+      <div class="empty-state-title">Aucun utilisateur similaire</div>
+      <div class="empty-state-text">
+        Personne ne partage exactement vos goûts musicaux pour le moment.<br>
+        Revenez plus tard ou modifiez vos préférences pour élargir vos correspondances.
+      </div>
+      <div style="display: flex; gap: 15px; justify-content: center;">
+        <button onclick="location.reload()" class="btn-refresh">
+          🔄 Actualiser
+        </button>
+        <a href="/menu/preferences.html" class="btn" style="background: #10b981; color: white; padding: 12px 30px;">
+          ✏️ Modifier mes préférences
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pied de page -->
+  <div class="footer">
+    <p>© 2024 Music Social - Trouvez vos partenaires musicaux</p>
+  </div>
+</div>
+
+<script>
+  // Configuration
+  const CONFIG = {
+      apiBaseUrl: '/api/music-favoris',
+      token: localStorage.getItem('accessToken')
+  };
+
+  // Éléments DOM
+  const DOM = {
+      errorMessage: document.getElementById('errorMessage'),
+      loadingMessage: document.getElementById('loadingMessage'),
+      mainContent: document.getElementById('mainContent'),
+      statsSection: document.getElementById('statsSection'),
+      usersCount: document.getElementById('usersCount'),
+      statsText: document.getElementById('statsText'),
+      usersGrid: document.getElementById('usersGrid'),
+      emptyState: document.getElementById('emptyState'),
+      logoutBtn: document.getElementById('logoutBtn')
+  };
+
+  class SimilarUsersManager {
+      constructor() {
+          this.init();
+      }
+
+      async init() {
+          try {
+              // Vérifier l'authentification
+              this.checkAuthentication();
+
+              // Configurer les événements
+              this.setupEventListeners();
+
+              // Charger les utilisateurs similaires
+              await this.loadSimilarUsers();
+
+          } catch (error) {
+              this.showError(error.message);
+          }
+      }
+
+      checkAuthentication() {
+          if (!CONFIG.token) {
+              throw new Error('Vous devez être connecté pour accéder à cette page');
+          }
+      }
+
+      setupEventListeners() {
+          // Déconnexion
+          DOM.logoutBtn.addEventListener('click', () => {
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('userData');
+              window.location.href = '/connection/connection.html';
+          });
+      }
+
+      async loadSimilarUsers() {
+          try {
+              DOM.loadingMessage.style.display = 'block';
+              DOM.errorMessage.style.display = 'none';
+              DOM.mainContent.style.display = 'none';
+
+              const response = await fetch(`${CONFIG.apiBaseUrl}/me/similar-users`, {
+                  headers: {
+                      'Authorization': `Bearer ${CONFIG.token}`
+                  }
+              });
+
+              if (!response.ok) {
+                  const errorData = await response.json().catch(() => ({}));
+                  throw new Error(errorData.error || `Erreur ${response.status}: ${response.statusText}`);
+              }
+
+              const data = await response.json();
+
+              // Masquer le chargement
+              DOM.loadingMessage.style.display = 'none';
+              DOM.mainContent.style.display = 'block';
+
+              if (data.users && data.users.length > 0) {
+                  this.renderUsers(data.users, data.count);
+              } else {
+                  this.showEmptyState(data.message || 'Aucun utilisateur trouvé');
+              }
+
+          } catch (error) {
+              DOM.loadingMessage.style.display = 'none';
+              this.showError(error.message);
+          }
+      }
+
+      renderUsers(users, count) {
+          // Afficher les statistiques
+          DOM.statsSection.style.display = 'block';
+          DOM.usersCount.textContent = count;
+          DOM.statsText.textContent = count === 1
+              ? 'personne partage vos goûts'
+              : 'personnes partagent vos goûts';
+
+          // Afficher les utilisateurs
+          DOM.usersGrid.innerHTML = '';
+          DOM.emptyState.style.display = 'none';
+
+          users.forEach(user => {
+              const userCard = this.createUserCard(user);
+              DOM.usersGrid.appendChild(userCard);
+          });
+      }
+
+      createUserCard(user) {
+          const card = document.createElement('div');
+          card.className = 'user-card';
+
+          // Avatar avec initiales si pas de photo
+          const initials = user.username ? user.username.charAt(0).toUpperCase() : '?';
+          const avatarHtml = user.photoUrl
+              ? `<img src="${user.photoUrl}" alt="${user.username}" onerror="this.onerror=null; this.parentElement.textContent='${initials}';">`
+              : initials;
+
+          // MODIFICATION ICI : id devient userId
+          card.innerHTML = `
+              <div class="user-avatar">
+                  ${avatarHtml}
+              </div>
+              <div class="user-name">${this.escapeHtml(user.username || 'Utilisateur')}</div>
+              <div class="user-email">${this.escapeHtml(user.email || 'Email non disponible')}</div>
+              <a href="/menu/profil_user.html?userId=${user.id}" class="btn-profile">
+                  👤 Voir le profil
+              </a>
+          `;
+
+          return card;
+      }
+
+      showEmptyState(message) {
+          DOM.statsSection.style.display = 'none';
+          DOM.usersGrid.innerHTML = '';
+          DOM.emptyState.style.display = 'block';
+
+          if (message) {
+              const titleElement = DOM.emptyState.querySelector('.empty-state-title');
+              if (titleElement) {
+                  titleElement.textContent = message;
+              }
+          }
+      }
+
+      showError(message) {
+          DOM.errorMessage.textContent = `❌ ${message}`;
+          DOM.errorMessage.style.display = 'block';
+          DOM.mainContent.style.display = 'none';
+          DOM.loadingMessage.style.display = 'none';
+
+          // Si erreur d'authentification, rediriger
+          if (message.includes('connecté') || message.includes('Authentification')) {
+              setTimeout(() => {
+                  window.location.href = '/connection/connection.html';
+              }, 2000);
+          }
+      }
+
+      escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+      }
+  }
+
+  // Initialisation
+  document.addEventListener('DOMContentLoaded', () => {
+      new SimilarUsersManager();
+  });
+
+  // Gestion de la déconnexion (doublon supprimé)
+</script>
+</body>
+</html>

@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lecteurs Audio Dropbox</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Boutons fixes (améliorés pour mobile) */
+        .back-btn, .reseau-btn {
+            position: fixed;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #374151;
+            border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .back-btn {
+            top: 15px;
+            left: 15px;
+        }
+
+        .reseau-btn {
+            top: 15px;
+            right: 15px;
+        }
+
+        .back-btn:hover, .reseau-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Container principal */
+        .players-container {
+            text-align: center;
+            background: white;
+            padding: 0;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            margin-top: 70px; /* Espace pour les boutons fixes */
+            margin-bottom: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 35px 25px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        /* Zone de contenu */
+        .players-content {
+            padding: 25px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Carte de lecteur audio */
+        .audio-player-card {
+            background: #f8f9ff;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .audio-player-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        /* En-tête du lecteur */
+        .player-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .track-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .track-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+            text-align: left;
+            line-height: 1.4;
+            flex: 1;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* LECTEUR AUDIO MODERNE (copié de l'autre code) */
+        .modern-player {
+            background: linear-gradient(145deg, #2d2d2d, #1a1a1a);
+            border-radius: 24px;
+            padding: 30px 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+        }
+
+        .mix-title {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        /* Contrôles du lecteur */
+        .player-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .play-pause-btn {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(145deg, #3d3d3d, #2a2a2a);
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .play-pause-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .play-icon, .pause-icon {
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        .play-icon {
+            border-width: 15px 0 15px 25px;
+            border-color: transparent transparent transparent #f3f4f6;
+            margin-left: 5px;
+        }
+
+        .pause-icon {
+            width: 20px;
+            height: 30px;
+            background: linear-gradient(90deg, #f3f4f6 0%, #f3f4f6 35%, transparent 35%, transparent 65%, #f3f4f6 65%, #f3f4f6 100%);
+            display: none;
+        }
+
+        /* Barre de progression */
+        .progress-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-bar-container {
+            position: relative;
+            height: 8px;
+            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+            border-radius: 10px;
+            overflow: visible;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35 0%, #ff8c42 100%);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+        }
+
+        .progress-handle {
+            position: absolute;
+            top: 50%;
+            left: 0%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: left 0.1s linear;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #9ca3af;
+            font-weight: 600;
+        }
+
+        /* Boutons secondaires */
+        .secondary-controls {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .control-btn-small {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(145deg, #3d3d3d, #2a2a2a);
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            color: #f3f4f6;
+            font-size: 1.4rem;
+        }
+
+        .control-btn-small:active {
+            transform: scale(0.95);
+        }
+
+        /* Section téléchargement */
+        .download-section {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* États */
+        .loading-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #667eea;
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .error-state {
+            background: #fee2e2;
+            border: 3px solid #ef4444;
+            border-radius: 16px;
+            padding: 25px 20px;
+            text-align: center;
+            color: #b91c1c;
+            margin-bottom: 20px;
+        }
+
+        .retry-btn {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .retry-btn:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #6b7280;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* ===== RESPONSIVE MOBILE ===== */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+            }
+
+            /* Boutons plus petits sur très petits écrans */
+            .back-btn, .reseau-btn {
+                padding: 12px 15px;
+                font-size: 0.85rem;
+                top: 10px;
+            }
+
+            .back-btn {
+                left: 10px;
+            }
+
+            .reseau-btn {
+                right: 10px;
+            }
+
+            /* Ajustement du container */
+            .players-container {
+                margin-top: 60px;
+                border-radius: 20px;
+                margin-bottom: 15px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 1.7rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+            }
+
+            .players-content {
+                padding: 20px 15px;
+                max-height: calc(100vh - 150px);
+            }
+
+            /* Carte audio compacte */
+            .audio-player-card {
+                padding: 18px;
+                border-radius: 16px;
+            }
+
+            .player-header {
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+
+            .track-number {
+                width: 32px;
+                height: 32px;
+                font-size: 0.95rem;
+            }
+
+            .track-title {
+                font-size: 1rem;
+            }
+
+            /* Lecteur moderne responsive */
+            .modern-player {
+                padding: 25px 20px;
+            }
+
+            .play-pause-btn {
+                width: 65px;
+                height: 65px;
+            }
+
+            .control-btn-small {
+                width: 50px;
+                height: 50px;
+            }
+
+            /* Boutons de contrôle empilés sur mobile */
+            .player-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .progress-wrapper {
+                order: 3;
+                width: 100%;
+                margin-top: 15px;
+            }
+
+            .play-pause-btn {
+                width: 60px;
+                height: 60px;
+            }
+
+            .control-btn-small {
+                width: 48px;
+                height: 48px;
+                font-size: 1.2rem;
+            }
+
+            /* Volume sur ligne unique */
+            .volume-control {
+                flex-direction: row;
+                justify-content: space-between;
+                gap: 10px;
+            }
+
+            .volume-control input {
+                width: 140px;
+                flex: 2;
+            }
+
+            .volume-value {
+                min-width: 40px;
+            }
+
+            .download-btn {
+                padding: 16px;
+                font-size: 1rem;
+                max-width: 100%;
+            }
+        }
+
+        /* Très petits téléphones */
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .back-btn, .reseau-btn {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+
+            .header {
+                padding: 25px 15px;
+            }
+
+            .players-content {
+                padding: 15px 12px;
+            }
+
+            .audio-player-card {
+                padding: 15px;
+            }
+
+            .track-number {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+            }
+
+            .track-title {
+                font-size: 0.95rem;
+            }
+
+            .modern-player {
+                padding: 20px 15px;
+            }
+
+            .play-pause-btn {
+                width: 55px;
+                height: 55px;
+            }
+
+            .control-btn-small {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+
+            .volume-control input {
+                width: 120px;
+            }
+        }
+
+        /* Support pour les navigateurs qui n'utilisent pas WebKit */
+        @supports not (-webkit-appearance: none) {
+            .audio-controls {
+                position: relative;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<a href="javascript:history.back()" class="back-btn">
+    <span>←</span> Retour
+</a>
+
+<a href="https://linktr.ee/djhustla" target="_blank" class="reseau-btn">
+    <span>🌐</span> MES RESEAUX
+</a>
+
+<div class="players-container">
+    <div class="header">
+        <h1>🎵 Lecteurs Audio</h1>
+        <p class="subtitle">Écoutez vos fichiers depuis Dropbox</p>
+    </div>
+
+    <div class="players-content" id="playersContent">
+        <div class="loading-state">Chargement des fichiers audio...</div>
+    </div>
+</div>
+
+<script>
+    const audioPlayers = new Map();
+    const playersContent = document.getElementById('playersContent');
+
+    function fixDropboxUrl(url) {
+        let cleanUrl = url.replace(/&e=\d+/g, '').replace(/&st=[^&]+/g, '');
+
+        if (cleanUrl.includes('/scl/fi/')) {
+            const streamUrl = cleanUrl
+                .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                .replace('?dl=0', '')
+                .replace('&dl=0', '');
+
+            const downloadUrl = cleanUrl.replace('?dl=0', '?dl=1').replace('&dl=0', '&dl=1');
+
+            return {
+                streamUrl: streamUrl,
+                downloadUrl: downloadUrl,
+                originalUrl: url
+            };
+        }
+
+        return {
+            streamUrl: cleanUrl.replace('?dl=0', '?raw=1'),
+            downloadUrl: cleanUrl.replace('?dl=0', '?dl=1'),
+            originalUrl: url
+        };
+    }
+
+    function getFileNameFromUrl(url) {
+        try {
+            const urlObj = new URL(url);
+            const pathParts = urlObj.pathname.split('/');
+            let filename = pathParts[pathParts.length - 1];
+            filename = filename.split('?')[0];
+            filename = decodeURIComponent(filename);
+            return filename || 'audio.mp3';
+        } catch (error) {
+            console.error('Erreur extraction nom:', error);
+            return 'audio.mp3';
+        }
+    }
+
+    // Fonction pour formater le temps
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function createAudioPlayer(link, index) {
+        const urls = fixDropboxUrl(link);
+        const fileName = getFileNameFromUrl(link);
+        const displayName = fileName.length > 40 ? fileName.substring(0, 37) + '...' : fileName;
+        const playerId = `audioPlayer-${index}`;
+
+        return `
+            <div class="audio-player-card">
+                <div class="player-header">
+                    <div class="track-number">${index + 1}</div>
+                    <div class="track-title" title="${fileName}">
+                        ${displayName}
+                    </div>
+                </div>
+
+                <div class="modern-player">
+                    <div class="mix-title">${displayName}</div>
+
+                    <div class="player-controls">
+                        <button class="play-pause-btn" id="playPauseBtn-${index}">
+                            <div class="play-icon" id="playIcon-${index}"></div>
+                            <div class="pause-icon" id="pauseIcon-${index}"></div>
+                        </button>
+
+                        <div class="progress-wrapper">
+                            <div class="progress-bar-container" id="progressContainer-${index}">
+                                <div class="progress-bar-fill" id="progressFill-${index}"></div>
+                                <div class="progress-handle" id="progressHandle-${index}"></div>
+                            </div>
+                            <div class="time-display">
+                                <span id="currentTime-${index}">0:00</span>
+                                <span id="duration-${index}">0:00</span>
+                            </div>
+                        </div>
+
+                        <div class="secondary-controls">
+                            <button class="control-btn-small" id="stopBtn-${index}" title="Stop">■</button>
+                            <button class="control-btn-small" id="muteBtn-${index}" title="Mute">🔊</button>
+                        </div>
+                    </div>
+                </div>
+
+                <audio id="${playerId}" preload="metadata" playsinline style="display: none;">
+                    <source src="${urls.streamUrl}" type="audio/mpeg">
+                    Votre navigateur ne supporte pas l'audio HTML5.
+                </audio>
+
+                <div class="download-section">
+                    <button class="download-btn" onclick="downloadFile('${urls.downloadUrl}', '${fileName}')">
+                        <span>📥</span> Télécharger
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Fonction pour mettre à jour la progression d'un lecteur
+    function updateProgress(index) {
+        const audio = document.getElementById(`audioPlayer-${index}`);
+        if (!audio || !audio.duration) return;
+
+        const progress = (audio.currentTime / audio.duration) * 100;
+        const progressFill = document.getElementById(`progressFill-${index}`);
+        const progressHandle = document.getElementById(`progressHandle-${index}`);
+        const currentTimeEl = document.getElementById(`currentTime-${index}`);
+        const durationEl = document.getElementById(`duration-${index}`);
+
+        if (progressFill) progressFill.style.width = `${progress}%`;
+        if (progressHandle) progressHandle.style.left = `${progress}%`;
+        if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.currentTime);
+        if (durationEl) durationEl.textContent = formatTime(audio.duration);
+    }
+
+    // Fonction pour configurer la barre de progression d'un lecteur
+    function setupProgressBar(index) {
+        const container = document.getElementById(`progressContainer-${index}`);
+        const handle = document.getElementById(`progressHandle-${index}`);
+
+        function handleSeek(e) {
+            const audio = document.getElementById(`audioPlayer-${index}`);
+            if (!audio) return;
+
+            const rect = container.getBoundingClientRect();
+            const clickX = (e.clientX || e.touches[0].clientX) - rect.left;
+            const percentage = Math.max(0, Math.min(100, (clickX / rect.width) * 100));
+
+            audio.currentTime = (percentage / 100) * audio.duration;
+            updateProgress(index);
+        }
+
+        function startDrag(e) {
+            e.preventDefault();
+            document.addEventListener('mousemove', handleDrag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchmove', handleDrag);
+            document.addEventListener('touchend', stopDrag);
+        }
+
+        function handleDrag(e) {
+            handleSeek(e);
+        }
+
+        function stopDrag() {
+            document.removeEventListener('mousemove', handleDrag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchmove', handleDrag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+
+        if (container && handle) {
+            container.addEventListener('click', handleSeek);
+            handle.addEventListener('mousedown', startDrag);
+            handle.addEventListener('touchstart', startDrag);
+        }
+    }
+
+    // Fonction pour configurer les contrôles d'un lecteur
+    function setupPlayerControls(index) {
+        const audio = document.getElementById(`audioPlayer-${index}`);
+        if (!audio) return;
+
+        audioPlayers.set(index, audio);
+        audio.volume = 0.7;
+
+        const playPauseBtn = document.getElementById(`playPauseBtn-${index}`);
+        const playIcon = document.getElementById(`playIcon-${index}`);
+        const pauseIcon = document.getElementById(`pauseIcon-${index}`);
+        const stopBtn = document.getElementById(`stopBtn-${index}`);
+        const muteBtn = document.getElementById(`muteBtn-${index}`);
+
+        let isPlaying = false;
+
+        // Configurer le bouton play/pause
+        if (playPauseBtn) {
+            playPauseBtn.addEventListener('click', () => {
+                if (isPlaying) {
+                    audio.pause();
+                } else {
+                    // Arrêter tous les autres lecteurs
+                    audioPlayers.forEach((player, idx) => {
+                        if (idx !== index && !player.paused) {
+                            player.pause();
+                        }
+                    });
+
+                    audio.play().catch(e => {
+                        console.error('Erreur lecture:', e);
+                        showNotification(`Impossible de lire le fichier #${index + 1}`, 'error');
+                    });
+                }
+            });
+        }
+
+        // Mettre à jour l'état play/pause
+        audio.addEventListener('play', () => {
+            isPlaying = true;
+            if (playIcon) playIcon.style.display = 'none';
+            if (pauseIcon) pauseIcon.style.display = 'block';
+        });
+
+        audio.addEventListener('pause', () => {
+            isPlaying = false;
+            if (playIcon) playIcon.style.display = 'block';
+            if (pauseIcon) pauseIcon.style.display = 'none';
+        });
+
+        // Configurer le bouton stop
+        if (stopBtn) {
+            stopBtn.addEventListener('click', () => {
+                audio.pause();
+                audio.currentTime = 0;
+                updateProgress(index);
+            });
+        }
+
+        // Configurer le bouton mute
+        if (muteBtn) {
+            muteBtn.addEventListener('click', () => {
+                audio.muted = !audio.muted;
+                muteBtn.textContent = audio.muted ? '🔇' : '🔊';
+            });
+        }
+
+        // Mettre à jour la progression
+        audio.addEventListener('timeupdate', () => updateProgress(index));
+        audio.addEventListener('loadedmetadata', () => updateProgress(index));
+        audio.addEventListener('ended', () => {
+            audio.currentTime = 0;
+            updateProgress(index);
+        });
+
+        // Configurer la barre de progression
+        setupProgressBar(index);
+
+        // Gérer les erreurs
+        audio.addEventListener('error', (e) => {
+            console.error(`Erreur audio #${index}:`, e);
+            console.error('Source:', audio.currentSrc);
+        });
+    }
+
+    window.downloadFile = function(url, filename) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showNotification(`Téléchargement de ${filename} démarré`, 'success');
+    };
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 15px;
+            background: ${type === 'error' ? '#fee2e2' : '#d1fae5'};
+            color: ${type === 'error' ? '#b91c1c' : '#065f46'};
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 1001;
+            font-weight: 600;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+            word-wrap: break-word;
+            font-size: 0.95rem;
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => notification.style.transform = 'translateX(0)', 10);
+        setTimeout(() => {
+            notification.style.transform = 'translateX(120%)';
+            setTimeout(() => document.body.removeChild(notification), 300);
+        }, 3000);
+    }
+
+    async function loadAudioFiles() {
+        try {
+            const response = await fetch('/api/dropbox/liens');
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message || 'Erreur serveur');
+            }
+
+            const links = data.liens || [];
+
+            if (links.length === 0) {
+                playersContent.innerHTML = `
+                    <div class="empty-state">
+                        <p style="font-size: 1.2rem;">🎵</p>
+                        <p>Aucun fichier audio trouvé.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let playersHTML = '';
+            links.forEach((link, index) => {
+                playersHTML += createAudioPlayer(link, index);
+            });
+
+            playersContent.innerHTML = playersHTML;
+
+            // Configurer les contrôles pour chaque lecteur
+            links.forEach((_, index) => {
+                setupPlayerControls(index);
+            });
+
+            showNotification(`${links.length} fichier(s) chargé(s)`, 'success');
+
+        } catch (error) {
+            console.error('Erreur chargement:', error);
+            playersContent.innerHTML = `
+                <div class="error-state">
+                    <p style="font-size: 1.2rem;">❌</p>
+                    <p><strong>Erreur de chargement</strong></p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
+                    <button class="retry-btn" onclick="retryLoading()">🔄 Réessayer</button>
+                </div>
+            `;
+        }
+    }
+
+    window.retryLoading = function() {
+        playersContent.innerHTML = '<div class="loading-state">Nouvelle tentative...</div>';
+        setTimeout(loadAudioFiles, 1000);
+    };
+
+    // Détection mobile et optimisation
+    function isMobileDevice() {
+        return (('ontouchstart' in window) ||
+                (navigator.maxTouchPoints > 0) ||
+                (navigator.msMaxTouchPoints > 0));
+    }
+
+    if (isMobileDevice()) {
+        document.body.classList.add('mobile-device');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadAudioFiles);
+
+    // Empêcher le zoom sur les boutons
+    document.addEventListener('touchstart', function(e) {
+        if (e.target.classList.contains('control-btn') ||
+            e.target.classList.contains('download-btn') ||
+            e.target.classList.contains('control-btn-small') ||
+            e.target.classList.contains('play-pause-btn')) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+</script>
+
+</body>
+</html>

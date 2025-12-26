@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu Principal</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; position:relative;}
+    .menu-container { background:white; border-radius:24px; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+                     overflow:hidden; width:100%; max-width:500px; position:relative; z-index:1;}
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding:50px 30px; text-align:center; color:white;}
+    h1 { font-size:2.5rem; font-weight:700; margin-bottom:8px; letter-spacing:-0.5px;}
+    .subtitle { font-size:1rem; opacity:0.9; font-weight:400;}
+    .menu-content { padding:30px; }
+    .menu { display:flex; flex-direction:column; gap:14px; margin-bottom:25px;}
+    .menu button { padding:16px 20px; border:none; border-radius:14px; font-size:1.1rem; font-weight:600;
+                   cursor:pointer; transition: all 0.3s; font-family:inherit; text-align:left; display:flex; align-items:center; gap:12px;
+                   position:relative;}
+    .menu button::before { content:attr(data-icon); font-size:1.3rem; }
+    .menu button:not(:disabled) { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; box-shadow:0 4px 12px rgba(102,126,234,0.3);}
+    .menu button:not(:disabled):hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(102,126,234,0.4);}
+    .menu button:not(:disabled):active { transform:translateY(0);}
+
+    /* Style spécial pour le bouton de déconnexion */
+    .menu button.logout-btn:not(:disabled) {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+      box-shadow:0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+    .menu button.logout-btn:not(:disabled):hover {
+      box-shadow:0 6px 20px rgba(255, 107, 107, 0.4);
+    }
+
+    /* Style pour bouton administrateur */
+    .menu button.admin-btn:not(:disabled) {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      box-shadow:0 4px 12px rgba(240, 147, 251, 0.3);
+    }
+    .menu button.admin-btn:not(:disabled):hover {
+      box-shadow:0 6px 20px rgba(240, 147, 251, 0.4);
+    }
+
+    /* Style pour bouton recherche */
+    .menu button.search-btn:not(:disabled) {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      box-shadow:0 4px 12px rgba(79, 172, 254, 0.3);
+    }
+    .menu button.search-btn:not(:disabled):hover {
+      box-shadow:0 6px 20px rgba(79, 172, 254, 0.4);
+    }
+
+    /* Style pour bouton désactivé */
+    .menu button:disabled {
+      background: #e5e7eb;
+      color: #9ca3af;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .divider { height:1px; background: linear-gradient(to right, transparent, #e5e7eb, transparent); margin:25px 0;}
+    .output { background:#f8f9ff; border:2px solid #e5e7eb; border-radius:12px; padding:16px; text-align:center;
+              color:#374151; font-size:0.95rem; font-weight:500; }
+  </style>
+</head>
+<body>
+
+<div class="menu-container">
+  <div class="header">
+    <h1>Menu Principal</h1>
+    <p class="subtitle">Gérez votre espace</p>
+  </div>
+
+  <div class="menu-content">
+    <div class="menu">
+      <!-- NOUVEAU BOUTON : Voir mon profil -->
+      <button id="btnVoirProfil" data-icon="👤">Mon profil</button>
+
+      <!-- NOUVEAU BOUTON : All About Music -->
+      <button id="btnAllAboutMusic" data-icon="🎵">All About Music</button>
+
+      <!-- BOUTON GARDÉ : Parler avec ma team -->
+      <button id="btnTeam" data-icon="💬">Parler avec ma team</button>
+
+      <!-- NOUVEAU BOUTON : Recherchez quelqu'un -->
+      <button id="btnRecherche" data-icon="🔍" class="search-btn">Recherchez quelqu'un...</button>
+
+      <!-- BOUTON DISPONIBLE POUR TOUS : Afficher la liste des utilisateurs -->
+      <button id="btnShowUsers" data-icon="👥">Afficher la liste des utilisateurs</button>
+    </div>
+
+    <!-- Section Admin (cachée par défaut) -->
+    <div id="adminSection" class="menu" style="display: none;">
+      <div class="divider"></div>
+      <h3 style="text-align: center; margin-bottom: 15px; color: #764ba2;">Options Administrateur</h3>
+      <button id="btnDeleteUser" data-icon="🗑️" class="admin-btn">Effacer un utilisateur</button>
+      <button id="btnAddGenre" data-icon="➕" class="admin-btn">Ajouter un genre musical</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="menu">
+      <!-- BOUTON GARDÉ : Déconnexion -->
+      <button id="btnLogout" data-icon="🚪" class="logout-btn">Déconnexion</button>
+    </div>
+
+    <div class="output" id="output">Sélectionnez une option ci-dessus</div>
+  </div>
+</div>
+
+<script>
+  const output = document.getElementById("output");
+  const adminSection = document.getElementById("adminSection");
+
+  // Vérifier l'authentification
+  const token = localStorage.getItem('accessToken');
+  if (!token) {
+    alert('Vous devez être connecté pour accéder au menu');
+    window.location.href = '/connection/connection.html';
+  }
+
+  // Variable pour stocker l'ID de l'utilisateur courant
+  let currentUserId = null;
+  let currentUsername = null;
+
+  async function checkAuth() {
+    try {
+      const response = await fetch('/api/users/me', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!response.ok) throw new Error('Token invalide');
+
+      const userData = await response.json();
+      currentUserId = userData.id; // Stocker l'ID de l'utilisateur courant
+      currentUsername = userData.username; // Stocker le nom d'utilisateur
+
+      // Vérifier si l'utilisateur est administrateur
+      if (currentUsername === "administrateur" || currentUsername === "doka" || currentUsername === "hustla") {
+        adminSection.style.display = "flex";
+      }
+
+      return userData;
+    } catch (err) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      alert('Session expirée');
+      window.location.href = '/connection/connection.html';
+    }
+  }
+
+  // NOUVEAU BOUTON : Voir mon profil
+  document.getElementById("btnVoirProfil").addEventListener("click", () => {
+    output.textContent = "Ouverture de votre profil...";
+    setTimeout(() => {
+      output.textContent = "Fonctionnalité 'Voir mon profil' en cours de développement";
+      setTimeout(()=>{window.location.href="/menu/profil_menu.html";},300);
+    }, 300);
+  });
+
+  // NOUVEAU BOUTON : All About Music
+  document.getElementById("btnAllAboutMusic").addEventListener("click", () => {
+    output.textContent = "Ouverture de la section musicale...";
+    setTimeout(() => {
+      output.textContent = "Fonctionnalité 'All About Music' en cours de développement";
+      setTimeout(()=>{window.location.href="/menu/all_about_music.html";},300);
+    }, 300);
+  });
+
+  // BOUTON GARDÉ : Parler avec ma team
+  document.getElementById("btnTeam").addEventListener("click", ()=>{
+    output.textContent="Ouverture de votre espace team...";
+    setTimeout(()=>{window.location.href="ma_communaute/ma_communaute.html";},300);
+  });
+
+  // NOUVEAU BOUTON : Recherchez quelqu'un
+  document.getElementById("btnRecherche").addEventListener("click", () => {
+    output.textContent = "Recherche d'utilisateurs...";
+    setTimeout(() => {
+      window.location.href = "/menu/recherche.html";
+    }, 300);
+  });
+
+  // BOUTON DISPONIBLE POUR TOUS : Afficher la liste des utilisateurs
+  document.getElementById("btnShowUsers").addEventListener("click", () => {
+    output.textContent = "Redirection vers la liste des utilisateurs...";
+    setTimeout(() => {
+      window.location.href = "/menu/afficherUserList.html";
+    }, 300);
+  });
+
+  // BOUTONS ADMINISTRATEUR
+  document.getElementById("btnDeleteUser").addEventListener("click", () => {
+    output.textContent = "Redirection vers la suppression d'utilisateur...";
+    setTimeout(() => {
+      window.location.href = "/menu/suppression.html";
+    }, 300);
+  });
+
+  document.getElementById("btnAddGenre").addEventListener("click", () => {
+    output.textContent = "Redirection vers l'ajout de genre musical...";
+    setTimeout(() => {
+      window.location.href = "/menu/ajouter_genre_musical.html";
+    }, 300);
+  });
+
+  // BOUTON GARDÉ : Déconnexion
+  document.getElementById("btnLogout").addEventListener("click", async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) return;
+
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ refreshToken })
+      });
+      if (response.ok) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('currentUserData');
+        alert('Déconnexion réussie');
+        window.location.href = '/connection/connection.html';
+      } else {
+        alert('Erreur lors de la déconnexion');
+      }
+    } catch (err) {
+      alert('Erreur réseau lors de la déconnexion');
+    }
+  });
+
+  // Initialisation - Récupérer l'ID utilisateur au chargement
+  checkAuth();
+</script>
+
+</body>
+</html>
