@@ -233,7 +233,17 @@ public class UserService {
                 throw new RuntimeException("Utilisateur non trouvé avec l'ID: " + userId);
             }
 
-            // ===== ORDRE DES SUPPRESSIONS (de dépendance faible à forte) =====
+            // ===== ORDRE DES SUPPRESSIONS (Strict respect des contraintes d'intégrité) =====
+
+            // 0. Supprimer les relations Many-to-Many entre Favoris et Genres
+            // C'est cette étape qui causait l'erreur SQLState: 23503
+            Query deleteMusicGenresLiaisons = entityManager.createNativeQuery(
+                    "DELETE FROM musicfavoris_genres WHERE music_favoris_id IN " +
+                            "(SELECT id FROM music_favoris WHERE user_id = ?)"
+            );
+            deleteMusicGenresLiaisons.setParameter(1, userId);
+            int genresLiaisonsDeleted = deleteMusicGenresLiaisons.executeUpdate();
+            System.out.println("0. Liaisons genres supprimées : " + genresLiaisonsDeleted);
 
             // 1. Supprimer les favoris musicaux (table: music_favoris)
             Query deleteMusicFavoris = entityManager.createNativeQuery(
@@ -241,7 +251,7 @@ public class UserService {
             );
             deleteMusicFavoris.setParameter(1, userId);
             int musicFavorisDeleted = deleteMusicFavoris.executeUpdate();
-            System.out.println("Favoris musicaux supprimés: " + musicFavorisDeleted);
+            System.out.println("1. Favoris musicaux supprimés : " + musicFavorisDeleted);
 
             // 2. Supprimer les commentaires écrits par l'utilisateur (table: commentaires)
             Query deleteCommentairesByUser = entityManager.createNativeQuery(
@@ -249,16 +259,16 @@ public class UserService {
             );
             deleteCommentairesByUser.setParameter(1, userId);
             int commentairesByUserDeleted = deleteCommentairesByUser.executeUpdate();
-            System.out.println("Commentaires écrits par l'user supprimés: " + commentairesByUserDeleted);
+            System.out.println("2. Commentaires écrits par l'user supprimés : " + commentairesByUserDeleted);
 
-            // 3. Supprimer les commentaires sur les messages de l'utilisateur (table: commentaires via messages)
+            // 3. Supprimer les commentaires sur les messages de l'utilisateur
             Query deleteCommentairesOnUserMessages = entityManager.createNativeQuery(
                     "DELETE FROM commentaires WHERE message_id IN " +
                             "(SELECT id FROM messages WHERE user_id = ?)"
             );
             deleteCommentairesOnUserMessages.setParameter(1, userId);
             int commentairesOnMessagesDeleted = deleteCommentairesOnUserMessages.executeUpdate();
-            System.out.println("Commentaires sur les messages de l'user supprimés: " + commentairesOnMessagesDeleted);
+            System.out.println("3. Commentaires sur les messages de l'user supprimés : " + commentairesOnMessagesDeleted);
 
             // 4. Supprimer les messages publics de l'utilisateur (table: messages)
             Query deleteMessages = entityManager.createNativeQuery(
@@ -266,9 +276,9 @@ public class UserService {
             );
             deleteMessages.setParameter(1, userId);
             int messagesDeleted = deleteMessages.executeUpdate();
-            System.out.println("Messages publics supprimés: " + messagesDeleted);
+            System.out.println("4. Messages publics supprimés : " + messagesDeleted);
 
-            // 5. Supprimer les messages privés de l'utilisateur (table: messages_prives via conversations)
+            // 5. Supprimer les messages privés (contenus dans les conversations)
             Query deleteMessagesPrives = entityManager.createNativeQuery(
                     "DELETE FROM messages_prives WHERE conversation_id IN " +
                             "(SELECT id FROM conversations WHERE user1_id = ? OR user2_id = ?)"
@@ -276,7 +286,7 @@ public class UserService {
             deleteMessagesPrives.setParameter(1, userId);
             deleteMessagesPrives.setParameter(2, userId);
             int messagesPrivesDeleted = deleteMessagesPrives.executeUpdate();
-            System.out.println("Messages privés supprimés: " + messagesPrivesDeleted);
+            System.out.println("5. Messages privés supprimés : " + messagesPrivesDeleted);
 
             // 6. Supprimer les conversations impliquant l'utilisateur (table: conversations)
             Query deleteConversations = entityManager.createNativeQuery(
@@ -285,7 +295,7 @@ public class UserService {
             deleteConversations.setParameter(1, userId);
             deleteConversations.setParameter(2, userId);
             int conversationsDeleted = deleteConversations.executeUpdate();
-            System.out.println("Conversations supprimées: " + conversationsDeleted);
+            System.out.println("6. Conversations supprimées : " + conversationsDeleted);
 
             // 7. Supprimer l'utilisateur lui-même (table: users)
             Query deleteUser = entityManager.createNativeQuery(
@@ -293,21 +303,13 @@ public class UserService {
             );
             deleteUser.setParameter(1, userId);
             int userDeleted = deleteUser.executeUpdate();
-            System.out.println("Utilisateur supprimé: " + userDeleted);
+            System.out.println("7. Utilisateur supprimé de la table users : " + userDeleted);
 
-            // ===== RÉSUMÉ =====
-            System.out.println("===== SUPPRESSION TERMINÉE =====");
-            System.out.println("• Favoris musicaux: " + musicFavorisDeleted);
-            System.out.println("• Commentaires écrits par l'user: " + commentairesByUserDeleted);
-            System.out.println("• Commentaires sur messages de l'user: " + commentairesOnMessagesDeleted);
-            System.out.println("• Messages publics: " + messagesDeleted);
-            System.out.println("• Messages privés: " + messagesPrivesDeleted);
-            System.out.println("• Conversations: " + conversationsDeleted);
-            System.out.println("• Utilisateur: " + userDeleted);
+            System.out.println("===== SUPPRESSION TOTALE RÉUSSIE POUR L'ID " + userId + " =====");
 
         } catch (Exception e) {
-            // Annuler la transaction en cas d'erreur
-            throw new RuntimeException("Erreur lors de la suppression de l'utilisateur " + userId + ": " + e.getMessage(), e);
+            // Grâce au @Transactional, si une étape échoue, rien n'est supprimé
+            throw new RuntimeException("Erreur critique lors de la suppression SQL : " + e.getMessage(), e);
         }
     }
 
