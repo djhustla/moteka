@@ -270,6 +270,98 @@
             opacity: 0.9;
         }
 
+        /* Modal de succès */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 35px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-icon {
+            font-size: 4rem;
+            color: #48bb78;
+            margin-bottom: 20px;
+            animation: checkmark 0.6s ease-out;
+        }
+
+        @keyframes checkmark {
+            0% {
+                transform: scale(0) rotate(-45deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2) rotate(10deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .modal-message {
+            font-size: 1rem;
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .modal-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
         /* Responsive */
         @media (max-width: 640px) {
             .container {
@@ -307,6 +399,18 @@
             .code-input {
                 letter-spacing: 6px;
             }
+
+            .modal {
+                padding: 30px 25px;
+            }
+
+            .modal-title {
+                font-size: 1.5rem;
+            }
+
+            .modal-message {
+                font-size: 0.95rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -326,6 +430,10 @@
                 right: 10px;
                 left: 10px;
                 max-width: none;
+            }
+
+            .modal-icon {
+                font-size: 3rem;
             }
         }
 
@@ -429,6 +537,22 @@
     </div>
 </div>
 
+<!-- Modal de succès -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal">
+        <div class="modal-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h2 class="modal-title">Votre compte est validé</h2>
+        <p class="modal-message">
+            Maintenant, vous pouvez vous connecter avec votre username ou mail et votre mot de passe.
+        </p>
+        <button class="modal-btn" onclick="goToConnection()">
+            OK
+        </button>
+    </div>
+</div>
+
 <script>
     // Fonctions de navigation
     function goBack() {
@@ -437,6 +561,10 @@
 
     function goToHome() {
         window.location.href = '/index.html';
+    }
+
+    function goToConnection() {
+        window.location.href = '/connection/connection.html';
     }
 
     // Formatage automatique du code
@@ -509,6 +637,12 @@
         }, 5000);
     }
 
+    // Fonction pour afficher le modal de succès
+    function showSuccessModal() {
+        const modal = document.getElementById('successModal');
+        modal.classList.add('show');
+    }
+
     // Soumission du formulaire
     document.getElementById('validationForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -552,10 +686,10 @@
             if (response.ok && result.success) {
                 showAlert('success', 'Succès !', result.message);
 
-                // Redirection après succès
+                // Afficher le modal au lieu de rediriger directement
                 setTimeout(() => {
-                    window.location.href = '/index.html';
-                }, 2000);
+                    showSuccessModal();
+                }, 1000);
 
             } else {
                 showAlert('error', 'Erreur', result.error || 'Une erreur est survenue');
