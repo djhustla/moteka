@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modifier le Profil</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    }
+
+    .form-container {
+      background:white;
+      border-radius:24px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.3);
+      overflow:hidden;
+      width:100%;
+      max-width:500px;
+      position:relative;
+      z-index:1;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding:50px 30px;
+      text-align:center;
+      color:white;
+      position: relative;
+    }
+
+    .header h2 {
+      font-size:2.5rem;
+      font-weight:700;
+      margin-bottom:8px;
+      letter-spacing:-0.5px;
+    }
+
+    .header p {
+      font-size:1rem;
+      opacity:0.9;
+      font-weight:400;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+
+    .form-content {
+      padding:30px;
+    }
+
+    .user-info-card {
+      background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
+      border-radius:16px;
+      padding:25px;
+      margin-bottom:30px;
+      border: 2px solid #e5e7eb;
+      box-shadow: 0 4px 12px rgba(102,126,234,0.1);
+      animation: slideUp 0.5s ease;
+    }
+
+    .user-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .user-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 3px solid #667eea;
+      overflow: hidden;
+      background: white;
+      flex-shrink: 0;
+      box-shadow: 0 8px 20px rgba(102,126,234,0.2);
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .user-avatar:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 30px rgba(102,126,234,0.3);
+    }
+
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-avatar .avatar-initials {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-size: 2.5rem;
+      font-weight: bold;
+    }
+
+    .user-details {
+      flex-grow: 1;
+    }
+
+    .user-name {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .user-email {
+      font-size: 1rem;
+      color: #6b7280;
+      margin-bottom: 5px;
+    }
+
+    .user-role {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(102,126,234,0.2);
+    }
+
+    .form-section {
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 2px solid #e5e7eb;
+      box-shadow: 0 4px 12px rgba(102,126,234,0.05);
+      animation: slideUp 0.6s ease;
+      animation-fill-mode: both;
+    }
+
+    .form-section:nth-child(2) { animation-delay: 0.1s; }
+    .form-section:nth-child(3) { animation-delay: 0.2s; }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f3f4f6;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-icon {
+      background: #eef2ff;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .label-text {
+      font-weight: 600;
+      color: #374151;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .optional {
+      font-weight: normal;
+      color: #6b7280;
+      font-size: 0.85rem;
+      font-style: italic;
+      background: #f3f4f6;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.3s;
+      background-color: white;
+      color: #374151;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102,126,234,0.15);
+    }
+
+    input::placeholder {
+      color: #9ca3af;
+      font-style: italic;
+    }
+
+    .photo-section {
+      text-align: center;
+    }
+
+    .photo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .photo-preview {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 4px solid #667eea;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 8px 25px rgba(102,126,234,0.2);
+      transition: all 0.3s;
+    }
+
+    .photo-preview:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 30px rgba(102,126,234,0.3);
+    }
+
+    .photo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-preview-initials {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-size: 3rem;
+      font-weight: bold;
+    }
+
+    .photo-btn {
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 1rem;
+      box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+      min-height: 50px;
+      width: 100%;
+      max-width: 250px;
+      margin: 0 auto;
+    }
+
+    .photo-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+    }
+
+    .remove-photo-btn {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+      margin-top: 10px;
+    }
+
+    .remove-photo-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239,68,68,0.4);
+    }
+
+    .toggle-password {
+      color: #667eea;
+      background: #eef2ff;
+      border: 2px solid #e5e7eb;
+      font-size: 0.95rem;
+      cursor: pointer;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s;
+      margin-bottom: 15px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .toggle-password:hover {
+      background: #dbeafe;
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102,126,234,0.1);
+    }
+
+    .password-fields {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .password-fields.visible {
+      display: block;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      animation: slideUp 0.7s ease;
+      animation-fill-mode: both;
+    }
+
+    .submit-btn {
+      flex: 1;
+      padding: 18px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+      min-height: 50px;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .cancel-btn {
+      padding: 18px 30px;
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(107,114,128,0.3);
+      min-height: 50px;
+    }
+
+    .cancel-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(107,114,128,0.4);
+    }
+
+    .alert-container {
+      margin-bottom: 25px;
+      animation: slideDown 0.5s ease;
+    }
+
+    .alert {
+      padding: 16px 20px;
+      border-radius: 12px;
+      display: none;
+      animation: slideIn 0.3s ease;
+      border-left: 5px solid transparent;
+    }
+
+    .alert.error {
+      background: linear-gradient(135deg, #fee 0%, #fecaca 100%);
+      color: #dc2626;
+      border-color: #dc2626;
+    }
+
+    .alert.success {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #065f46;
+      border-color: #065f46;
+    }
+
+    .alert.warning {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #92400e;
+      border-color: #92400e;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 5px solid #e5e7eb;
+      border-top: 5px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .progress-bar {
+      width: 200px;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .camera-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 10001;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .camera-preview {
+      width: 100%;
+      max-width: 500px;
+      height: 70vh;
+      overflow: hidden;
+      border-radius: 10px;
+      background: black;
+    }
+
+    .camera-preview video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .camera-controls {
+      display: flex;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .camera-btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .capture-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+    }
+
+    .cancel-camera-btn {
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(107,114,128,0.3);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Styles spécifiques pour mobile */
+    @media (max-width: 600px) {
+      .header h2 { font-size: 2rem; }
+      .form-content { padding: 20px; }
+      .form-actions { flex-direction: column; }
+      .user-header { flex-direction: column; text-align: center; gap: 15px; }
+      .photo-preview {
+        width: 120px;
+        height: 120px;
+      }
+      .section-title { font-size: 1.1rem; }
+      input[type="text"],
+      input[type="email"],
+      input[type="password"] {
+        padding: 16px;
+        font-size: 1.05rem;
+      }
+      .submit-btn, .cancel-btn {
+        padding: 20px;
+        font-size: 1.15rem;
+      }
+      .user-avatar {
+        width: 80px;
+        height: 80px;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      input, textarea {
+        font-size: 16px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Overlay de chargement -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <p id="loadingText" style="color: #374151; font-weight: 600;">Mise à jour en cours...</p>
+</div>
+
+<!-- Overlay pour la caméra -->
+<div class="camera-overlay" id="cameraOverlay">
+  <div class="camera-preview">
+    <video id="cameraVideo" autoplay playsinline></video>
+  </div>
+  <div class="camera-controls">
+    <button class="camera-btn capture-btn" id="capturePhoto">
+      📸 Prendre la photo
+    </button>
+    <button class="camera-btn cancel-camera-btn" id="cancelCamera">
+      ✖ Annuler
+    </button>
+  </div>
+</div>
+
+<div class="form-container">
+  <div class="header">
+    <button class="back-btn" onclick="window.location.href='/menu/menu.html'">
+      <span>⬅️</span> Retour
+    </button>
+    <h2>Modifier le Profil</h2>
+    <p>Mettez à jour vos informations personnelles</p>
+  </div>
+
+  <div class="form-content">
+    <!-- Alert Messages -->
+    <div class="alert-container">
+      <div class="alert" id="alert"></div>
+    </div>
+
+    <!-- User Info Card -->
+    <div class="user-info-card">
+      <div class="user-header">
+        <div class="user-avatar" id="userAvatar">
+          <!-- Dynamiquement rempli par JavaScript -->
+        </div>
+        <div class="user-details">
+          <h3 class="user-name" id="currentUsername">Chargement...</h3>
+          <div class="user-email" id="currentEmail">Chargement...</div>
+          <div class="user-role" id="currentRole">USER</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update Form -->
+    <form id="profileForm" enctype="multipart/form-data">
+      <!-- Informations de base -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <div class="section-icon">👤</div>
+          Informations personnelles
+        </h3>
+
+        <div class="form-group">
+          <div class="form-label">
+            <span class="label-text">
+              <span>📛</span> Nom d'utilisateur
+            </span>
+            <span class="optional">optionnel</span>
+          </div>
+          <input type="text" id="username" name="username" placeholder="Nouveau nom d'utilisateur">
+          <div style="font-size: 0.85rem; color: #6b7280; margin-top: 5px;">
+            Min. 3 caractères
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">
+            <span class="label-text">
+              <span>📧</span> Adresse email
+            </span>
+            <span class="optional">optionnel</span>
+          </div>
+          <input type="email" id="email" name="email" placeholder="Nouvelle adresse email">
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <div class="section-icon">🔐</div>
+          Sécurité
+        </h3>
+
+        <button type="button" class="toggle-password" id="togglePassword">
+          <span>🔒</span> Modifier le mot de passe
+        </button>
+
+        <div class="password-fields" id="passwordFields">
+          <div class="form-group">
+            <div class="form-label">
+              <span class="label-text">
+                <span>🔑</span> Mot de passe actuel
+              </span>
+              <span class="optional">requis si changement</span>
+            </div>
+            <input type="password" id="currentPassword" name="currentPassword"
+                   placeholder="Entrez votre mot de passe actuel">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">
+              <span class="label-text">
+                <span>🆕</span> Nouveau mot de passe
+              </span>
+              <span class="optional">optionnel</span>
+            </div>
+            <input type="password" id="newPassword" name="newPassword"
+                   placeholder="Nouveau mot de passe">
+            <div style="font-size: 0.85rem; color: #6b7280; margin-top: 5px;">
+              Min. 4 caractères
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">
+              <span class="label-text">
+                <span>✅</span> Confirmer le nouveau mot de passe
+              </span>
+            </div>
+            <input type="password" id="confirmPassword" name="confirmPassword"
+                   placeholder="Confirmez le nouveau mot de passe">
+          </div>
+        </div>
+      </div>
+
+      <!-- Photo de profil -->
+      <div class="form-section photo-section">
+        <h3 class="section-title">
+          <div class="section-icon">📷</div>
+          Photo de profil
+        </h3>
+
+        <div class="photo-container">
+          <div class="photo-preview" id="photoPreview">
+            <!-- Photo actuelle ou placeholder -->
+          </div>
+
+          <button type="button" class="photo-btn" id="selectPhotoBtn">
+            <span>📁</span> Sélectionner une photo
+          </button>
+
+          <div id="removePhotoContainer" style="display: none;">
+            <button type="button" class="remove-photo-btn" id="removePhotoBtn">
+              <span>🗑️</span> Supprimer la photo
+            </button>
+          </div>
+        </div>
+
+        <!-- Input caché pour la photo -->
+        <input type="file" id="photoInput" accept="image/*" style="display: none;">
+        <input type="hidden" id="removePhoto" name="removePhoto" value="false">
+
+        <div style="text-align: center; color: #6b7280; font-size: 0.9rem; margin-top: 15px; padding: 10px; background: #f9fafb; border-radius: 8px;">
+          <span>⚠️</span> Formats acceptés : JPG, PNG, GIF, WebP • Max 5 Mo
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span>💾</span> Enregistrer
+        </button>
+        <a href="/menu/menu.html" class="cancel-btn">
+          <span>✖️</span> Annuler
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // ===== CONFIGURATION =====
+  const CONFIG = {
+    API: {
+      ME: '/api/users/me',
+      UPDATE: '/api/users/me/update',
+      LOGIN: '/api/auth/login'
+    },
+    ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
+    MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
+    VALIDATION: {
+      USERNAME_MIN: 3,
+      PASSWORD_MIN: 4
+    }
+  };
+
+  // ===== ÉTAT GLOBAL =====
+  const state = {
+    currentUser: null,
+    selectedPhotoUrl: null,
+    passwordFieldsVisible: false,
+    isSubmitting: false,
+    cameraStream: null
+  };
+
+  // ===== ÉLÉMENTS DOM =====
+  const el = {
+    // Alertes
+    alert: document.getElementById('alert'),
+
+    // Infos utilisateur
+    userAvatar: document.getElementById('userAvatar'),
+    currentUsername: document.getElementById('currentUsername'),
+    currentEmail: document.getElementById('currentEmail'),
+    currentRole: document.getElementById('currentRole'),
+
+    // Formulaire
+    username: document.getElementById('username'),
+    email: document.getElementById('email'),
+    currentPassword: document.getElementById('currentPassword'),
+    newPassword: document.getElementById('newPassword'),
+    confirmPassword: document.getElementById('confirmPassword'),
+
+    // Photo
+    photoPreview: document.getElementById('photoPreview'),
+    selectPhotoBtn: document.getElementById('selectPhotoBtn'),
+    removePhotoBtn: document.getElementById('removePhotoBtn'),
+    removePhotoContainer: document.getElementById('removePhotoContainer'),
+    photoInput: document.getElementById('photoInput'),
+    removePhoto: document.getElementById('removePhoto'),
+
+    // Caméra
+    cameraOverlay: document.getElementById('cameraOverlay'),
+    cameraVideo: document.getElementById('cameraVideo'),
+    capturePhoto: document.getElementById('capturePhoto'),
+    cancelCamera: document.getElementById('cancelCamera'),
+
+    // Mot de passe
+    togglePassword: document.getElementById('togglePassword'),
+    passwordFields: document.getElementById('passwordFields'),
+
+    // Formulaires et actions
+    profileForm: document.getElementById('profileForm'),
+    submitBtn: document.getElementById('submitBtn'),
+
+    // Chargement
+    loadingOverlay: document.getElementById('loadingOverlay'),
+    progressFill: document.getElementById('progressFill'),
+    loadingText: document.getElementById('loadingText')
+  };
+
+  // ===== UTILITAIRES =====
+  const utils = {
+    // Vérification d'authentification
+    checkAuth() {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        this.showAlert('Erreur d\'authentification', 'Veuillez vous reconnecter', 'error');
+        setTimeout(() => window.location.href = '/connection/connection.html', 2000);
+        return false;
+      }
+      return true;
+    },
+
+    // Alertes
+    showAlert(title, message, type = 'error', duration = 5000) {
+      el.alert.innerHTML = `
+        <strong>${title}</strong>
+        <div style="margin-top: 8px; line-height: 1.4;">${message}</div>
+      `;
+      el.alert.className = `alert ${type}`;
+      el.alert.style.display = 'block';
+
+      if (type === 'success' && duration > 0) {
+        setTimeout(() => {
+          el.alert.style.display = 'none';
+        }, duration);
+      }
+    },
+
+    // Formatage de date
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const options = {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      };
+      return date.toLocaleDateString('fr-FR', options);
+    },
+
+    // Initiales
+    getInitials(username) {
+      if (!username) return '?';
+      const parts = username.split(' ');
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return username.substring(0, 2).toUpperCase();
+    },
+
+    // Compression d'image
+    compressImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            let width = img.width;
+            let height = img.height;
+
+            // Redimensionner si trop grand (max 800px)
+            const MAX_SIZE = 800;
+            if (width > height && width > MAX_SIZE) {
+              height = Math.round(height * (MAX_SIZE / width));
+              width = MAX_SIZE;
+            } else if (height > width && height > MAX_SIZE) {
+              width = Math.round(width * (MAX_SIZE / height));
+              height = MAX_SIZE;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob((blob) => {
+              const compressedFile = new File([blob], 'photo.jpg', {
+                type: 'image/jpeg',
+                lastModified: Date.now()
+              });
+              resolve(compressedFile);
+            }, 'image/jpeg', 0.75);
+          };
+
+          img.onerror = () => {
+            reject(new Error('Erreur lors du chargement de l\'image'));
+          };
+        };
+
+        reader.onerror = () => {
+          reject(new Error('Erreur lors de la lecture du fichier'));
+        };
+      });
+    },
+
+    // Mise à jour de la barre de progression
+    updateProgress(percent) {
+      if (el.progressFill) {
+        el.progressFill.style.width = `${percent}%`;
+      }
+    },
+
+    // Affichage du chargement
+    showLoading(text = 'Chargement...') {
+      state.isSubmitting = true;
+      el.loadingText.textContent = text;
+      el.loadingOverlay.style.display = 'flex';
+      this.updateProgress(0);
+    },
+
+    // Masquage du chargement
+    hideLoading() {
+      state.isSubmitting = false;
+      el.loadingOverlay.style.display = 'none';
+      this.updateProgress(0);
+    },
+
+    // Vérification de la taille du fichier
+    validateFile(file) {
+      if (!CONFIG.ALLOWED_IMAGE_TYPES.includes(file.type)) {
+        this.showAlert('Format invalide', 'Seuls les formats JPG, PNG, GIF et WebP sont acceptés', 'error');
+        return false;
+      }
+
+      if (file.size > CONFIG.MAX_FILE_SIZE) {
+        this.showAlert('Fichier trop volumineux', 'L\'image ne doit pas dépasser 5 Mo', 'error');
+        return false;
+      }
+
+      return true;
+    },
+
+    // Création d'une URL d'aperçu
+    createPreviewUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    },
+
+    // Détection mobile
+    isMobile() {
+      return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+    },
+
+    // Notification toast
+    showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      const color = type === 'success' ? '#10b981' : type === 'error' ? '#dc2626' : '#f59e0b';
+
+      toast.style.cssText = `
+        position: fixed;
+        top: 30px;
+        right: 30px;
+        background: ${color};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        z-index: 9999;
+        max-width: 400px;
+        animation: slideIn 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+      `;
+
+      const icon = type === 'success' ? '✅' : type === 'error' ? '⚠️' : 'ℹ️';
+      toast.innerHTML = `
+        <span style="font-size: 1.2rem;">${icon}</span>
+        <span>${message}</span>
+      `;
+
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+
+      // Ajouter les styles d'animation si pas déjà présents
+      if (!document.querySelector('#toast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'toast-styles';
+        style.textContent = `
+          @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+          }
+          @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    },
+
+    // Redirection vers le menu
+    redirectToMenu() {
+      setTimeout(() => {
+        window.location.href = '/menu/menu.html';
+      }, 2000);
+    }
+  };
+
+  // ===== GESTION DES DONNÉES UTILISATEUR =====
+  const userManager = {
+    // Charger les données utilisateur
+    async loadUserData() {
+      if (!utils.checkAuth()) return;
+
+      try {
+        utils.showLoading('Chargement de votre profil...');
+        utils.updateProgress(30);
+
+        const response = await fetch(CONFIG.API.ME, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+        }
+
+        state.currentUser = await response.json();
+        utils.updateProgress(70);
+
+        this.updateUI();
+        utils.updateProgress(100);
+        utils.hideLoading();
+
+      } catch (error) {
+        console.error('Erreur:', error);
+        utils.showAlert('Erreur', 'Impossible de charger votre profil', 'error');
+        utils.hideLoading();
+      }
+    },
+
+    // Mettre à jour l'interface
+    updateUI() {
+      if (!state.currentUser) return;
+
+      const user = state.currentUser;
+
+      // Informations de base
+      el.currentUsername.textContent = user.username || 'Utilisateur';
+      el.currentEmail.textContent = user.email || 'Non spécifié';
+      el.currentRole.textContent = user.role || 'USER';
+
+      // Avatar
+      this.updateAvatarDisplay();
+
+      // Bouton de suppression de photo (uniquement si l'utilisateur a déjà une photo)
+      if (user.photoUrl) {
+        el.removePhotoContainer.style.display = 'block';
+      }
+    },
+
+    // Mettre à jour l'affichage de l'avatar
+    updateAvatarDisplay() {
+      const user = state.currentUser;
+      if (!user) return;
+
+      // Utiliser la photo sélectionnée si elle existe
+      if (state.selectedPhotoUrl) {
+        this.updatePhotoPreview(state.selectedPhotoUrl);
+        return;
+      }
+
+      // Sinon utiliser la photo de profil existante
+      if (user.photoUrl) {
+        this.updatePhotoPreview(user.photoUrl + '?t=' + new Date().getTime());
+      } else {
+        this.showInitials();
+      }
+    },
+
+    // Mettre à jour la prévisualisation de la photo
+    updatePhotoPreview(imageUrl) {
+      // Prévisualisation principale
+      el.photoPreview.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = imageUrl;
+      img.alt = 'Photo de profil';
+      img.onerror = () => this.showInitials();
+      el.photoPreview.appendChild(img);
+
+      // Avatar dans la carte utilisateur
+      el.userAvatar.innerHTML = '';
+      const avatarImg = document.createElement('img');
+      avatarImg.src = imageUrl;
+      avatarImg.alt = `Photo de ${state.currentUser?.username}`;
+      avatarImg.onerror = () => {
+        this.showInitialsForAvatar();
+      };
+      el.userAvatar.appendChild(avatarImg);
+    },
+
+    // Afficher les initiales dans la prévisualisation
+    showInitials() {
+      const initials = utils.getInitials(state.currentUser?.username);
+      el.photoPreview.innerHTML = `
+        <div class="photo-preview-initials">
+          ${initials}
+        </div>
+      `;
+    },
+
+    // Afficher les initiales dans l'avatar
+    showInitialsForAvatar() {
+      const initials = utils.getInitials(state.currentUser?.username);
+      el.userAvatar.innerHTML = `
+        <div class="avatar-initials">${initials}</div>
+      `;
+    }
+  };
+
+  // ===== GESTION DE LA PHOTO =====
+  const photoManager = {
+    init() {
+      // Bouton de sélection de photo
+      el.selectPhotoBtn.addEventListener('click', () => this.showPhotoOptions());
+
+      // Bouton de suppression de photo
+      el.removePhotoBtn.addEventListener('click', () => this.removePhoto());
+
+      // Changement de fichier (sélection depuis les fichiers)
+      el.photoInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files[0]));
+
+      // Bouton de capture de photo
+      el.capturePhoto.addEventListener('click', () => this.captureFromCamera());
+
+      // Bouton d'annulation de la caméra
+      el.cancelCamera.addEventListener('click', () => this.closeCamera());
+    },
+
+    // Afficher les options pour la photo
+    showPhotoOptions() {
+      // Sur mobile, proposer les deux options
+      if (utils.isMobile()) {
+        this.showMobilePhotoOptions();
+      } else {
+        // Sur desktop, ouvrir directement le sélecteur de fichiers
+        el.photoInput.click();
+      }
+    },
+
+    // Afficher les options mobiles
+    showMobilePhotoOptions() {
+      // Créer une boîte de dialogue avec les options
+      const optionsDialog = document.createElement('div');
+      optionsDialog.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 10002;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `;
+
+      optionsDialog.innerHTML = `
+        <div style="background: white; border-radius: 16px; padding: 30px; max-width: 90%; width: 400px; text-align: center;">
+          <h3 style="margin-bottom: 20px; color: #374151;">Choisir une photo</h3>
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <button id="cameraOption" style="padding: 15px; background: #667eea; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <span>📸</span> Prendre une photo
+            </button>
+            <button id="galleryOption" style="padding: 15px; background: #10b981; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <span>📁</span> Parcourir les dossiers
+            </button>
+            <button id="cancelOption" style="padding: 15px; background: #6b7280; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer;">
+              Annuler
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(optionsDialog);
+
+      // Gérer les clics
+      document.getElementById('cameraOption').addEventListener('click', () => {
+        document.body.removeChild(optionsDialog);
+        this.openCamera();
+      });
+
+      document.getElementById('galleryOption').addEventListener('click', () => {
+        document.body.removeChild(optionsDialog);
+        el.photoInput.click();
+      });
+
+      document.getElementById('cancelOption').addEventListener('click', () => {
+        document.body.removeChild(optionsDialog);
+      });
+
+      // Fermer en cliquant à l'extérieur
+      optionsDialog.addEventListener('click', (e) => {
+        if (e.target === optionsDialog) {
+          document.body.removeChild(optionsDialog);
+        }
+      });
+    },
+
+    // Ouvrir la caméra
+    async openCamera() {
+      try {
+        // Démarrer la caméra frontale
+        state.cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'user', // Caméra frontale
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+
+        // Afficher l'overlay de la caméra
+        el.cameraVideo.srcObject = state.cameraStream;
+        el.cameraOverlay.style.display = 'flex';
+
+      } catch (error) {
+        console.error('Erreur caméra:', error);
+        utils.showAlert('Erreur caméra', 'Impossible d\'accéder à la caméra. Veuillez vérifier les permissions.', 'error');
+        // Fallback au fichier normal
+        el.photoInput.click();
+      }
+    },
+
+    // Fermer la caméra
+    closeCamera() {
+      // Arrêter le flux vidéo
+      if (state.cameraStream) {
+        state.cameraStream.getTracks().forEach(track => track.stop());
+        state.cameraStream = null;
+      }
+
+      // Cacher l'overlay
+      el.cameraOverlay.style.display = 'none';
+      el.cameraVideo.srcObject = null;
+    },
+
+    // Capturer la photo depuis la caméra
+    captureFromCamera() {
+      const canvas = document.createElement('canvas');
+      canvas.width = el.cameraVideo.videoWidth;
+      canvas.height = el.cameraVideo.videoHeight;
+
+      const ctx = canvas.getContext('2d');
+
+      // Retourner l'image horizontalement pour la caméra frontale
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(el.cameraVideo, 0, 0, canvas.width, canvas.height);
+
+      // Restaurer le contexte
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+      canvas.toBlob((blob) => {
+        const file = new File([blob], 'photo-camera.jpg', { type: 'image/jpeg' });
+        this.handleFileSelect(file);
+        this.closeCamera();
+      }, 'image/jpeg', 0.8);
+    },
+
+    // Gestion de la sélection de fichier
+    async handleFileSelect(file) {
+      if (!file) return;
+
+      // Validation
+      if (!utils.validateFile(file)) return;
+
+      try {
+        utils.showLoading('Traitement de l\'image...');
+        utils.updateProgress(30);
+
+        // Compression
+        const compressedFile = await utils.compressImage(file);
+        utils.updateProgress(70);
+
+        // Créer une URL d'aperçu
+        const previewUrl = await utils.createPreviewUrl(compressedFile);
+
+        // Mettre à jour l'état
+        state.selectedPhotoUrl = previewUrl;
+        el.removePhoto.value = 'false';
+
+        // Mettre à jour l'aperçu
+        userManager.updatePhotoPreview(previewUrl);
+
+        // Afficher le bouton de suppression
+        el.removePhotoContainer.style.display = 'block';
+
+        // Mettre à jour le fichier dans l'input
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(compressedFile);
+        el.photoInput.files = dataTransfer.files;
+
+        utils.updateProgress(100);
+        utils.hideLoading();
+        utils.showToast('Photo sélectionnée avec succès', 'success');
+
+      } catch (error) {
+        utils.hideLoading();
+        console.error('Erreur:', error);
+        utils.showAlert('Erreur', 'Impossible de traiter l\'image', 'error');
+      }
+    },
+
+    // Suppression de la photo
+    removePhoto() {
+      if (confirm('Voulez-vous vraiment supprimer votre photo de profil ?')) {
+        state.selectedPhotoUrl = null;
+        el.removePhoto.value = 'true';
+        el.photoInput.value = '';
+
+        // Réinitialiser l'affichage
+        userManager.showInitials();
+        userManager.showInitialsForAvatar();
+
+        // Cacher le bouton de suppression
+        el.removePhotoContainer.style.display = 'none';
+
+        utils.showToast('La photo sera supprimée après enregistrement', 'warning');
+      }
+    }
+  };
+
+  // ===== GESTION DU MOT DE PASSE =====
+  const passwordManager = {
+    init() {
+      el.togglePassword.addEventListener('click', () => this.togglePasswordFields());
+    },
+
+    togglePasswordFields() {
+      state.passwordFieldsVisible = !state.passwordFieldsVisible;
+
+      if (state.passwordFieldsVisible) {
+        el.passwordFields.classList.add('visible');
+        el.togglePassword.innerHTML = '<span>🔓</span> Masquer la modification du mot de passe';
+      } else {
+        el.passwordFields.classList.remove('visible');
+        el.togglePassword.innerHTML = '<span>🔒</span> Modifier le mot de passe';
+        this.clearPasswordFields();
+      }
+    },
+
+    clearPasswordFields() {
+      el.currentPassword.value = '';
+      el.newPassword.value = '';
+      el.confirmPassword.value = '';
+    }
+  };
+
+  // ===== VALIDATION =====
+  const validator = {
+    validateForm() {
+      const username = el.username.value.trim();
+      const email = el.email.value.trim();
+      const currentPassword = el.currentPassword.value;
+      const newPassword = el.newPassword.value;
+      const confirmPassword = el.confirmPassword.value;
+
+      // Validation du nom d'utilisateur
+      if (username && username.length < CONFIG.VALIDATION.USERNAME_MIN) {
+        utils.showAlert(
+          'Nom d\'utilisateur invalide',
+          `Le nom d'utilisateur doit contenir au moins ${CONFIG.VALIDATION.USERNAME_MIN} caractères`,
+          'error'
+        );
+        return false;
+      }
+
+      // Validation de l'email
+      if (email && !this.isValidEmail(email)) {
+        utils.showAlert('Email invalide', 'Veuillez entrer une adresse email valide', 'error');
+        return false;
+      }
+
+      // Validation du mot de passe
+      if (state.passwordFieldsVisible) {
+        if (newPassword && !currentPassword) {
+          utils.showAlert('Mot de passe requis', 'Le mot de passe actuel est requis pour modifier le mot de passe', 'error');
+          return false;
+        }
+
+        if (newPassword && newPassword.length < CONFIG.VALIDATION.PASSWORD_MIN) {
+          utils.showAlert(
+            'Mot de passe trop court',
+            `Le nouveau mot de passe doit contenir au moins ${CONFIG.VALIDATION.PASSWORD_MIN} caractères`,
+            'error'
+          );
+          return false;
+        }
+
+        if (newPassword && newPassword !== confirmPassword) {
+          utils.showAlert('Mots de passe différents', 'Les nouveaux mots de passe ne correspondent pas', 'error');
+          return false;
+        }
+      }
+
+      return true;
+    },
+
+    isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    },
+
+    hasChanges() {
+      const username = el.username.value.trim();
+      const email = el.email.value.trim();
+      const currentPassword = el.currentPassword.value;
+      const newPassword = el.newPassword.value;
+      const file = el.photoInput.files[0];
+      const removePhoto = el.removePhoto.value === 'true';
+
+      return !!(username || email || currentPassword || newPassword || file || removePhoto);
+    }
+  };
+
+  // ===== SOUMISSION DU FORMULAIRE =====
+  const formManager = {
+    init() {
+      el.profileForm.addEventListener('submit', (e) => this.handleSubmit(e));
+    },
+
+    async handleSubmit(e) {
+      e.preventDefault();
+
+      if (state.isSubmitting) return;
+
+      // Masquer les alertes précédentes
+      el.alert.style.display = 'none';
+
+      // Validation
+      if (!validator.validateForm()) return;
+
+      // Vérifier les changements
+      if (!validator.hasChanges()) {
+        utils.showAlert('Aucune modification', 'Vous n\'avez apporté aucune modification', 'warning');
+        return;
+      }
+
+      // Préparer les données
+      const formData = this.prepareFormData();
+
+      // Désactiver le bouton
+      el.submitBtn.disabled = true;
+      el.submitBtn.innerHTML = '<span>⏳</span> Traitement en cours...';
+
+      try {
+        // Étape 1 : Mettre à jour le profil
+        utils.showLoading('Mise à jour du profil...');
+        utils.updateProgress(30);
+
+        const updateResponse = await this.updateProfile(formData);
+
+        if (!updateResponse.success) {
+          throw new Error(updateResponse.error || 'Erreur lors de la mise à jour');
+        }
+
+        // Étape 2 : Succès
+        utils.updateProgress(100);
+        utils.hideLoading();
+
+        utils.showAlert('Succès', 'Votre profil a été mis à jour avec succès ! Redirection vers le menu...', 'success', 3000);
+        utils.showToast('Profil mis à jour avec succès !', 'success');
+
+        // MODIFICATION : Redirection vers le menu après succès
+        utils.redirectToMenu();
+
+      } catch (error) {
+        console.error('Erreur:', error);
+        utils.showAlert('Erreur', error.message || 'Une erreur est survenue lors de la mise à jour', 'error');
+        utils.hideLoading();
+
+        el.submitBtn.disabled = false;
+        el.submitBtn.innerHTML = '<span>💾</span> Enregistrer';
+      }
+    },
+
+    prepareFormData() {
+      const formData = new FormData();
+
+      const username = el.username.value.trim();
+      const email = el.email.value.trim();
+      const currentPassword = el.currentPassword.value;
+      const newPassword = el.newPassword.value;
+      const removePhoto = el.removePhoto.value === 'true';
+      const file = el.photoInput.files[0];
+
+      if (username) formData.append('username', username);
+      if (email) formData.append('email', email);
+      if (currentPassword) formData.append('currentPassword', currentPassword);
+      if (newPassword) formData.append('newPassword', newPassword);
+      if (removePhoto) formData.append('removePhoto', 'true');
+      if (file) formData.append('file', file);
+
+      return formData;
+    },
+
+    async updateProfile(formData) {
+      try {
+        const response = await fetch(CONFIG.API.UPDATE, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          },
+          body: formData
+        });
+
+        const result = await response.json();
+        return {
+          success: response.ok,
+          data: result,
+          error: result.error
+        };
+
+      } catch (error) {
+        return {
+          success: false,
+          error: 'Erreur réseau lors de la mise à jour'
+        };
+      }
+    },
+
+    resetForm() {
+      // Réinitialiser les champs
+      el.username.value = '';
+      el.email.value = '';
+      el.currentPassword.value = '';
+      el.newPassword.value = '';
+      el.confirmPassword.value = '';
+      el.photoInput.value = '';
+      el.removePhoto.value = 'false';
+
+      // Réinitialiser l'état
+      state.selectedPhotoUrl = null;
+
+      // Fermer les champs mot de passe si ouverts
+      if (state.passwordFieldsVisible) {
+        passwordManager.togglePasswordFields();
+      }
+    }
+  };
+
+  // ===== INITIALISATION =====
+  const app = {
+    init() {
+      // Vérifier l'authentification
+      if (!utils.checkAuth()) return;
+
+      // Initialiser les managers
+      photoManager.init();
+      passwordManager.init();
+      formManager.init();
+
+      // Charger les données utilisateur
+      userManager.loadUserData();
+    }
+  };
+
+  // ===== DÉMARRAGE DE L'APPLICATION =====
+  document.addEventListener('DOMContentLoaded', () => {
+    app.init();
+  });
+</script>
+
+</body>
+</html>

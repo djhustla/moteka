@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Profil</title>
+  <style>
+    * {
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body {
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+      position:relative;
+    }
+
+    /* Boutons fixes en haut - Style amélioré */
+    .fixed-header {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      padding: 0;
+      background: transparent;
+      z-index: 1000;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 90%;
+    }
+
+    .fixed-header button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      white-space: nowrap;
+    }
+
+    .fixed-header button::before {
+      font-size: 1.1rem;
+    }
+
+    .btn-retour {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-retour:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+    }
+
+    .btn-deconnexion {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+      color: white;
+    }
+
+    .btn-deconnexion:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    }
+
+    /* Responsive pour petits écrans */
+    @media (max-width: 480px) {
+      .fixed-header {
+        top: 15px;
+        gap: 10px;
+      }
+
+      .fixed-header button {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Menu principal */
+    .menu-container {
+      background:white;
+      border-radius:24px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.3);
+      overflow:hidden;
+      width:100%;
+      max-width:500px;
+      position:relative;
+      z-index:1;
+      margin-top: 80px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding:50px 30px;
+      text-align:center;
+      color:white;
+    }
+
+    h1 {
+      font-size:2.5rem;
+      font-weight:700;
+      margin-bottom:8px;
+      letter-spacing:-0.5px;
+    }
+
+    .subtitle {
+      font-size:1rem;
+      opacity:0.9;
+      font-weight:400;
+    }
+
+    .menu-content {
+      padding:30px;
+    }
+
+    .menu {
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-bottom:25px;
+    }
+
+    .menu button {
+      padding:16px 20px;
+      border:none;
+      border-radius:14px;
+      font-size:1.1rem;
+      font-weight:600;
+      cursor:pointer;
+      transition: all 0.3s;
+      font-family:inherit;
+      text-align:left;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      position:relative;
+    }
+
+    .menu button::before {
+      content:attr(data-icon);
+      font-size:1.3rem;
+    }
+
+    .menu button:not(:disabled) {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color:white;
+      box-shadow:0 4px 12px rgba(102,126,234,0.3);
+    }
+
+    .menu button:not(:disabled):hover {
+      transform:translateY(-2px);
+      box-shadow:0 6px 20px rgba(102,126,234,0.4);
+    }
+
+    .menu button:not(:disabled):active {
+      transform:translateY(0);
+    }
+
+    /* Style pour bouton désactivé */
+    .menu button:disabled {
+      background: #e5e7eb;
+      color: #9ca3af;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .divider {
+      height:1px;
+      background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+      margin:25px 0;
+    }
+
+    .output {
+      background:#f8f9ff;
+      border:2px solid #e5e7eb;
+      border-radius:12px;
+      padding:16px;
+      text-align:center;
+      color:#374151;
+      font-size:0.95rem;
+      font-weight:500;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Boutons fixes en haut - Nouveau style -->
+<div class="fixed-header">
+  <button id="btnRetour" class="btn-retour" data-icon="⬅️">Retour au menu principal</button>
+  <button id="btnDeconnexion" class="btn-deconnexion" data-icon="🚪">Déconnexion</button>
+</div>
+
+<div class="menu-container">
+  <div class="header">
+    <h1>Mon Profil</h1>
+    <p class="subtitle">Gérez votre profil et vos sons</p>
+  </div>
+
+  <div class="menu-content">
+    <div class="menu">
+      <!-- Bouton 1: Voir mon profil (avec redirection vers profil.html avec ID) -->
+      <button id="btnVoirProfil" data-icon="👤">Voir mon profil</button>
+
+      <!-- Bouton 2: Modifier mon profil -->
+      <button id="btnModifierProfil" data-icon="✏️">Modifier mon profil</button>
+
+      <!-- NOUVEAU BOUTON: Ce que j'affiche dans mon profil -->
+      <button id="btnDonneesVisibles" data-icon="👁️">Ce que j'affiche dans mon profil</button>
+
+      <!-- Bouton 3: Encoder mes réseaux -->
+      <button id="btnEncoderReseaux" data-icon="🔗">Encoder mes réseaux</button>
+
+      <!-- Bouton 4: Encoder mon son de bienvenue -->
+      <button id="btnEncoderSon" data-icon="🎵">Encoder mon son de bienvenue</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="output" id="output">Sélectionnez une option ci-dessus</div>
+  </div>
+</div>
+
+<script>
+  const output = document.getElementById("output");
+  let currentUserId = null;
+
+  // Vérifier l'authentification et récupérer l'ID utilisateur
+  const token = localStorage.getItem('accessToken');
+  if (!token) {
+    alert('Vous devez être connecté pour accéder à cette page');
+    window.location.href = '/connection/connection.html';
+  }
+
+  // Fonction pour récupérer l'ID de l'utilisateur connecté
+  async function getCurrentUserId() {
+    try {
+      const response = await fetch('/api/users/me', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération du profil');
+      }
+
+      const userData = await response.json();
+      return userData.id;
+    } catch (error) {
+      console.error('Erreur:', error);
+      output.textContent = "Erreur: Impossible de récupérer votre profil";
+      return null;
+    }
+  }
+
+  // Initialisation - Récupérer l'ID utilisateur au chargement
+  async function initialize() {
+    currentUserId = await getCurrentUserId();
+    if (currentUserId) {
+      console.log('ID utilisateur connecté:', currentUserId);
+    }
+  }
+
+  // Bouton Retour au menu principal
+  document.getElementById("btnRetour").addEventListener("click", () => {
+    window.location.href = "/menu/menu.html";
+  });
+
+  // Bouton Déconnexion
+  document.getElementById("btnDeconnexion").addEventListener("click", async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ refreshToken })
+      });
+
+      if (response.ok) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('currentUserData');
+        alert('Déconnexion réussie');
+        window.location.href = '/index.html';
+      } else {
+        alert('Erreur lors de la déconnexion');
+      }
+    } catch (err) {
+      alert('Erreur réseau lors de la déconnexion');
+    }
+  });
+
+  // Bouton Voir mon profil - Redirection vers profil.html avec ID utilisateur
+  document.getElementById("btnVoirProfil").addEventListener("click", async () => {
+    output.textContent = "Chargement de votre profil...";
+
+    try {
+      // Si on n'a pas encore l'ID, on le récupère
+      if (!currentUserId) {
+        currentUserId = await getCurrentUserId();
+      }
+
+      if (currentUserId) {
+        output.textContent = "Ouverture de votre profil...";
+        // Redirection vers la page profil avec l'ID en paramètre
+        setTimeout(() => {
+          window.location.href = `/menu/mon_profil.html?userId=${currentUserId}`;
+        }, 300);
+      } else {
+        output.textContent = "Erreur: Impossible de récupérer votre ID";
+      }
+    } catch (err) {
+      output.textContent = "Erreur réseau lors du chargement du profil";
+      console.error('Erreur:', err);
+    }
+  });
+
+  // Bouton Modifier mon profil - Redirection vers modifier_profil.html
+  document.getElementById("btnModifierProfil").addEventListener("click", async () => {
+    output.textContent = "Ouverture de la page de modification du profil...";
+
+    try {
+      // Si on n'a pas encore l'ID, on le récupère
+      if (!currentUserId) {
+        currentUserId = await getCurrentUserId();
+      }
+
+      if (currentUserId) {
+        output.textContent = "Redirection vers la page de modification...";
+        // Redirection vers la page de modification du profil
+        setTimeout(() => {
+          window.location.href = `/menu/modifier_profil.html`;
+        }, 300);
+      } else {
+        output.textContent = "Erreur: Impossible de récupérer votre ID";
+      }
+    } catch (err) {
+      output.textContent = "Erreur réseau lors de l'ouverture de la page de modification";
+      console.error('Erreur:', err);
+    }
+  });
+
+  // NOUVEAU BOUTON: Ce que j'affiche dans mon profil - Redirection vers donnees_visibles.html
+  document.getElementById("btnDonneesVisibles").addEventListener("click", async () => {
+    output.textContent = "Ouverture des paramètres d'affichage...";
+
+    try {
+      // Si on n'a pas encore l'ID, on le récupère
+      if (!currentUserId) {
+        currentUserId = await getCurrentUserId();
+      }
+
+      if (currentUserId) {
+        output.textContent = "Redirection vers la page des données visibles...";
+        // Redirection vers la page des données visibles avec l'ID utilisateur
+        setTimeout(() => {
+          window.location.href = `/menu/encoder_donnees_visibles.html?userId=${currentUserId}`;
+        }, 300);
+      } else {
+        output.textContent = "Erreur: Impossible de récupérer votre ID";
+      }
+    } catch (err) {
+      output.textContent = "Erreur réseau lors de l'ouverture des paramètres d'affichage";
+      console.error('Erreur:', err);
+    }
+  });
+
+  // Bouton Encoder mes réseaux - Redirection vers encoder_liste_reseaux.html
+  document.getElementById("btnEncoderReseaux").addEventListener("click", async () => {
+    output.textContent = "Ouverture de la page d'encodage des réseaux...";
+
+    try {
+      // Si on n'a pas encore l'ID, on le récupère
+      if (!currentUserId) {
+        currentUserId = await getCurrentUserId();
+      }
+
+      if (currentUserId) {
+        output.textContent = "Redirection vers la page des réseaux...";
+        // Redirection vers la page d'encodage des réseaux avec l'ID utilisateur
+        setTimeout(() => {
+          window.location.href = `/menu/encoder_liste_reseaux.html?userId=${currentUserId}`;
+        }, 300);
+      } else {
+        output.textContent = "Erreur: Impossible de récupérer votre ID";
+      }
+    } catch (err) {
+      output.textContent = "Erreur réseau lors de l'ouverture de la page des réseaux";
+      console.error('Erreur:', err);
+    }
+  });
+
+  // Bouton Encoder mon son de bienvenue
+  document.getElementById("btnEncoderSon").addEventListener("click", () => {
+    output.textContent = "Ouverture de l'encodeur de son...";
+    setTimeout(() => {
+      window.location.href = "/menu/menu_encodage_son.html";
+    }, 300);
+  });
+
+  // Initialisation au chargement de la page
+  initialize();
+</script>
+
+</body>
+</html>

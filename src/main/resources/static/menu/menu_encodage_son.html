@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enregistre ton son de bienvenue</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    }
+
+    .container {
+      background:white;
+      border-radius:24px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.3);
+      padding:40px 30px;
+      width:100%;
+      max-width:500px;
+      text-align:center;
+    }
+
+    h1 {
+      color:#333;
+      font-size:2rem;
+      margin-bottom:10px;
+      font-weight:700;
+    }
+
+    .subtitle {
+      color:#666;
+      font-size:1rem;
+      margin-bottom:30px;
+    }
+
+    .tabs {
+      display:flex;
+      gap:10px;
+      margin-bottom:30px;
+      border-bottom:2px solid #e5e7eb;
+    }
+
+    .tab {
+      flex:1;
+      padding:12px 20px;
+      border:none;
+      background:transparent;
+      color:#6b7280;
+      font-weight:600;
+      cursor:pointer;
+      border-bottom:3px solid transparent;
+      transition:all 0.3s;
+    }
+
+    .tab.active {
+      color:#667eea;
+      border-bottom-color:#667eea;
+    }
+
+    .tab-content {
+      display:none;
+    }
+
+    .tab-content.active {
+      display:block;
+    }
+
+    /* ONGLET ENREGISTREMENT */
+    .record-area {
+      border:3px dashed #667eea;
+      border-radius:16px;
+      padding:40px 20px;
+      margin:25px 0;
+      background:#f8f9ff;
+    }
+
+    .record-icon {
+      font-size:4rem;
+      margin-bottom:15px;
+    }
+
+    .record-icon.recording {
+      animation:pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform:scale(1); }
+      50% { transform:scale(1.1); }
+    }
+
+    .timer {
+      font-size:2rem;
+      font-weight:700;
+      color:#667eea;
+      margin:20px 0;
+      font-family:monospace;
+    }
+
+    .record-btn {
+      width:80px;
+      height:80px;
+      border-radius:50%;
+      border:none;
+      background:#ef4444;
+      color:white;
+      font-size:2rem;
+      cursor:pointer;
+      transition:all 0.3s;
+      box-shadow:0 4px 12px rgba(239,68,68,0.4);
+      margin:20px 0;
+    }
+
+    .record-btn:hover {
+      transform:scale(1.05);
+      box-shadow:0 6px 20px rgba(239,68,68,0.6);
+    }
+
+    .record-btn.recording {
+      background:#10b981;
+    }
+
+    .record-btn.disabled {
+      background:#9ca3af;
+      cursor:not-allowed;
+      opacity:0.6;
+    }
+
+    /* ONGLET UPLOAD */
+    .upload-area {
+      border:3px dashed #667eea;
+      border-radius:16px;
+      padding:40px 20px;
+      margin:25px 0;
+      background:#f8f9ff;
+      cursor:pointer;
+      transition:all 0.3s;
+    }
+
+    .upload-area:hover {
+      background:#eef1ff;
+      border-color:#764ba2;
+    }
+
+    .upload-icon {
+      font-size:3rem;
+      margin-bottom:15px;
+      color:#667eea;
+    }
+
+    /* LECTEUR AUDIO */
+    .audio-player {
+      background:#f8f9ff;
+      border-radius:12px;
+      padding:20px;
+      margin:20px 0;
+      display:none;
+    }
+
+    .audio-player.show {
+      display:block;
+    }
+
+    .audio-player audio {
+      width:100%;
+      margin:10px 0;
+    }
+
+    /* BOUTONS */
+    .buttons {
+      display:flex;
+      gap:15px;
+      margin-top:30px;
+    }
+
+    button:not(.record-btn):not(.tab) {
+      flex:1;
+      padding:16px 20px;
+      border:none;
+      border-radius:14px;
+      font-size:1rem;
+      font-weight:600;
+      cursor:pointer;
+      transition:all 0.3s;
+      font-family:inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color:white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform:translateY(-2px);
+      box-shadow:0 6px 20px rgba(102,126,234,0.4);
+    }
+
+    .btn-secondary {
+      background:#f3f4f6;
+      color:#374151;
+      border:2px solid #d1d5db;
+    }
+
+    .btn-secondary:hover {
+      background:#e5e7eb;
+    }
+
+    button:disabled {
+      opacity:0.6;
+      cursor:not-allowed;
+    }
+
+    .message {
+      padding:15px;
+      border-radius:12px;
+      margin:15px 0;
+      font-weight:500;
+      display:none;
+    }
+
+    .message.success {
+      background:#d1fae5;
+      color:#065f46;
+      border:2px solid #a7f3d0;
+    }
+
+    .message.error {
+      background:#fee2e2;
+      color:#991b1b;
+      border:2px solid #fca5a5;
+    }
+
+    .info {
+      background:#e0e7ff;
+      border-radius:12px;
+      padding:15px;
+      margin:20px 0;
+      text-align:left;
+      font-size:0.9rem;
+      color:#3730a3;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding:30px 20px; }
+      h1 { font-size:1.7rem; }
+      .buttons { flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🎤 Ton son de bienvenue</h1>
+  <p class="subtitle">Enregistre ou importe ton audio</p>
+
+  <!-- ONGLETS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('record')">🎤 Enregistrer</button>
+    <button class="tab" onclick="switchTab('upload')">📂 Importer</button>
+  </div>
+
+  <!-- ONGLET ENREGISTREMENT -->
+  <div id="recordTab" class="tab-content active">
+    <div class="record-area">
+      <div class="record-icon" id="recordIcon">🎤</div>
+      <div class="timer" id="timer">00:00</div>
+      <button class="record-btn" id="recordBtn" onclick="toggleRecording()">⏺️</button>
+      <p id="recordStatus">Appuyez pour enregistrer</p>
+    </div>
+
+    <div class="audio-player" id="recordPlayer">
+      <p style="font-weight:600; margin-bottom:10px;">🎵 Aperçu de ton enregistrement</p>
+      <audio id="recordedAudio" controls></audio>
+    </div>
+
+    <div class="info">
+      💡 <strong>Conseil :</strong> Enregistre un message court et clair (5-30 secondes)
+    </div>
+  </div>
+
+  <!-- ONGLET UPLOAD -->
+  <div id="uploadTab" class="tab-content">
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-icon">📁</div>
+      <div>Cliquez pour choisir un fichier</div>
+      <div style="font-size:0.9rem; color:#6b7280; margin-top:10px;">MP3, WAV, AAC • Max 10MB</div>
+      <input type="file" id="fileInput" accept="audio/*" style="display:none">
+    </div>
+
+    <div class="audio-player" id="uploadPlayer">
+      <p style="font-weight:600; margin-bottom:10px;">🎵 Aperçu du fichier</p>
+      <audio id="uploadedAudio" controls></audio>
+    </div>
+  </div>
+
+  <div class="message" id="message"></div>
+
+  <!-- BOUTONS -->
+  <div class="buttons">
+    <button class="btn-secondary" onclick="window.location.href='/menu/menu.html'">← Retour</button>
+    <button class="btn-primary" id="validateBtn" onclick="validateAudio()" disabled>Valider</button>
+  </div>
+</div>
+
+<script>
+  let mediaRecorder;
+  let audioChunks = [];
+  let recordingInterval;
+  let seconds = 0;
+  let currentAudioBlob = null;
+
+  const token = localStorage.getItem('accessToken');
+  if (!token) {
+    alert('Vous devez être connecté');
+    window.location.href = '/connection/connection.html';
+  }
+
+  // ============================================
+  // GESTION DES ONGLETS
+  // ============================================
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
+    if (tab === 'record') {
+      document.querySelectorAll('.tab')[0].classList.add('active');
+      document.getElementById('recordTab').classList.add('active');
+    } else {
+      document.querySelectorAll('.tab')[1].classList.add('active');
+      document.getElementById('uploadTab').classList.add('active');
+    }
+  }
+
+  // ============================================
+  // ENREGISTREMENT AUDIO
+  // ============================================
+  async function toggleRecording() {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+      await startRecording();
+    } else {
+      stopRecording();
+    }
+  }
+
+  async function startRecording() {
+    try {
+      // Demander l'accès au micro
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      seconds = 0;
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        currentAudioBlob = audioBlob;
+
+        const audioUrl = URL.createObjectURL(audioBlob);
+        document.getElementById('recordedAudio').src = audioUrl;
+        document.getElementById('recordPlayer').classList.add('show');
+        document.getElementById('validateBtn').disabled = false;
+
+        // Arrêter tous les tracks du stream
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+
+      // UI pendant l'enregistrement
+      document.getElementById('recordIcon').classList.add('recording');
+      document.getElementById('recordIcon').textContent = '🔴';
+      document.getElementById('recordBtn').classList.add('recording');
+      document.getElementById('recordBtn').textContent = '⏹️';
+      document.getElementById('recordStatus').textContent = 'Enregistrement en cours...';
+
+      // Timer
+      recordingInterval = setInterval(() => {
+        seconds++;
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        document.getElementById('timer').textContent =
+          `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }, 1000);
+
+    } catch (error) {
+      showMessage('❌ Erreur: Impossible d\'accéder au micro. Vérifiez les permissions.', 'error');
+      console.error('Erreur micro:', error);
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      clearInterval(recordingInterval);
+
+      // Reset UI
+      document.getElementById('recordIcon').classList.remove('recording');
+      document.getElementById('recordIcon').textContent = '✅';
+      document.getElementById('recordBtn').classList.remove('recording');
+      document.getElementById('recordBtn').textContent = '⏺️';
+      document.getElementById('recordStatus').textContent = 'Enregistrement terminé';
+    }
+  }
+
+  // ============================================
+  // UPLOAD FICHIER
+  // ============================================
+  document.getElementById('fileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('audio/')) {
+        showMessage('Le fichier doit être un fichier audio', 'error');
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        showMessage('Le fichier est trop volumineux (max 10MB)', 'error');
+        return;
+      }
+
+      currentAudioBlob = file;
+      const audioUrl = URL.createObjectURL(file);
+      document.getElementById('uploadedAudio').src = audioUrl;
+      document.getElementById('uploadPlayer').classList.add('show');
+      document.getElementById('validateBtn').disabled = false;
+    }
+  });
+
+  // ============================================
+  // VALIDATION ET ENVOI AU SERVEUR
+  // ============================================
+  async function validateAudio() {
+    if (!currentAudioBlob) {
+      showMessage('Aucun audio à valider', 'error');
+      return;
+    }
+
+    document.getElementById('validateBtn').disabled = true;
+    document.getElementById('validateBtn').textContent = 'Validation...';
+
+    const formData = new FormData();
+    formData.append('audio', currentAudioBlob, 'son-bienvenue.webm');
+
+    try {
+      const response = await fetch('/api/users/me/son-entree', {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        },
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showMessage('✅ Son de bienvenue validé avec succès ! Redirection...', 'success');
+        document.getElementById('validateBtn').textContent = 'Validé ✓';
+
+        // Redirection vers le menu après validation réussie
+        setTimeout(() => {
+          window.location.href = '/menu/menu.html';
+        }, 1500);
+      } else {
+        throw new Error(result.error || 'Erreur lors de la validation');
+      }
+    } catch (error) {
+      showMessage('❌ Erreur: ' + error.message, 'error');
+      document.getElementById('validateBtn').disabled = false;
+      document.getElementById('validateBtn').textContent = 'Valider';
+    }
+  }
+
+  function showMessage(text, type) {
+    const message = document.getElementById('message');
+    message.textContent = text;
+    message.className = 'message ' + type;
+    message.style.display = 'block';
+  }
+</script>
+</body>
+</html>
