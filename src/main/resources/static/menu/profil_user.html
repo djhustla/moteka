@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Utilisateur</title>
+    <style>
+        /* ==================================== */
+        /* BASE & LAYOUT                        */
+        /* ==================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* ==================================== */
+        /* BOUTONS SUPÉRIEURS                   */
+        /* ==================================== */
+        .buttons-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .buttons-container button {
+            background: #fff;
+            color: #667eea;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+        }
+
+        .buttons-container button:hover {
+            background: #667eea;
+            color: #fff;
+        }
+
+        /* ==================================== */
+        /* CONTENEUR PRINCIPAL DU PROFIL        */
+        /* ==================================== */
+        .profile-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 50px 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .profile-content {
+            padding: 30px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #dc2626;
+        }
+
+        /* ==================================== */
+        /* PHOTO DE PROFIL                      */
+        /* ==================================== */
+        .profile-photo-container {
+            position: relative;
+            margin-bottom: 30px;
+            width: 280px;
+            height: 280px;
+        }
+
+        .profile-photo {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            border: 6px solid rgba(255, 255, 255, 0.9);
+            object-fit: cover;
+            box-shadow:
+                0 0 0 4px rgba(255, 255, 255, 0.4),
+                0 15px 40px rgba(0, 0, 0, 0.4),
+                0 0 60px rgba(102, 126, 234, 0.6);
+            transition: all 0.4s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-photo:hover {
+            transform: scale(1.03);
+            box-shadow:
+                0 0 0 6px rgba(255, 255, 255, 0.5),
+                0 20px 50px rgba(0, 0, 0, 0.5),
+                0 0 80px rgba(102, 126, 234, 0.8);
+        }
+
+        .profile-photo-container::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px;
+            height: 320px;
+            border-radius: 25px;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(255, 255, 255, 0.25) 0%,
+                rgba(255, 255, 255, 0.08) 40%,
+                transparent 70%
+            );
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .profile-photo-hidden {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            border: 6px solid rgba(255, 255, 255, 0.3);
+            object-fit: cover;
+            filter: grayscale(100%) blur(6px) brightness(0.3);
+            position: relative;
+            box-shadow:
+                0 0 0 4px rgba(255, 255, 255, 0.1),
+                0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .photo-hidden-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px 30px;
+            border-radius: 15px;
+            z-index: 3;
+            text-align: center;
+            width: 200px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .default-photo {
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 5rem;
+            letter-spacing: 2px;
+        }
+
+        /* ==================================== */
+        /* INDICATEUR AUDIO & VISIBILITÉ        */
+        /* ==================================== */
+        .audio-player {
+            display: none;
+        }
+
+        .son-playing-indicator {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(16, 185, 129, 0.95);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 700;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .visibility-info {
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
+            border-radius: 15px;
+            padding: 18px;
+            margin: 20px 0;
+            font-size: 1rem;
+            color: #92400e;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);
+        }
+
+        /* ==================================== */
+        /* BOUTON CHAT - STYLE IDENTIQUE À "MESSAGE" */
+        /* ==================================== */
+        .chat-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 25px auto;
+        }
+
+        .chat-button:hover {
+            filter: brightness(1.1);
+        }
+
+        /* ==================================== */
+        /* FAVORIS MUSICAUX                     */
+        /* ==================================== */
+        .favoris-section {
+            background: #f8f9ff;
+            border: 2px solid #e0e7ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .favoris-title {
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.3rem;
+            letter-spacing: 0.5px;
+        }
+
+        .favoris-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .favoris-item:last-child {
+            border-bottom: none;
+        }
+
+        .favoris-genre {
+            font-weight: 700;
+            color: #374151;
+            font-size: 1.1rem;
+        }
+
+        .favoris-cote {
+            font-size: 1rem;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-weight: 700;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        /* Classes de cote */
+        .cote-10 { background: #dbeafe; color: #2563eb; border: 3px solid #2563eb; }
+        .cote-9 { background: #dbeafe; color: #2563eb; }
+        .cote-8 { background: #d1fae5; color: #059669; }
+        .cote-7 { background: #d1fae5; color: #059669; }
+        .cote-6 { background: #fef3c7; color: #d97706; }
+        .cote-5 { background: #fef3c7; color: #d97706; }
+        .cote-4 { background: #fef3c7; color: #d97706; }
+        .cote-3 { background: #fee2e2; color: #dc2626; }
+        .cote-2 { background: #fee2e2; color: #dc2626; }
+        .cote-1 { background: #fee2e2; color: #dc2626; border: 3px solid #dc2626; }
+
+        .no-favoris {
+            color: #6b7280;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.1rem;
+        }
+
+        /* ==================================== */
+        /* RÉSEAUX SOCIAUX (NÉON/CYBERPUNK)     */
+        /* ==================================== */
+        .reseaux-section {
+            background: rgba(20, 20, 30, 0.7);
+            border-radius: 25px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid rgba(100, 126, 234, 0.4);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .reseaux-title {
+            color: #FFFFFF;
+            font-size: 2rem;
+            margin-bottom: 35px;
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            text-align: center;
+            font-weight: 400;
+            text-shadow: 0 0 15px rgba(102, 126, 234, 0.7);
+        }
+
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 50px;
+            justify-items: center;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+        }
+
+        /* Style pour les réseaux avec logo plein (Instagram, Facebook, TikTok, Snapchat) */
+        .reseau-icon-wrapper {
+            width: 100%;
+            max-width: 180px;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+            position: relative;
+        }
+
+        .reseau-icon-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        /* Style pour les nouveaux réseaux avec effet verre - BULLES AGRANDIES */
+        .reseau-icon-custom {
+            width: 100%;
+            max-width: 180px;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+            position: relative;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+        }
+
+        /* Texte stylé avec la couleur du réseau */
+        .reseau-icon-custom .reseau-name {
+            font-size: 0.85rem;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-top: 8px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .reseau-icon-custom .reseau-symbol {
+            font-size: 2.8rem;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+            transition: all 0.3s ease;
+        }
+
+        .reseau-icon-custom .youtube-play {
+            font-size: 3.2rem;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+            transition: all 0.3s ease;
+        }
+
+        .reseau-icon-custom .whatsapp-phone {
+            font-size: 2.8rem;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+            transition: all 0.3s ease;
+        }
+
+        /* Effets de survol pour tous les réseaux */
+        .reseau-icon-wrapper:hover,
+        .reseau-icon-custom:hover {
+            transform: scale(1.35);
+            box-shadow: 0 0 80px rgba(255, 255, 255, 0.6), 0 25px 60px rgba(0, 0, 0, 1.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .reseau-icon-wrapper:hover img {
+            filter: brightness(1.3) saturate(1.2);
+        }
+
+        /* Couleurs de survol spécifiques pour chaque réseau */
+        .reseau-icon-wrapper[data-network="twitter"]:hover,
+        .reseau-icon-custom[data-network="twitter"]:hover {
+            border-color: #1DA1F2;
+            box-shadow: 0 0 90px #1DA1F2, 0 0 120px rgba(29, 161, 242, 0.9);
+        }
+
+        .reseau-icon-wrapper[data-network="instagram"]:hover {
+            border-color: #E4405F;
+            box-shadow: 0 0 90px #E4405F, 0 0 120px rgba(228, 64, 95, 0.9);
+        }
+
+        .reseau-icon-wrapper[data-network="facebook"]:hover {
+            border-color: #1877F2;
+            box-shadow: 0 0 90px #1877F2, 0 0 120px rgba(24, 119, 242, 0.9);
+        }
+
+        .reseau-icon-wrapper[data-network="tiktok"]:hover {
+            border-color: #00F2EA;
+            box-shadow: 0 0 90px #00F2EA, 0 0 120px rgba(0, 242, 234, 0.9);
+        }
+
+        .reseau-icon-wrapper[data-network="snapchat"]:hover {
+            border-color: #FFFC00;
+            box-shadow: 0 0 90px #FFFC00, 0 0 120px rgba(255, 252, 0, 0.9);
+        }
+
+        .reseau-icon-wrapper[data-network="default"]:hover {
+            border-color: #667eea;
+            box-shadow: 0 0 90px #667eea, 0 0 120px rgba(102, 126, 234, 0.9);
+        }
+
+        /* Couleurs de survol pour les nouveaux réseaux - avec changement de couleur du texte */
+        .reseau-icon-custom[data-network="youtube"]:hover {
+            border-color: #FF0000;
+            box-shadow: 0 0 90px #FF0000, 0 0 120px rgba(255, 0, 0, 0.9);
+        }
+        .reseau-icon-custom[data-network="youtube"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="youtube"]:hover .youtube-play {
+            color: #FF0000;
+            text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="whatsapp"]:hover {
+            border-color: #25D366;
+            box-shadow: 0 0 90px #25D366, 0 0 120px rgba(37, 211, 102, 0.9);
+        }
+        .reseau-icon-custom[data-network="whatsapp"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="whatsapp"]:hover .whatsapp-phone {
+            color: #25D366;
+            text-shadow: 0 0 15px rgba(37, 211, 102, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="linkedin"]:hover {
+            border-color: #0077B5;
+            box-shadow: 0 0 90px #0077B5, 0 0 120px rgba(0, 119, 181, 0.9);
+        }
+        .reseau-icon-custom[data-network="linkedin"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="linkedin"]:hover .reseau-symbol {
+            color: #0077B5;
+            text-shadow: 0 0 15px rgba(0, 119, 181, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="pinterest"]:hover {
+            border-color: #E60023;
+            box-shadow: 0 0 90px #E60023, 0 0 120px rgba(230, 0, 35, 0.9);
+        }
+        .reseau-icon-custom[data-network="pinterest"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="pinterest"]:hover .reseau-symbol {
+            color: #E60023;
+            text-shadow: 0 0 15px rgba(230, 0, 35, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="telegram"]:hover {
+            border-color: #0088CC;
+            box-shadow: 0 0 90px #0088CC, 0 0 120px rgba(0, 136, 204, 0.9);
+        }
+        .reseau-icon-custom[data-network="telegram"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="telegram"]:hover .reseau-symbol {
+            color: #0088CC;
+            text-shadow: 0 0 15px rgba(0, 136, 204, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="mixcloud"]:hover {
+            border-color: #52aad8;
+            box-shadow: 0 0 90px #52aad8, 0 0 120px rgba(82, 170, 216, 0.9);
+        }
+        .reseau-icon-custom[data-network="mixcloud"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="mixcloud"]:hover .reseau-symbol {
+            color: #52aad8;
+            text-shadow: 0 0 15px rgba(82, 170, 216, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="soundcloud"]:hover {
+            border-color: #FF5500;
+            box-shadow: 0 0 90px #FF5500, 0 0 120px rgba(255, 85, 0, 0.9);
+        }
+        .reseau-icon-custom[data-network="soundcloud"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="soundcloud"]:hover .reseau-symbol {
+            color: #FF5500;
+            text-shadow: 0 0 15px rgba(255, 85, 0, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="twitter"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="twitter"]:hover .reseau-symbol {
+            color: #1DA1F2;
+            text-shadow: 0 0 15px rgba(29, 161, 242, 0.8);
+        }
+
+        .no-reseaux {
+            color: #d1d5db;
+            font-style: italic;
+            text-align: center;
+            padding: 25px;
+            font-size: 1.1rem;
+        }
+
+        /* ==================================== */
+        /* ADMIN INFO                           */
+        /* ==================================== */
+        .admin-info {
+            background: #f8f9ff;
+            border: 3px solid #d1d5db;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-title {
+            font-weight: 800;
+            color: #374151;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .admin-info-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .admin-info-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .admin-label {
+            font-size: 0.95rem;
+            color: #6b7280;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .admin-value {
+            font-size: 1.1rem;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        /* ==================================== */
+        /* MEDIA QUERIES (Responsive)           */
+        /* ==================================== */
+        @media (max-width: 768px) {
+            .buttons-container {
+                top: 10px;
+                right: 10px;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .buttons-container button {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            .profile-container {
+                margin-top: 60px;
+                max-width: 95%;
+            }
+
+            .reseaux-title {
+                font-size: 1.5rem;
+                letter-spacing: 6px;
+            }
+
+            .icons-grid {
+                gap: 30px;
+            }
+
+            .reseau-icon-wrapper,
+            .reseau-icon-custom {
+                max-width: 160px;
+            }
+
+            .profile-photo-container {
+                width: 240px;
+                height: 240px;
+            }
+
+            .profile-photo-container::before {
+                width: 270px;
+                height: 270px;
+            }
+
+            .reseau-icon-custom .reseau-name {
+                font-size: 0.8rem;
+            }
+
+            .reseau-icon-custom .reseau-symbol {
+                font-size: 2.5rem;
+            }
+
+            .reseau-icon-custom .youtube-play {
+                font-size: 2.8rem;
+            }
+
+            .reseau-icon-custom .whatsapp-phone {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .icons-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .reseau-icon-wrapper,
+            .reseau-icon-custom {
+                max-width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .reseaux-title {
+                font-size: 1.3rem;
+                letter-spacing: 4px;
+                margin-bottom: 25px;
+            }
+
+            .icons-grid {
+                gap: 35px;
+            }
+
+            .reseau-icon-wrapper,
+            .reseau-icon-custom {
+                max-width: 170px;
+            }
+
+            .profile-photo-container {
+                width: 200px;
+                height: 200px;
+            }
+
+            .profile-photo {
+                border-width: 4px;
+                border-radius: 15px;
+            }
+
+            .profile-photo-hidden {
+                border-width: 4px;
+                border-radius: 15px;
+            }
+
+            .profile-photo-container::before {
+                width: 230px;
+                height: 230px;
+                border-radius: 20px;
+            }
+
+            .photo-hidden-label {
+                font-size: 1rem;
+                padding: 12px 24px;
+                width: 180px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .default-photo {
+                font-size: 4rem;
+            }
+
+            .reseau-icon-custom .reseau-name {
+                font-size: 0.75rem;
+            }
+
+            .reseau-icon-custom .reseau-symbol {
+                font-size: 2.2rem;
+            }
+
+            .reseau-icon-custom .youtube-play {
+                font-size: 2.5rem;
+            }
+
+            .reseau-icon-custom .whatsapp-phone {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .icons-grid {
+                gap: 30px;
+            }
+
+            .reseau-icon-wrapper,
+            .reseau-icon-custom {
+                max-width: 150px;
+            }
+
+            .profile-photo-container {
+                width: 180px;
+                height: 180px;
+            }
+
+            .profile-photo-container::before {
+                width: 210px;
+                height: 210px;
+            }
+
+            .reseau-icon-custom .reseau-name {
+                font-size: 0.7rem;
+            }
+
+            .reseau-icon-custom .reseau-symbol {
+                font-size: 2rem;
+            }
+
+            .reseau-icon-custom .youtube-play {
+                font-size: 2.3rem;
+            }
+
+            .reseau-icon-custom .whatsapp-phone {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="sonPlayingIndicator" class="son-playing-indicator">
+    🔈 Son d'entrée en cours...
+</div>
+
+<div class="buttons-container">
+    <button onclick="window.location.href='/menu/afficherUserList.html'">⬅ Retour à la liste</button>
+    <button id="btnLogout">🚪 Déconnexion</button>
+</div>
+
+<div class="profile-container">
+    <div class="header">
+        <div class="profile-photo-container" id="profilePhotoContainer"></div>
+        <h1 id="profileUsername">Chargement...</h1>
+    </div>
+
+    <div class="profile-content" id="profileContent">
+        <div class="loading">Chargement des informations...</div>
+    </div>
+</div>
+
+<audio id="sonEntreePlayer" class="audio-player"></audio>
+
+<script>
+    const token = localStorage.getItem('accessToken');
+
+    if (!token) {
+        alert('Vous devez être connecté pour voir les profils');
+        window.location.href = '/connection/connection.html';
+    }
+
+    let currentUserId = null;
+    let targetUserId = null;
+    let currentUserUsername = null;
+
+    // ================================================
+    // CONFIGURATION DES RÉSEAUX SOCIAUX
+    // ================================================
+    const socialAppsConfig = {
+        // Instagram
+        'instagram.com': {
+            webUrl: (url, username) => `https://www.instagram.com/${username}`,
+            appUrl: (url, username) => `instagram://user?username=${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/instagram\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        // TikTok
+        'tiktok.com': {
+            webUrl: (url, username) => `https://www.tiktok.com/@${username}`,
+            appUrl: (url, username) => `tiktok://@${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/tiktok\.com\/@([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        // Snapchat
+        'snapchat.com': {
+            webUrl: (url, username) => `https://www.snapchat.com/add/${username}`,
+            appUrl: (url, username) => `snapchat://add/${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/snapchat\.com\/add\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        // Facebook
+        'facebook.com': {
+            webUrl: (url, username) => `https://www.facebook.com/${username}`,
+            appUrl: (url, username) => `fb://profile/${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/facebook\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        // YouTube
+        'youtube.com': {
+            webUrl: (url, username) => url,
+            appUrl: (url, username) => `vnd.youtube://${url.replace('https://', '')}`,
+            extractUsername: (url) => {
+                const match = url.match(/youtube\.com\/(@[^/?#]+)/) ||
+                              url.match(/youtube\.com\/(c\/[^/?#]+)/) ||
+                              url.match(/youtube\.com\/(channel\/[^/?#]+)/) ||
+                              url.match(/youtube\.com\/user\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        // WhatsApp
+        'whatsapp.com': {
+            webUrl: (url) => url,
+            appUrl: (url) => `whatsapp://send?text=${encodeURIComponent(url)}`,
+            extractUsername: (url) => {
+                const match = url.match(/whatsapp\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        // X (Twitter)
+        'twitter.com': {
+            webUrl: (url, username) => `https://twitter.com/${username}`,
+            appUrl: (url, username) => `twitter://user?screen_name=${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/twitter\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'x.com': {
+            webUrl: (url, username) => `https://x.com/${username}`,
+            appUrl: (url, username) => `twitter://user?screen_name=${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/x\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        // LinkedIn
+        'linkedin.com': {
+            webUrl: (url) => url,
+            appUrl: (url) => `linkedin://${url.replace('https://', '')}`,
+            extractUsername: (url) => {
+                const match = url.match(/linkedin\.com\/in\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        // Pinterest
+        'pinterest.com': {
+            webUrl: (url, username) => `https://pinterest.com/${username}`,
+            appUrl: (url, username) => `pinterest://user/${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/pinterest\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        // Telegram
+        't.me': {
+            webUrl: (url) => url,
+            appUrl: (url) => `tg://resolve?domain=${url.replace('https://t.me/', '')}`,
+            extractUsername: (url) => {
+                const match = url.match(/t\.me\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        // Mixcloud
+        'mixcloud.com': {
+            webUrl: (url) => url,
+            appUrl: (url) => `mixcloud://${url.replace('https://', '')}`,
+            extractUsername: (url) => {
+                const match = url.match(/mixcloud\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        // SoundCloud
+        'soundcloud.com': {
+            webUrl: (url) => url,
+            appUrl: (url) => `soundcloud://${url.replace('https://', '')}`,
+            extractUsername: (url) => {
+                const match = url.match(/soundcloud\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        }
+    };
+
+    // ================================================
+    // FONCTIONS UTILITAIRES
+    // ================================================
+    function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    function cleanUrl(url) {
+        if (!url) return '';
+        return url.replace(/\n/g, '').replace(/\r/g, '').trim();
+    }
+
+    function getUserIdFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('userId');
+    }
+
+    function hasSpecialPrivileges(username) {
+        return username === 'doka' || username === 'administrateur';
+    }
+
+    // ================================================
+    // FONCTIONS D'INTERACTION
+    // ================================================
+
+    // Gestion de la déconnexion
+    function handleLogout() {
+        localStorage.removeItem('accessToken');
+        alert('Vous avez été déconnecté.');
+        window.location.href = '/connection/connection.html';
+    }
+
+    // Gestion de l'ouverture des liens sociaux
+    function openSocialLink(url, network = null) {
+        if (!url || url === 'hidden') return;
+
+        const cleanedUrl = cleanUrl(url);
+
+        let platformConfig = null;
+        let username = null;
+
+        for (const domain in socialAppsConfig) {
+            if (cleanedUrl.includes(domain)) {
+                platformConfig = socialAppsConfig[domain];
+                username = platformConfig.extractUsername(cleanedUrl);
+                break;
+            }
+        }
+
+        if (platformConfig && username) {
+            if (isMobileDevice()) {
+                const appUrl = platformConfig.appUrl(cleanedUrl, username);
+                if (appUrl) {
+                    window.location.href = appUrl;
+                    // Fallback vers l'URL web après un délai
+                    setTimeout(() => {
+                        if (!document.hidden) {
+                            const webUrl = platformConfig.webUrl(cleanedUrl, username);
+                            window.open(webUrl, '_blank');
+                        }
+                    }, 500);
+                    return;
+                }
+            }
+            const webUrl = platformConfig.webUrl(cleanedUrl, username);
+            window.open(webUrl, '_blank');
+            return;
+        }
+
+        // Cas générique ou URL inconnue
+        window.open(cleanedUrl, '_blank');
+    }
+
+    // ================================================
+    // FONCTIONS DE LECTURE ET AFFICHAGE DES DONNÉES
+    // ================================================
+
+    // Map des logos pour les réseaux avec images
+    function getReseauIconInfo(url) {
+        url = url.toLowerCase();
+
+        const platformMap = {
+            'facebook.com': { network: 'facebook', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/facebook.png' },
+            'instagram.com': { network: 'instagram', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/instagram.png' },
+            'tiktok.com': { network: 'tiktok', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/tiktok.png' },
+            'snapchat.com': { network: 'snapchat', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/snap.png' },
+            // Ajout des autres réseaux avec logos
+            'twitter.com': { network: 'twitter', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/twitter.png' },
+            'x.com': { network: 'twitter', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/twitter.png' }
+        };
+
+        for (const [domain, info] of Object.entries(platformMap)) {
+            if (url.includes(domain)) {
+                return info;
+            }
+        }
+
+        return { network: 'default', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/default.png' };
+    }
+
+    // Fonction pour créer l'icône custom selon le réseau
+    function createCustomReseauIcon(url, network) {
+        const cleanedUrl = cleanUrl(url);
+
+        switch(network) {
+            case 'youtube':
+                return `
+                    <a href="javascript:void(0)" class="reseau-icon-custom" data-network="youtube"
+                        onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'youtube')"
+                        title="Visiter YouTube">
+                        <div class="youtube-play">▶</div>
+                        <div class="reseau-name">YouTube</div>
+                    </a>
+                `;
+
+            case 'whatsapp':
+                return `
+                    <a href="javascript:void(0)" class="reseau-icon-custom" data-network="whatsapp"
+                        onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'whatsapp')"
+                        title="Visiter WhatsApp">
+                        <div class="whatsapp-phone">📱</div>
+                        <div class="reseau-name">WhatsApp</div>
+                    </a>
+                `;
+
+            case 'linkedin':
+                return `
+                    <a href="javascript:void(0)" class="reseau-icon-custom" data-network="linkedin"
+                        onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'linkedin')"
+                        title="Visiter LinkedIn">
+                        <div class="reseau-symbol">in</div>
+                        <div class="reseau-name">LinkedIn</div>
+                    </a>
+                `;
+
+            case 'pinterest':
+                return `
+                    <a href="javascript:void(0)" class="reseau-icon-custom" data-network="pinterest"
+                        onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'pinterest')"
+                        title="Visiter Pinterest">
+                        <div class="reseau-symbol">P</div>
+                        <div class="reseau-name">Pinterest</div>
+                    </a>
+                `;
+
+            case 'telegram':
+                return `
+                    <a href="javascript:void(0)" class="reseau-icon-custom" data-network="telegram"
+                        onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'telegram')"
+                        title="Visiter Telegram">
+                        <div class="reseau-symbol">✈</div>
+                        <div class="reseau-name">Telegram</div>
+                    </a>
+                `;
+
+            case 'mixcloud':
+                return `
+                    <a href="javascript:void(0)" class="reseau-icon-custom" data-network="mixcloud"
+                        onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'mixcloud')"
+                        title="Visiter Mixcloud">
+                        <div class="reseau-symbol">☁</div>
+                        <div class="reseau-name">Mixcloud</div>
+                    </a>
+                `;
+
+            case 'soundcloud':
+                return `
+                    <a href="javascript:void(0)" class="reseau-icon-custom" data-network="soundcloud"
+                        onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'soundcloud')"
+                        title="Visiter SoundCloud">
+                        <div class="reseau-symbol">♫</div>
+                        <div class="reseau-name">SoundCloud</div>
+                    </a>
+                `;
+
+            default:
+                return `
+                    <a href="javascript:void(0)" class="reseau-icon-custom" data-network="default"
+                        onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'default')"
+                        title="Visiter le profil">
+                        <div class="reseau-symbol">🌐</div>
+                        <div class="reseau-name">Site Web</div>
+                    </a>
+                `;
+        }
+    }
+
+    // Récupérer les infos de l'utilisateur connecté
+    async function getCurrentUserInfo() {
+        try {
+            const response = await fetch('/api/users/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!response.ok) throw new Error('Erreur lors de la récupération du profil');
+            const userData = await response.json();
+            return {
+                id: userData.id,
+                username: userData.username,
+                donneeVisible: userData.donneeVisible || "111"
+            };
+        } catch (error) {
+            console.error('Erreur:', error);
+            return null;
+        }
+    }
+
+    // Charger les favoris
+    async function loadMusicFavoris(userId) {
+        try {
+            const response = await fetch(`/api/users/${userId}/music-favoris`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                return data.favoris || data;
+            } else {
+                return [];
+            }
+        } catch (err) {
+            console.error('Erreur chargement favoris:', err);
+            return [];
+        }
+    }
+
+    // Afficher le son d'entrée
+    function playSonEntree(sonUrl, showSon) {
+        if (!sonUrl || !showSon) return;
+
+        const cleanedUrl = cleanUrl(sonUrl);
+        const audioPlayer = document.getElementById('sonEntreePlayer');
+        const indicator = document.getElementById('sonPlayingIndicator');
+
+        audioPlayer.src = cleanedUrl;
+        audioPlayer.volume = 0.7;
+        indicator.style.display = 'flex';
+
+        audioPlayer.onended = function() {
+            indicator.style.display = 'none';
+        };
+
+        audioPlayer.onerror = function() {
+            indicator.style.display = 'none';
+            console.error('❌ Erreur lors de la lecture du son');
+        };
+
+        audioPlayer.play().catch(error => {
+            console.error('Erreur de lecture audio (probablement auto-play bloqué):', error);
+            indicator.style.display = 'none';
+        });
+    }
+
+    // Afficher la photo de profil
+    function displayProfilePhoto(photoUrl, username, showPhoto, isAdmin) {
+        const container = document.getElementById('profilePhotoContainer');
+        const defaultAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&size=280&background=667eea&color=fff`;
+
+        if (isAdmin || showPhoto === '1') {
+            const finalPhotoUrl = photoUrl && photoUrl !== 'hidden' ? photoUrl : defaultAvatarUrl;
+            container.innerHTML = `
+                <img class="profile-photo" src="${finalPhotoUrl}"
+                    alt="Photo de profil"
+                    onerror="this.src='${defaultAvatarUrl}'">
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="profile-photo profile-photo-hidden default-photo">
+                    <div class="photo-hidden-label">Photo cachée</div>
+                </div>
+            `;
+        }
+    }
+
+    // Rendu des favoris
+    function displayMusicFavoris(favoris) {
+        if (!favoris || favoris.length === 0) {
+            return `
+                <div class="favoris-section">
+                    <div class="favoris-title">🎵 Favoris Musicaux</div>
+                    <div class="no-favoris">Aucun favori musical défini</div>
+                </div>
+            `;
+        }
+
+        const sortedFavoris = [...favoris].sort((a, b) => b.cotePreference - a.cotePreference);
+        let html = `<div class="favoris-section"><div class="favoris-title">🎵 Favoris Musicaux</div>`;
+
+        sortedFavoris.forEach(favori => {
+            const coteClass = `cote-${favori.cotePreference}`;
+            html += `
+                <div class="favoris-item">
+                    <span class="favoris-genre">${favori.musicGenreDescription}</span>
+                    <span class="favoris-cote ${coteClass}">${favori.cotePreference}/10</span>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        return html;
+    }
+
+    // Rendu des réseaux sociaux
+    function displayReseaux(reseauxList, showNetworks, isAdmin) {
+        if (!isAdmin && showNetworks !== '1') {
+            return '';
+        }
+
+        if (!reseauxList || reseauxList.trim() === '') {
+            return `
+                <div class="reseaux-section">
+                    <div class="reseaux-title">FOLLOW ME</div>
+                    <div class="no-reseaux">Aucun réseau social ajouté</div>
+                </div>
+            `;
+        }
+
+        const reseauxArray = reseauxList.split(';').filter(url => url.trim() !== '');
+
+        if (reseauxArray.length === 0) {
+             return `
+                <div class="reseaux-section">
+                    <div class="reseaux-title">FOLLOW ME</div>
+                    <div class="no-reseaux">Aucun réseau social ajouté</div>
+                </div>
+            `;
+        }
+
+        let html = `
+            <div class="reseaux-section">
+                <div class="reseaux-title">FOLLOW ME</div>
+                <div class="icons-grid">
+        `;
+
+        reseauxArray.forEach((url) => {
+            const cleanedUrl = cleanUrl(url);
+            const lowerUrl = cleanedUrl.toLowerCase();
+
+            // Détection du type de réseau
+            let networkType = 'default';
+            let customHtml = '';
+
+            if (lowerUrl.includes('youtube.com')) {
+                networkType = 'youtube';
+                customHtml = createCustomReseauIcon(cleanedUrl, 'youtube');
+            } else if (lowerUrl.includes('whatsapp.com')) {
+                networkType = 'whatsapp';
+                customHtml = createCustomReseauIcon(cleanedUrl, 'whatsapp');
+            } else if (lowerUrl.includes('linkedin.com')) {
+                networkType = 'linkedin';
+                customHtml = createCustomReseauIcon(cleanedUrl, 'linkedin');
+            } else if (lowerUrl.includes('pinterest.com')) {
+                networkType = 'pinterest';
+                customHtml = createCustomReseauIcon(cleanedUrl, 'pinterest');
+            } else if (lowerUrl.includes('t.me') || lowerUrl.includes('telegram.me')) {
+                networkType = 'telegram';
+                customHtml = createCustomReseauIcon(cleanedUrl, 'telegram');
+            } else if (lowerUrl.includes('mixcloud.com')) {
+                networkType = 'mixcloud';
+                customHtml = createCustomReseauIcon(cleanedUrl, 'mixcloud');
+            } else if (lowerUrl.includes('soundcloud.com')) {
+                networkType = 'soundcloud';
+                customHtml = createCustomReseauIcon(cleanedUrl, 'soundcloud');
+            } else if (lowerUrl.includes('twitter.com') || lowerUrl.includes('x.com')) {
+                networkType = 'twitter';
+                customHtml = createCustomReseauIcon(cleanedUrl, 'twitter');
+            } else if (lowerUrl.includes('instagram.com') || lowerUrl.includes('facebook.com') ||
+                       lowerUrl.includes('tiktok.com') || lowerUrl.includes('snapchat.com')) {
+                const reseauInfo = getReseauIconInfo(cleanedUrl);
+                customHtml = `
+                    <a href="javascript:void(0)" class="reseau-icon-wrapper" data-network="${reseauInfo.network}"
+                        onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', '${reseauInfo.network}')"
+                        title="Visiter le profil">
+                        <img src="${reseauInfo.logo}" alt="Logo ${reseauInfo.network}" onerror="this.src='https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/default.png'">
+                    </a>
+                `;
+            } else {
+                // Pour les autres réseaux non spécifiés
+                customHtml = createCustomReseauIcon(cleanedUrl, 'default');
+            }
+
+            html += customHtml;
+        });
+
+        html += `
+                </div>
+            </div>
+        `;
+        return html;
+    }
+
+    // Rendu des infos Admin
+    function displayAdminInfo(user) {
+        return `
+            <div class="admin-info">
+                <div class="admin-title">👑 Informations Administrateur</div>
+                <div class="admin-info-item">
+                    <div class="admin-label">Nom d'utilisateur</div>
+                    <div class="admin-value">${user.username}</div>
+                </div>
+                <div class="admin-info-item">
+                    <div class="admin-label">Email</div>
+                    <div class="admin-value">${user.email}</div>
+                </div>
+                <div class="admin-info-item">
+                    <div class="admin-label">Rôle</div>
+                    <div class="admin-value">${user.role}</div>
+                </div>
+                <div class="admin-info-item">
+                    <div class="admin-label">Membre depuis</div>
+                    <div class="admin-value">${new Date(user.createdAt).toLocaleDateString('fr-FR')}</div>
+                </div>
+                <div class="admin-info-item">
+                    <div class="admin-label">Paramètres de visibilité</div>
+                    <div class="admin-value">${user.donneeVisible || "111"} (Photo: ${user.donneeVisible?.[0] || '1'}, Son: ${user.donneeVisible?.[1] || '1'}, Réseaux: ${user.donneeVisible?.[2] || '1'})</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // ================================================
+    // FONCTION PRINCIPALE DE CHARGEMENT
+    // ================================================
+    async function loadUserProfile() {
+        targetUserId = getUserIdFromURL();
+
+        if (!targetUserId) {
+            document.getElementById('profileContent').innerHTML = `
+                <div class="error">ID utilisateur manquant dans l'URL</div>
+            `;
+            return;
+        }
+
+        try {
+            const currentUserInfo = await getCurrentUserInfo();
+            if (!currentUserInfo) {
+                throw new Error('Impossible de récupérer votre profil');
+            }
+
+            currentUserId = currentUserInfo.id;
+            currentUserUsername = currentUserInfo.username;
+
+            const isAdmin = hasSpecialPrivileges(currentUserUsername);
+
+            // 1. Récupération du profil cible
+            const response = await fetch(`/api/users/${targetUserId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Utilisateur non trouvé');
+                }
+                throw new Error('Erreur lors du chargement du profil');
+            }
+
+            const user = await response.json();
+
+            // 2. Détermination de la visibilité
+            const donneeVisible = user.donneeVisible || "111";
+            const showPhoto = donneeVisible[0] || '1';
+            const showSound = donneeVisible[1] || '1';
+            const showNetworks = donneeVisible[2] || '1';
+
+            document.getElementById('profileUsername').textContent = user.username;
+            displayProfilePhoto(user.photoUrl, user.username, showPhoto, isAdmin);
+
+            // 3. Jouer le son
+            if (user.sonEntreeURL && (isAdmin || showSound === '1')) {
+                playSonEntree(user.sonEntreeURL, true);
+            }
+
+            const isCurrentUser = (currentUserId.toString() === targetUserId.toString());
+
+            // 4. Construction des sections
+            let favorisSection = '';
+            let reseauxSection = '';
+            let adminInfo = '';
+            let visibilityMessage = '';
+            let chatButton = '';
+
+            // Charger les favoris (Visible si Admin OU si on est l'utilisateur cible)
+            if (isAdmin || isCurrentUser) {
+                 const favoris = await loadMusicFavoris(targetUserId);
+                 favorisSection = displayMusicFavoris(favoris);
+            }
+
+            // Informations Admin (Visible uniquement si l'utilisateur connecté est Admin)
+            if (isAdmin) {
+                adminInfo = displayAdminInfo(user);
+            } else {
+                 visibilityMessage = `
+                    <div class="visibility-info">
+                        🔒 Affichage limité selon les paramètres de visibilité de l'utilisateur
+                    </div>
+                `;
+            }
+
+            // Réseaux sociaux (Visible si Admin OU si showNetworks est '1')
+            reseauxSection = displayReseaux(user.listeReseaux, showNetworks, isAdmin);
+
+            // Bouton Chat - MÊME FONCTIONNALITÉ QUE "MESSAGE" DANS L'AUTRE CODE
+            if (!isCurrentUser) {
+                chatButton = `
+                    <a href="/menu/ma_communaute/conversation.html?userId=${user.id}" class="chat-button">
+                        💬 Discuter avec ${user.username}
+                    </a>
+                `;
+            }
+
+            // 5. Assemblage Final
+            document.getElementById('profileContent').innerHTML = `
+                ${visibilityMessage}
+                ${adminInfo}
+                ${chatButton}
+                ${favorisSection}
+                ${reseauxSection}
+            `;
+
+        } catch (error) {
+            console.error('Erreur de chargement du profil:', error);
+            document.getElementById('profileUsername').textContent = 'Erreur';
+            document.getElementById('profileContent').innerHTML = `
+                <div class="error">❌ ${error.message}</div>
+            `;
+            displayProfilePhoto(null, 'Erreur', '0', false);
+        }
+    }
+
+    // ================================================
+    // INITIALISATION & ÉVÉNEMENTS
+    // ================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        loadUserProfile();
+        document.getElementById('btnLogout').addEventListener('click', handleLogout);
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Accès - Infrabel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            color: #333;
+            font-size: 16px;
+            min-height: 100vh;
+        }
+
+        /* Header et navigation */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .menu-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            min-height: 44px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #d68910;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-delete-all {
+            background-color: #8e44ad;
+            color: white;
+        }
+
+        .btn-delete-all:hover {
+            background-color: #7d3c98;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(142, 68, 173, 0.3);
+        }
+
+        .btn-back {
+            background-color: #95a5a6;
+            color: white;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+
+        /* Conteneur principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            min-height: 400px;
+        }
+
+        /* Section Liste */
+        #listeSection {
+            display: block;
+        }
+
+        #formSection {
+            display: none;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        /* Modal de confirmation */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(-20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal h3 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .modal p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-warning {
+            background-color: #fdf2f2;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border: 2px solid #e74c3c;
+            border-radius: 4px;
+            font-size: 16px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .modal-input::placeholder {
+            color: #999;
+            font-weight: normal;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+        }
+
+        /* Formulaire */
+        .form-section {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .inline-selects {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .form-buttons button {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .current-id {
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            border-left: 4px solid #3498db;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Tableau */
+        .table-section {
+            overflow-x: auto;
+            margin-top: 20px;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+            word-wrap: break-word;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+            position: sticky;
+            top: 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons button {
+            padding: 8px 12px;
+            min-width: auto;
+            font-size: 0.9rem;
+        }
+
+        .gps-link, .adresse-link {
+            color: #3498db;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 2px 5px;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .gps-link:hover, .adresse-link:hover {
+            background-color: #e8f4fc;
+            text-decoration: underline;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .notification.success {
+            background-color: #2ecc71;
+        }
+
+        .notification.error {
+            background-color: #e74c3c;
+        }
+
+        .notification.info {
+            background-color: #3498db;
+        }
+
+        .notification.warning {
+            background-color: #f39c12;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .header {
+                margin-top: 60px;
+            }
+
+            .menu-buttons {
+                flex-direction: column;
+            }
+
+            .btn-back {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                width: calc(100% - 20px);
+            }
+
+            .inline-selects {
+                flex-direction: column;
+            }
+
+            .form-buttons {
+                flex-direction: column;
+            }
+
+            .form-buttons button {
+                width: 100%;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+            }
+
+            th, td {
+                padding: 10px 8px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            .form-section {
+                padding: 15px;
+            }
+
+            .modal {
+                padding: 20px;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            .notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: calc(100% - 20px);
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Bouton Retour au Menu -->
+<button class="btn-back" onclick="window.location.href='/infrabel/index.html'">
+    ◄ Retour au Menu
+</button>
+
+<!-- Modal de confirmation pour suppression totale -->
+<div class="modal-overlay" id="deleteAllModal">
+    <div class="modal">
+        <h3>⚠️ SUPPRESSION TOTALE</h3>
+        <p>Vous êtes sur le point de supprimer <strong>TOUS LES ACCÈS</strong> de la base de données.</p>
+
+        <div class="modal-warning">
+            <strong>ATTENTION :</strong> Cette action est irréversible. Tous les accès seront définitivement supprimés.
+        </div>
+
+        <p>Pour confirmer, veuillez taper <strong>"SUPPRIMER TOUT"</strong> dans le champ ci-dessous :</p>
+
+        <input type="text" id="confirmText" class="modal-input"
+               placeholder='Tapez "SUPPRIMER TOUT"'
+               autocomplete="off">
+
+        <div class="modal-buttons">
+            <button class="btn-danger" onclick="confirmDeleteAll()">
+                🗑️ SUPPRIMER TOUT
+            </button>
+            <button class="btn-warning" onclick="closeDeleteAllModal()">
+                ❌ Annuler
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="header">
+    <h1>Gestion des Accès - Infrabel</h1>
+
+    <!-- Boutons du menu principal -->
+    <div class="menu-buttons" id="menuButtons">
+        <button class="btn-success" onclick="showAddForm()">
+            ➕ Ajouter un Accès
+        </button>
+        <button class="btn-delete-all" onclick="openDeleteAllModal()">
+            🗑️ TOUS SUPPRIMER
+        </button>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Section Liste des Accès -->
+    <div id="listeSection">
+        <h2 class="section-title">📋 Liste des Accès</h2>
+        <div class="table-section">
+            <table id="accesTable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom d'Accès</th>
+                    <th>Ligne/BK/BH</th>
+                    <th>Adresse</th>
+                    <th>Description</th>
+                    <th>Coordonnées GPS</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="tableBody">
+                <!-- Les données seront chargées ici -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section Formulaire -->
+    <div id="formSection">
+        <h2 class="section-title" id="formTitle">📝 Ajouter un Accès</h2>
+
+        <div id="currentId" class="current-id hidden">
+            Modification de l'accès ID: <span id="editId"></span>
+        </div>
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="nomAcces">Nom d'Accès *</label>
+                <input type="text" id="nomAcces" placeholder="Entrez le nom d'accès" required>
+            </div>
+
+            <div class="form-group">
+                <label>Ligne / BK / BH</label>
+                <div class="inline-selects">
+                    <select id="ligne">
+                        <option value="">Ligne</option>
+                    </select>
+                    <select id="indice">
+                        <option value="">Indice</option>
+                    </select>
+                    <select id="bk">
+                        <option value="">BK (km)</option>
+                    </select>
+                    <select id="bh">
+                        <option value="">BH (hm)</option>
+                    </select>
+                </div>
+                <input type="hidden" id="ligneBkVoie">
+            </div>
+
+            <div class="form-group">
+                <label for="adresse">Adresse</label>
+                <input type="text" id="adresse" placeholder="Entrez l'adresse complète">
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <div class="inline-selects">
+                    <select id="typeDescription">
+                        <option value="">Type d'accès</option>
+                        <option value="Zone de mise à rail">Zone de mise à rail</option>
+                        <option value="Accessible en remorque">Accessible en remorque</option>
+                        <option value="Accessible en camionette">Accessible en camionette</option>
+                        <option value="Accessible pieton">Accessible pieton</option>
+                    </select>
+                    <select id="coteVoie">
+                        <option value="">Côté voie</option>
+                        <option value="Cote Voie A">Cote Voie A</option>
+                        <option value="Cote Voie B">Cote Voie B</option>
+                    </select>
+                </div>
+                <input type="hidden" id="description">
+            </div>
+
+            <div class="form-group">
+                <label>Coordonnées GPS</label>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="latitude" placeholder="Latitude" style="flex: 1;">
+                    <input type="text" id="longitude" placeholder="Longitude" style="flex: 1;">
+                </div>
+                <div style="margin-top: 10px;">
+                    <button type="button" onclick="getCurrentLocation()" class="btn-primary" style="width: auto;">
+                        📍 Utiliser ma position actuelle
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-buttons">
+                <button id="saveBtn" class="btn-success" onclick="saveAcces()">
+                    💾 Enregistrer
+                </button>
+                <button class="btn-danger" onclick="showList()">
+                    ❌ Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // URL de l'API
+    const API_BASE_URL = '/api/acces';
+    let currentAccesId = null;
+    let isEditing = false;
+
+    // Initialisation des listes déroulantes
+    function initializeDropdowns() {
+        // Lignes (0-100)
+        const ligneSelect = document.getElementById('ligne');
+        for (let i = 0; i <= 100; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            ligneSelect.appendChild(option);
+        }
+
+        // Indice (A-Z)
+        const indiceSelect = document.getElementById('indice');
+        for (let i = 65; i <= 90; i++) { // ASCII codes for A-Z
+            const letter = String.fromCharCode(i);
+            const option = document.createElement('option');
+            option.value = letter;
+            option.textContent = letter;
+            indiceSelect.appendChild(option);
+        }
+
+        // BK (0-100 km)
+        const bkSelect = document.getElementById('bk');
+        for (let i = 0; i <= 100; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i + 'KM';
+            bkSelect.appendChild(option);
+        }
+
+        // BH (0, 100, 200, ..., 900)
+        const bhSelect = document.getElementById('bh');
+        for (let i = 0; i <= 9; i++) {
+            const option = document.createElement('option');
+            const valeur = i * 100;
+            option.value = valeur;
+            option.textContent = valeur + 'HM';
+            bhSelect.appendChild(option);
+        }
+
+        // Écouteurs pour les champs combinés
+        ['ligne', 'indice', 'bk', 'bh'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updateLigneBkVoie);
+        });
+
+        ['typeDescription', 'coteVoie'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updateDescription);
+        });
+    }
+
+    function updateLigneBkVoie() {
+        const ligne = document.getElementById('ligne').value;
+        const indice = document.getElementById('indice').value;
+        const bk = document.getElementById('bk').value;
+        const bh = document.getElementById('bh').value;
+
+        let lignePart = '';
+        if (ligne && indice) {
+            lignePart = `Ligne ${ligne}${indice}`;
+        } else if (ligne) {
+            lignePart = `Ligne ${ligne}`;
+        }
+
+        if (lignePart && bk && bh) {
+            // BH est déjà en valeur complète (0, 100, 200, ... 900)
+            // On formate avec 3 chiffres après le point
+            const valeurFormatee = bh.toString().padStart(3, '0');
+            document.getElementById('ligneBkVoie').value = `${lignePart} BK ${bk}.${valeurFormatee}`;
+        } else if (lignePart) {
+            document.getElementById('ligneBkVoie').value = lignePart;
+        } else {
+            document.getElementById('ligneBkVoie').value = '';
+        }
+    }
+
+    function updateDescription() {
+        const type = document.getElementById('typeDescription').value;
+        const cote = document.getElementById('coteVoie').value;
+
+        if (type && cote) {
+            document.getElementById('description').value = `${type} - ${cote}`;
+        } else if (type) {
+            document.getElementById('description').value = type;
+        } else if (cote) {
+            document.getElementById('description').value = cote;
+        } else {
+            document.getElementById('description').value = '';
+        }
+    }
+
+    // Fonction pour extraire les valeurs numériques de Ligne/BK/BH
+    function extractLigneBkBhValues(ligneBkVoie) {
+        if (!ligneBkVoie) return { ligne: 999, ligneNumber: 999, bk: 999, bh: 999 };
+
+        // Regex pour matcher "Ligne 36B BK 12.400" ou "Ligne 36 BK 12.400"
+        const match = ligneBkVoie.match(/Ligne\s*(\d+)([A-Z]?)\s*BK\s*(\d+)\.(\d+)/);
+        if (match) {
+            const ligneNumber = parseInt(match[1]);
+            const ligneIndice = match[2];
+
+            // Créer une valeur numérique pour le tri: ligneNumber * 100 + valeur ASCII de l'indice
+            // Si pas d'indice, on utilise ligneNumber * 100
+            let ligneValue = ligneNumber * 100;
+            if (ligneIndice) {
+                // A=1, B=2, ..., Z=26
+                ligneValue += ligneIndice.charCodeAt(0) - 64;
+            }
+
+            return {
+                ligne: ligneValue,
+                ligneNumber: ligneNumber,
+                ligneIndice: ligneIndice,
+                bk: parseInt(match[3]),
+                bh: parseInt(match[4])
+            };
+        }
+
+        // Tentative de matcher juste "Ligne 36" ou "Ligne 36B"
+        const simpleMatch = ligneBkVoie.match(/Ligne\s*(\d+)([A-Z]?)/);
+        if (simpleMatch) {
+            const ligneNumber = parseInt(simpleMatch[1]);
+            const ligneIndice = simpleMatch[2] || '';
+
+            let ligneValue = ligneNumber * 100;
+            if (ligneIndice) {
+                ligneValue += ligneIndice.charCodeAt(0) - 64;
+            }
+
+            return {
+                ligne: ligneValue,
+                ligneNumber: ligneNumber,
+                ligneIndice: ligneIndice,
+                bk: 999,
+                bh: 999
+            };
+        }
+
+        return { ligne: 999, ligneNumber: 999, bk: 999, bh: 999 };
+    }
+
+    // Fonction de tri personnalisée pour Ligne/BK/BH
+    function sortAccesByLigneBkBh(accesList) {
+        return accesList.sort((a, b) => {
+            const aValues = extractLigneBkBhValues(a.ligneBkVoie);
+            const bValues = extractLigneBkBhValues(b.ligneBkVoie);
+
+            // Tri d'abord par ligne (valeur numérique combinée)
+            if (aValues.ligne !== bValues.ligne) {
+                return aValues.ligne - bValues.ligne;
+            }
+
+            // Ensuite par BK (km)
+            if (aValues.bk !== bValues.bk) {
+                return aValues.bk - bValues.bk;
+            }
+
+            // Enfin par BH (hm)
+            return aValues.bh - bValues.bh;
+        });
+    }
+
+    // Charger la liste des accès
+    async function loadAccesList() {
+        try {
+            const response = await fetch(API_BASE_URL);
+            if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+
+            const accesList = await response.json();
+            displayAccesList(accesList);
+        } catch (error) {
+            console.error('Erreur:', error);
+            showNotification('Erreur lors du chargement de la liste', 'error');
+        }
+    }
+
+    function displayAccesList(accesList) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        if (accesList.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                        Aucun accès trouvé. Cliquez sur "Ajouter un Accès" pour en créer un.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        // Tri des accès par Ligne/BK/BH avant affichage
+        const sortedAccesList = sortAccesByLigneBkBh(accesList);
+
+        sortedAccesList.forEach(acces => {
+            const row = document.createElement('tr');
+
+            // Lien GPS - MODIFICATION POUR OUVERTURE NATIVE
+            let gpsCell = 'Non défini';
+            if (acces.latitude && acces.longitude) {
+                gpsCell = `
+                    <a href="javascript:void(0)"
+                       onclick="openGoogleMapsNative(${acces.latitude}, ${acces.longitude})"
+                       class="gps-link">
+                        📍 ${acces.latitude.toFixed(6)}, ${acces.longitude.toFixed(6)}
+                    </a>
+                `;
+            }
+
+            // Affichage de l'adresse - MODIFICATION POUR RENDRE CLICKABLE
+            let adresseCell = 'Adresse non encodée';
+            if (acces.adresse && acces.adresse.trim() !== '') {
+                // Encoder l'adresse pour l'URL Google Maps
+                const adresseEncodee = encodeURIComponent(acces.adresse.trim());
+                adresseCell = `
+                    <a href="javascript:void(0)"
+                       onclick="openGoogleMapsForAddress('${adresseEncodee}')"
+                       class="adresse-link">
+                        📍 ${acces.adresse}
+                    </a>
+                `;
+            } else {
+                adresseCell = '<span style="color: #999; font-style: italic;">' + adresseCell + '</span>';
+            }
+
+            row.innerHTML = `
+                <td><strong>${acces.id}</strong></td>
+                <td>${acces.nomAcces || ''}</td>
+                <td>${acces.ligneBkVoie || ''}</td>
+                <td>${adresseCell}</td>
+                <td>${acces.description || ''}</td>
+                <td>${gpsCell}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-warning" onclick="editAcces(${acces.id})">
+                            ✏️ Modifier
+                        </button>
+                        <button class="btn-danger" onclick="deleteAcces(${acces.id})">
+                            🗑️ Supprimer
+                        </button>
+                    </div>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    // MODIFICATION PRINCIPALE : Ouvre Google Maps de manière native
+    function openGoogleMapsNative(latitude, longitude) {
+        if (latitude && longitude) {
+            // URL universelle Google Maps pour ouverture native
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude}%2C${longitude}`;
+            // URL de secours pour le navigateur
+            const webUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+            // Création d'un lien invisible pour détecter l'application
+            const hiddenLink = document.createElement('a');
+            hiddenLink.href = mapsUrl;
+            hiddenLink.target = '_blank';
+            hiddenLink.rel = 'noopener noreferrer';
+
+            // Tentative d'ouverture de l'application native
+            // Si l'app n'est pas installée, elle ouvrira le site web
+            hiddenLink.click();
+        }
+    }
+
+    // NOUVELLE FONCTION : Ouvre Google Maps avec une adresse
+    function openGoogleMapsForAddress(adresse) {
+        if (adresse && adresse.trim() !== '') {
+            // URL pour recherche d'adresse dans Google Maps
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${adresse}`;
+
+            // Création d'un lien invisible
+            const hiddenLink = document.createElement('a');
+            hiddenLink.href = mapsUrl;
+            hiddenLink.target = '_blank';
+            hiddenLink.rel = 'noopener noreferrer';
+
+            // Ouvrir le lien
+            hiddenLink.click();
+        }
+    }
+
+    // Navigation entre sections
+    function showList() {
+        document.getElementById('listeSection').style.display = 'block';
+        document.getElementById('formSection').style.display = 'none';
+        document.getElementById('menuButtons').style.display = 'flex';
+        clearForm();
+        loadAccesList();
+    }
+
+    function showAddForm() {
+        document.getElementById('listeSection').style.display = 'none';
+        document.getElementById('formSection').style.display = 'block';
+        document.getElementById('menuButtons').style.display = 'none';
+        document.getElementById('formTitle').textContent = '📝 Ajouter un Accès';
+        document.getElementById('currentId').classList.add('hidden');
+        document.getElementById('saveBtn').textContent = '💾 Ajouter';
+        isEditing = false;
+        currentAccesId = null;
+        clearForm();
+    }
+
+    function showEditForm() {
+        document.getElementById('listeSection').style.display = 'none';
+        document.getElementById('formSection').style.display = 'block';
+        document.getElementById('menuButtons').style.display = 'none';
+        document.getElementById('formTitle').textContent = '✏️ Modifier un Accès';
+        document.getElementById('saveBtn').textContent = '💾 Mettre à jour';
+        isEditing = true;
+    }
+
+    // Éditer un accès
+    async function editAcces(id) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/${id}`);
+            if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+
+            const acces = await response.json();
+            currentAccesId = id;
+
+            // Remplir le formulaire
+            document.getElementById('nomAcces').value = acces.nomAcces || '';
+
+            // Découper ligneBkVoie avec le nouveau format
+            if (acces.ligneBkVoie) {
+                // Regex pour matcher "Ligne 36B BK 12.400" ou "Ligne 36 BK 12.400"
+                const match = acces.ligneBkVoie.match(/Ligne\s*(\d+)([A-Z]?)\s*(?:BK\s*(\d+)\.(\d+))?/);
+                if (match) {
+                    // Ligne (nombre)
+                    document.getElementById('ligne').value = match[1];
+
+                    // Indice (lettre optionnelle)
+                    if (match[2]) {
+                        document.getElementById('indice').value = match[2];
+                    } else {
+                        document.getElementById('indice').value = '';
+                    }
+
+                    // BK et BH (optionnels)
+                    if (match[3] && match[4]) {
+                        document.getElementById('bk').value = match[3];
+
+                        // BH est maintenant en valeur directe (0, 100, 200, ... 900)
+                        const bhValue = parseInt(match[4]); // 000, 100, 200, etc.
+                        // Trouver la valeur correspondante dans la liste
+                        document.getElementById('bh').value = bhValue;
+                    }
+
+                    updateLigneBkVoie();
+                }
+            }
+
+            // Remplir l'adresse
+            document.getElementById('adresse').value = acces.adresse || '';
+
+            // Découper description
+            if (acces.description) {
+                const parts = acces.description.split(' - ');
+                if (parts.length === 2) {
+                    document.getElementById('typeDescription').value = parts[0].trim();
+                    document.getElementById('coteVoie').value = parts[1].trim();
+                } else {
+                    const typeOptions = [
+                        'Zone de mise à rail',
+                        'Accessible en remorque',
+                        'Accessible en camionette',
+                        'Accessible pieton'
+                    ];
+
+                    if (typeOptions.includes(acces.description.trim())) {
+                        document.getElementById('typeDescription').value = acces.description.trim();
+                    } else {
+                        const coteOptions = ['Cote Voie A', 'Cote Voie B'];
+                        if (coteOptions.includes(acces.description.trim())) {
+                            document.getElementById('coteVoie').value = acces.description.trim();
+                        }
+                    }
+                }
+                updateDescription();
+            }
+
+            // Coordonnées GPS
+            if (acces.latitude) {
+                document.getElementById('latitude').value = acces.latitude;
+            }
+            if (acces.longitude) {
+                document.getElementById('longitude').value = acces.longitude;
+            }
+
+            // Afficher l'ID
+            document.getElementById('editId').textContent = id;
+            document.getElementById('currentId').classList.remove('hidden');
+
+            // Afficher le formulaire
+            showEditForm();
+
+        } catch (error) {
+            console.error('Erreur:', error);
+            showNotification('Erreur lors du chargement de l\'accès', 'error');
+        }
+    }
+
+    // Sauvegarder (ajouter ou modifier)
+    async function saveAcces() {
+        const accesData = {
+            nomAcces: document.getElementById('nomAcces').value.trim(),
+            ligneBkVoie: document.getElementById('ligneBkVoie').value,
+            adresse: document.getElementById('adresse').value.trim(),
+            description: document.getElementById('description').value.trim(),
+            latitude: document.getElementById('latitude').value ? parseFloat(document.getElementById('latitude').value) : null,
+            longitude: document.getElementById('longitude').value ? parseFloat(document.getElementById('longitude').value) : null
+        };
+
+        if (!accesData.nomAcces) {
+            showNotification('Le nom d\'accès est obligatoire', 'error');
+            return;
+        }
+
+        try {
+            let response;
+            if (isEditing && currentAccesId) {
+                // Mettre à jour
+                response = await fetch(`${API_BASE_URL}/${currentAccesId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(accesData)
+                });
+            } else {
+                // Ajouter
+                response = await fetch(API_BASE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(accesData)
+                });
+            }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Erreur HTTP: ${response.status}`);
+            }
+
+            showNotification(
+                isEditing ? 'Accès mis à jour avec succès!' : 'Accès ajouté avec succès!',
+                'success'
+            );
+
+            showList();
+
+        } catch (error) {
+            console.error('Erreur:', error);
+            showNotification('Erreur: ' + error.message, 'error');
+        }
+    }
+
+    // Supprimer un accès
+    async function deleteAcces(id) {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer cet accès ?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+
+            showNotification('Accès supprimé avec succès!', 'success');
+            loadAccesList();
+
+        } catch (error) {
+            console.error('Erreur:', error);
+            showNotification('Erreur lors de la suppression', 'error');
+        }
+    }
+
+    // ============================================
+    // FONCTIONS POUR SUPPRIMER TOUS LES ACCÈS
+    // ============================================
+
+    function openDeleteAllModal() {
+        const modal = document.getElementById('deleteAllModal');
+        modal.classList.add('active');
+        document.getElementById('confirmText').value = '';
+        document.getElementById('confirmText').focus();
+    }
+
+    function closeDeleteAllModal() {
+        const modal = document.getElementById('deleteAllModal');
+        modal.classList.remove('active');
+    }
+
+    async function confirmDeleteAll() {
+        const confirmText = document.getElementById('confirmText').value;
+
+        if (confirmText !== "SUPPRIMER TOUT") {
+            showNotification('Veuillez taper exactement "SUPPRIMER TOUT" pour confirmer', 'warning');
+            document.getElementById('confirmText').focus();
+            return;
+        }
+
+        try {
+            // Utilisation de l'endpoint DELETE /api/acces/all?confirm=true
+            showNotification('Suppression en cours...', 'info');
+
+            const response = await fetch(`${API_BASE_URL}/all?confirm=true`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Erreur HTTP: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            // Fermer le modal
+            closeDeleteAllModal();
+
+            // Afficher le résultat
+            showNotification(`✅ ${result.message} (${result.deleted} accès supprimés)`, 'success');
+
+            // Recharger la liste (qui sera vide)
+            loadAccesList();
+
+        } catch (error) {
+            console.error('Erreur lors de la suppression totale:', error);
+
+            // Vérifier si c'est l'erreur de confirmation
+            if (error.message.includes("confirmer") || error.message.includes("ajoutez ?confirm=true")) {
+                showNotification('❌ Action non confirmée. Veuillez réessayer.', 'warning');
+            } else {
+                showNotification('Erreur lors de la suppression totale: ' + error.message, 'error');
+            }
+        }
+    }
+
+    // Géolocalisation
+    function getCurrentLocation() {
+        if (!navigator.geolocation) {
+            showNotification('La géolocalisation n\'est pas supportée par votre navigateur', 'error');
+            return;
+        }
+
+        showNotification('Récupération de votre position...', 'info');
+
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const lat = position.coords.latitude.toFixed(6);
+                const lng = position.coords.longitude.toFixed(6);
+
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lng;
+
+                showNotification('Position actuelle récupérée avec succès!', 'success');
+            },
+            error => {
+                let message = 'Impossible de récupérer votre position: ';
+                switch(error.code) {
+                    case 1: message += 'Permission refusée'; break;
+                    case 2: message += 'Position non disponible'; break;
+                    case 3: message += 'Temps écoulé'; break;
+                    default: message += 'Erreur inconnue';
+                }
+                showNotification(message, 'error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    function clearForm() {
+        document.getElementById('nomAcces').value = '';
+        document.getElementById('ligne').value = '';
+        document.getElementById('indice').value = '';
+        document.getElementById('bk').value = '';
+        document.getElementById('bh').value = '';
+        document.getElementById('ligneBkVoie').value = '';
+        document.getElementById('adresse').value = '';
+        document.getElementById('typeDescription').value = '';
+        document.getElementById('coteVoie').value = '';
+        document.getElementById('description').value = '';
+        document.getElementById('latitude').value = '';
+        document.getElementById('longitude').value = '';
+    }
+
+    function showNotification(message, type) {
+        const oldNotifications = document.querySelectorAll('.notification');
+        oldNotifications.forEach(notif => notif.remove());
+
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideIn 0.3s ease reverse';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeDropdowns();
+        loadAccesList();
+
+        // Exposer les fonctions globalement
+        window.openGoogleMapsNative = openGoogleMapsNative;
+        window.openGoogleMapsForAddress = openGoogleMapsForAddress;
+        window.openDeleteAllModal = openDeleteAllModal;
+        window.confirmDeleteAll = confirmDeleteAll;
+        window.closeDeleteAllModal = closeDeleteAllModal;
+    });
+</script>
+</body>
+</html>

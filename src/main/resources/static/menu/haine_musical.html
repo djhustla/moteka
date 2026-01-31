@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oppositions Totales - Music Social</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #8B0000 0%, #4B0082 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .main-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        min-height: 90vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .header {
+        background: linear-gradient(135deg, #8B0000 0%, #4B0082 100%);
+        padding: 30px;
+        color: white;
+        text-align: center;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .header .subtitle {
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+        background: #fff0f0;
+        border-bottom: 2px solid #ffcccc;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        border: 2px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex: 1;
+        min-width: 160px;
+    }
+
+    .btn-menu {
+        background: #8B0000;
+        color: white;
+    }
+
+    .btn-menu:hover {
+        background: #700000;
+        transform: translateY(-2px);
+    }
+
+    .btn-prev {
+        background: #4B0082;
+        color: white;
+    }
+
+    .btn-prev:hover {
+        background: #3a0066;
+        transform: translateY(-2px);
+    }
+
+    .btn-logout {
+        background: #374151;
+        color: white;
+        border: none;
+        font-family: inherit;
+    }
+
+    .btn-logout:hover {
+        background: #1f2937;
+        transform: translateY(-2px);
+    }
+
+    .content {
+        padding: 30px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .message {
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border: 2px solid;
+        text-align: center;
+        width: 100%;
+        max-width: 800px;
+    }
+
+    .loading-message {
+        background: #ffe4e4;
+        color: #8B0000;
+        border-color: #ffb3b3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .error-message {
+        background: #fee;
+        color: #dc2626;
+        border-color: #fecaca;
+        display: none;
+    }
+
+    .stats-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 15px 0;
+        flex-wrap: wrap;
+        width: 100%;
+        max-width: 800px;
+    }
+
+    .stat-card {
+        background: #fff0f0;
+        padding: 15px 20px;
+        border-radius: 12px;
+        text-align: center;
+        min-width: 120px;
+        border: 2px solid #ffcccc;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #8B0000;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+
+    .users-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 25px;
+        width: 100%;
+        max-width: 1200px;
+        margin-top: 20px;
+    }
+
+    /* CARTE UTILISATEUR - STRUCTURE IDENTIQUE AUX AUTRES PAGES */
+    .user-card {
+        background: #f8f9ff;
+        border-radius: 16px;
+        padding: 20px;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .user-card:hover {
+        border-color: #8B0000;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(139, 0, 0, 0.15);
+    }
+
+    /* Conteneur de photo - structure identique */
+    .user-photo-container {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        max-width: 180px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        overflow: hidden;
+        background: #eee;
+        border: 3px solid #8B0000;
+    }
+
+    .user-avatar {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #8B0000 0%, #4B0082 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: white;
+        font-weight: bold;
+    }
+
+    .user-name {
+        font-weight: 700;
+        font-size: 1.3rem;
+        color: #374151;
+        margin-bottom: 20px;
+        word-break: break-word;
+    }
+
+    /* Bouton profil - style identique */
+    .profile-link {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #8B0000 0%, #4B0082 100%);
+        color: white;
+        text-align: center;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .profile-link:hover {
+        filter: brightness(1.1);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6b7280;
+        display: none;
+        grid-column: 1 / -1;
+    }
+
+    .refresh-btn {
+        background: linear-gradient(135deg, #8B0000 0%, #4B0082 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 20px;
+    }
+
+    .refresh-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(139, 0, 0, 0.3);
+        border-radius: 50%;
+        border-top-color: #8B0000;
+        animation: spin 1s linear infinite;
+    }
+
+    .footer {
+        text-align: center;
+        padding: 15px;
+        color: #6b7280;
+        font-size: 0.85rem;
+        border-top: 2px solid #ffcccc;
+        margin-top: auto;
+        background: #fff0f0;
+    }
+
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+
+        .users-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-container {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-card {
+            width: 100%;
+            max-width: 200px;
+        }
+    }
+  </style>
+</head>
+<body>
+<div class="main-container">
+  <div class="header">
+    <h1>⚡ Oppositions Totales</h1>
+    <p class="subtitle">Vos 10/10 sont leurs 2/10, et vice-versa</p>
+    <div class="stats-container">
+      <div class="stat-card">
+        <span class="stat-number" id="totalUsers">0</span>
+        <span class="stat-label">Oppositions</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <a href="/menu/menu.html" class="btn btn-menu">🏠 Retour au menu principal</a>
+    <a href="/menu/connection_musical_menu.html" class="btn btn-prev">⬅️ Menu précédent</a>
+    <button id="logoutBtn" class="btn btn-logout">🚪 Déconnexion</button>
+  </div>
+
+  <div class="content">
+    <div class="message loading-message" id="loadingMessage">
+      <div class="loading-spinner"></div>
+      <span>Recherche des oppositions totales...</span>
+    </div>
+
+    <div class="message error-message" id="errorMessage">
+      ❌ <span id="errorText"></span>
+    </div>
+
+    <div class="users-grid" id="usersGrid"></div>
+
+    <div class="empty-state" id="emptyState">
+      <p>Aucune opposition totale trouvée pour le moment.</p>
+      <button class="refresh-btn" onclick="location.reload()">🔄 Actualiser</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Oppositions totales • Mis à jour: <span id="lastUpdate">--:--</span></p>
+  </div>
+</div>
+
+<script>
+  const CONFIG = {
+    apiBaseUrl: '/api/music-favoris',
+    token: localStorage.getItem('accessToken')
+  };
+
+  const DOM = {
+    loadingMessage: document.getElementById('loadingMessage'),
+    errorMessage: document.getElementById('errorMessage'),
+    errorText: document.getElementById('errorText'),
+    usersGrid: document.getElementById('usersGrid'),
+    emptyState: document.getElementById('emptyState'),
+    logoutBtn: document.getElementById('logoutBtn'),
+    totalUsers: document.getElementById('totalUsers'),
+    lastUpdate: document.getElementById('lastUpdate')
+  };
+
+  class OppositionTotalManager {
+    constructor() {
+      this.users = [];
+    }
+
+    async init() {
+      if (!CONFIG.token) {
+        window.location.href = '/connection/connection.html';
+        return;
+      }
+      this.setupEventListeners();
+      await this.loadUsers();
+      this.updateLastUpdate();
+    }
+
+    setupEventListeners() {
+      DOM.logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('userData');
+        window.location.href = '/connection/connection.html';
+      });
+    }
+
+    async loadUsers() {
+      try {
+        DOM.loadingMessage.style.display = 'flex';
+        DOM.errorMessage.style.display = 'none';
+        DOM.usersGrid.style.display = 'none';
+        DOM.emptyState.style.display = 'none';
+
+        const response = await fetch(`${CONFIG.apiBaseUrl}/me/oppositions-total`, {
+          headers: { 'Authorization': `Bearer ${CONFIG.token}` }
+        });
+
+        if (response.status === 401) {
+          window.location.href = '/connection/connection.html';
+          return;
+        }
+
+        const data = await response.json();
+        this.users = data.users || [];
+        this.renderUsers();
+        DOM.totalUsers.textContent = data.count || 0;
+
+        if (this.users.length === 0) {
+          DOM.emptyState.style.display = 'block';
+        } else {
+          DOM.usersGrid.style.display = 'grid';
+        }
+
+      } catch (error) {
+        DOM.errorText.textContent = error.message;
+        DOM.errorMessage.style.display = 'block';
+      } finally {
+        DOM.loadingMessage.style.display = 'none';
+      }
+    }
+
+    renderUsers() {
+      DOM.usersGrid.innerHTML = '';
+      this.users.forEach(user => {
+        const card = document.createElement('div');
+        card.className = 'user-card';
+
+        const photoContent = user.photoUrl
+          ? `<img src="${user.photoUrl}" class="user-avatar" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\"avatar-placeholder\">${(user.username || '?')[0].toUpperCase()}</div>';">`
+          : `<div class="avatar-placeholder">${(user.username || '?')[0].toUpperCase()}</div>`;
+
+        card.innerHTML = `
+          <div class="user-photo-container">${photoContent}</div>
+          <div class="user-name">${this.escapeHtml(user.username || 'Utilisateur')}</div>
+          <a href="/menu/profil_user.html?userId=${user.id}" class="profile-link">👤 Voir le profil</a>
+        `;
+        DOM.usersGrid.appendChild(card);
+      });
+    }
+
+    updateLastUpdate() {
+      DOM.lastUpdate.textContent = new Date().toLocaleTimeString('fr-FR', {
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    new OppositionTotalManager().init();
+  });
+</script>
+</body>
+</html>
