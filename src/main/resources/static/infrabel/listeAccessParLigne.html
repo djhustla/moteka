@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accès par Ligne</title>
+    <style>
+        /* Reset et base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 15px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .back-button:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Ligne info */
+        .ligne-info {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .ligne-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: white;
+            color: #3498db;
+            padding: 8px 22px;
+            border-radius: 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 90px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 50px 20px;
+            color: #3498db;
+            font-size: 1.1rem;
+        }
+
+        .spinner {
+            width: 45px;
+            height: 45px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error */
+        .error {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+            margin-top: 20px;
+            -webkit-overflow-scrolling: touch;
+            background: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            position: sticky;
+            top: 0;
+        }
+
+        th:first-child {
+            border-top-left-radius: 9px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 9px;
+        }
+
+        td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.88rem;
+            vertical-align: top;
+        }
+
+        tr {
+            transition: all 0.2s ease;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #6c757d;
+            font-size: 1.05rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .empty-state-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+
+        /* Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.82rem;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 80px;
+            justify-content: center;
+        }
+
+        .view-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .view-btn:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #1c5a7a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(243, 156, 18, 0.2);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.2);
+        }
+
+        .go-btn {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            max-width: 65px;
+            text-align: center;
+        }
+
+        .go-btn:hover {
+            background: linear-gradient(135deg, #27ae60 0%, #219653 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(46, 204, 113, 0.2);
+        }
+
+        .go-btn:disabled {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            padding: 9px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            background: white;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            min-width: 45px;
+        }
+
+        .page-btn:hover {
+            background: #e9ecef;
+            border-color: #3498db;
+            transform: translateY(-2px);
+        }
+
+        .page-btn.active {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border-color: #3498db;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+        }
+
+        .page-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f8f9fa;
+            border-color: #dee2e6;
+            transform: none;
+        }
+
+        /* Description cell */
+        .description-cell {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: help;
+            position: relative;
+        }
+
+        .description-cell:hover::after {
+            content: attr(data-full);
+            position: absolute;
+            left: 0;
+            top: 100%;
+            background: #2c3e50;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            z-index: 1000;
+            white-space: normal;
+            width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-size: 0.85rem;
+        }
+
+        /* Modal de confirmation */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+            padding: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-title {
+            color: #c0392b;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-text {
+            margin-bottom: 25px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 24px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .modal-cancel {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #dee2e6;
+        }
+
+        .modal-cancel:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .modal-confirm {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .modal-confirm:hover {
+            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 18px;
+            }
+
+            .description-cell {
+                max-width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                background: #f5f7fa;
+            }
+
+            .container {
+                padding: 15px;
+                border-radius: 10px;
+                box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+            }
+
+            h1 {
+                font-size: 1.6rem;
+                text-align: center;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+
+            .ligne-info {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+                gap: 12px;
+            }
+
+            .stats {
+                justify-content: center;
+                width: 100%;
+                gap: 12px;
+            }
+
+            .stat-item {
+                flex: 1;
+                min-width: 80px;
+                padding: 8px 12px;
+            }
+
+            .stat-value {
+                font-size: 1.3rem;
+            }
+
+            .table-container {
+                border: none;
+                border-radius: 8px;
+                margin: 0 -15px;
+                width: calc(100% + 30px);
+            }
+
+            table {
+                min-width: 700px;
+            }
+
+            th, td {
+                padding: 12px 10px;
+                font-size: 0.85rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .go-btn {
+                max-width: 100%;
+                padding: 8px 16px;
+            }
+
+            .modal-content {
+                padding: 25px;
+                margin: 0 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 12px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            .ligne-number {
+                font-size: 1.5rem;
+                padding: 6px 18px;
+            }
+
+            .stats {
+                gap: 8px;
+            }
+
+            .stat-item {
+                padding: 6px 10px;
+                min-width: 70px;
+            }
+
+            .stat-value {
+                font-size: 1.2rem;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+            }
+
+            .page-btn {
+                padding: 8px 12px;
+                min-width: 40px;
+                font-size: 0.85rem;
+            }
+
+            .modal-btn {
+                padding: 9px 18px;
+                font-size: 0.9rem;
+            }
+
+            .description-cell {
+                max-width: 150px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 1.3rem;
+            }
+
+            .ligne-number {
+                font-size: 1.3rem;
+                padding: 5px 15px;
+            }
+
+            .stat-value {
+                font-size: 1.1rem;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
+            }
+
+            .action-btn {
+                min-width: 70px;
+                font-size: 0.78rem;
+                padding: 6px 10px;
+            }
+        }
+
+        /* Touch-friendly pour mobile */
+        @media (pointer: coarse) {
+            .action-btn, .go-btn, .page-btn, .back-button {
+                min-height: 44px;
+                min-width: 44px;
+            }
+
+            td, th {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>📊 Accès par Ligne</h1>
+        <button onclick="window.location.href='/infrabel/localisation.html'" class="back-button">
+            ← Retour
+        </button>
+    </div>
+
+    <!-- Info ligne -->
+    <div class="ligne-info" id="ligneInfo">
+        <div class="ligne-number" id="ligneNumber">Chargement...</div>
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-value" id="totalAcces">0</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="avecGPS">0</span>
+                <span class="stat-label">Avec GPS</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="sansGPS">0</span>
+                <span class="stat-label">Sans GPS</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div>Chargement des accès...</div>
+    </div>
+
+    <!-- Error -->
+    <div id="errorMessage" class="error hidden"></div>
+
+    <!-- Table -->
+    <div class="table-container hidden" id="tableContainer">
+        <table id="resultTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Ligne BK/Voie</th>
+                <th>Adresse</th>
+                <th>Description</th>
+                <th>GPS</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="resultBody">
+            <!-- Rempli dynamiquement -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyState" class="empty-state hidden">
+        <div class="empty-state-icon">🚫</div>
+        <h3>Aucun accès trouvé</h3>
+        <p>Aucun accès n'a été trouvé pour cette ligne.</p>
+        <p style="margin-top: 10px; font-size: 0.9rem; color: #6c757d;">
+            Vérifiez le paramètre "ligne" dans l'URL
+        </p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination hidden" id="pagination">
+        <!-- Rempli dynamiquement -->
+    </div>
+</div>
+
+<!-- Modal de confirmation suppression -->
+<div id="deleteModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <div class="modal-title">
+            <span>⚠️</span>
+            <span>Confirmation de suppression</span>
+        </div>
+        <div class="modal-text">
+            <p>Êtes-vous sûr de vouloir supprimer cet accès ?</p>
+            <p style="margin-top: 10px; font-weight: bold; color: #c0392b;" id="modalAccesInfo"></p>
+            <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                <em>Cette action est irréversible. L'accès sera définitivement supprimé.</em>
+            </p>
+        </div>
+        <div class="modal-buttons">
+            <button id="modalCancelBtn" class="modal-btn modal-cancel">Annuler</button>
+            <button id="modalConfirmBtn" class="modal-btn modal-confirm">Supprimer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuration
+    const API_BASE_URL = '/api/acces';
+    let currentLigne = '';
+    let allAcces = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let accessToDelete = null;
+
+    // Récupérer le paramètre "ligne" depuis l'URL
+    function getLigneFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('ligne');
+    }
+
+    // Ouvrir Google Maps
+    function openGoogleMaps(latitude, longitude) {
+        if (!latitude || !longitude) {
+            alert('Coordonnées GPS non disponibles');
+            return;
+        }
+        const url = `https://www.google.com/maps?q=${latitude},${longitude}&z=15`;
+        window.open(url, '_blank');
+    }
+
+    // Ouvrir page aperçu
+    function openApercuPage(id) {
+        window.location.href = `/infrabel/access.html?id=${id}`;
+    }
+
+    // Ouvrir page modification
+    function openModifierPage(id) {
+        window.location.href = `/infrabel/modifierAccess.html?id=${id}`;
+    }
+
+    // Afficher modal de confirmation suppression
+    function showDeleteModal(acces) {
+        accessToDelete = acces;
+        const modal = document.getElementById('deleteModal');
+        const info = document.getElementById('modalAccesInfo');
+
+        info.textContent = `ID: ${acces.id} - ${acces.nomAcces || 'Sans nom'}`;
+        modal.classList.remove('hidden');
+    }
+
+    // Cacher modal
+    function hideDeleteModal() {
+        const modal = document.getElementById('deleteModal');
+        modal.classList.add('hidden');
+        accessToDelete = null;
+    }
+
+    // Supprimer un accès via API
+    async function deleteAccess(id) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                showMessage('success', 'Accès supprimé avec succès');
+
+                // Recharger la liste
+                setTimeout(() => {
+                    loadAccesParLigne();
+                }, 1000);
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Erreur lors de la suppression');
+            }
+        } catch (error) {
+            console.error('Erreur suppression:', error);
+            showMessage('error', `Erreur: ${error.message}`);
+        } finally {
+            hideDeleteModal();
+        }
+    }
+
+    // Afficher/masquer éléments
+    function showElement(id, show = true) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.classList.toggle('hidden', !show);
+        }
+    }
+
+    // Afficher message
+    function showMessage(type, text) {
+        const message = type === 'error' ? 'Erreur' : 'Succès';
+        alert(`${message}: ${text}`);
+    }
+
+    // Afficher erreur
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = message;
+        showElement('errorMessage', true);
+        showElement('loading', false);
+    }
+
+    // Générer pagination
+    function generatePagination(totalItems) {
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const paginationDiv = document.getElementById('pagination');
+
+        if (totalPages <= 1) {
+            paginationDiv.innerHTML = '';
+            showElement('pagination', false);
+            return;
+        }
+
+        let paginationHTML = '';
+
+        // Bouton précédent
+        if (currentPage > 1) {
+            paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage - 1})">← Préc</button>`;
+        } else {
+            paginationHTML += `<button class="page-btn disabled" disabled>← Préc</button>`;
+        }
+
+        // Numéros de page
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            if (i === currentPage) {
+                paginationHTML += `<button class="page-btn active">${i}</button>`;
+            } else {
+                paginationHTML += `<button class="page-btn" onclick="changePage(${i})">${i}</button>`;
+            }
+        }
+
+        // Bouton suivant
+        if (currentPage < totalPages) {
+            paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage + 1})">Suiv →</button>`;
+        } else {
+            paginationHTML += `<button class="page-btn disabled" disabled>Suiv →</button>`;
+        }
+
+        paginationDiv.innerHTML = paginationHTML;
+        showElement('pagination', true);
+    }
+
+    // Changer de page
+    function changePage(page) {
+        currentPage = page;
+        displayCurrentPage();
+        // Scroll vers le haut du tableau
+        document.querySelector('.table-container').scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+
+    // Afficher page courante
+    function displayCurrentPage() {
+        const tbody = document.getElementById('resultBody');
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const pageItems = allAcces.slice(startIndex, endIndex);
+
+        if (pageItems.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #6c757d;">Aucun accès sur cette page</td></tr>';
+            return;
+        }
+
+        let tableHTML = '';
+
+        pageItems.forEach(acces => {
+            const hasGPS = acces.latitude && acces.longitude;
+            const description = acces.description || 'Aucune description';
+            const truncatedDescription = description.length > 50
+                ? description.substring(0, 47) + '...'
+                : description;
+
+            tableHTML += `
+                <tr>
+                    <td style="font-weight: bold; color: #3498db;">${acces.id}</td>
+                    <td>${acces.nomAcces || '-'}</td>
+                    <td>${acces.ligneBkVoie || ''}</td>
+                    <td>${acces.adresse || '-'}</td>
+                    <td class="description-cell" data-full="${description.replace(/"/g, '&quot;')}">
+                        ${truncatedDescription}
+                    </td>
+                    <td>
+                        <button class="go-btn" ${!hasGPS ? 'disabled' : ''}
+                                onclick="openGoogleMaps(${acces.latitude}, ${acces.longitude})">
+                            GO
+                        </button>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn view-btn" onclick="openApercuPage(${acces.id})" title="Aperçu">
+                                👁️ Aperçu
+                            </button>
+                            <button class="action-btn edit-btn" onclick="openModifierPage(${acces.id})" title="Modifier">
+                                ✏️ Modifier
+                            </button>
+                            <button class="action-btn delete-btn" onclick="showDeleteModal(${JSON.stringify(acces).replace(/"/g, '&quot;')})" title="Supprimer">
+                                🗑️ Supprimer
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = tableHTML;
+        generatePagination(allAcces.length);
+    }
+
+    // Mettre à jour statistiques
+    function updateStats(accesList) {
+        const total = accesList.length;
+        const avecGPS = accesList.filter(a => a.latitude && a.longitude).length;
+        const sansGPS = total - avecGPS;
+
+        document.getElementById('totalAcces').textContent = total;
+        document.getElementById('avecGPS').textContent = avecGPS;
+        document.getElementById('sansGPS').textContent = sansGPS;
+    }
+
+    // Charger les accès par ligne
+    async function loadAccesParLigne() {
+        currentLigne = getLigneFromURL();
+
+        if (!currentLigne) {
+            showError('Paramètre "ligne" manquant dans l\'URL. Exemple: ?ligne=Ligne 36N');
+            return;
+        }
+
+        document.getElementById('ligneNumber').textContent = currentLigne;
+
+        showElement('loading', true);
+        showElement('errorMessage', false);
+        showElement('tableContainer', false);
+        showElement('emptyState', false);
+        showElement('pagination', false);
+
+        try {
+            const encodedLigne = encodeURIComponent(currentLigne);
+            const apiUrl = `${API_BASE_URL}/ligne/${encodedLigne}`;
+
+            console.log('Chargement depuis:', apiUrl);
+
+            const response = await fetch(apiUrl);
+
+            if (response.status === 404) {
+                allAcces = [];
+                showElement('loading', false);
+                showElement('emptyState', true);
+                updateStats([]);
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP ${response.status}`);
+            }
+
+            allAcces = await response.json();
+
+            showElement('loading', false);
+
+            if (allAcces.length === 0) {
+                showElement('emptyState', true);
+            } else {
+                showElement('tableContainer', true);
+                allAcces.sort((a, b) => a.id - b.id);
+                updateStats(allAcces);
+                currentPage = 1;
+                displayCurrentPage();
+            }
+
+        } catch (error) {
+            console.error('Erreur lors du chargement:', error);
+            showError(`Erreur lors du chargement: ${error.message}`);
+        }
+    }
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+        // Charger les données
+        loadAccesParLigne();
+
+        // Écouteurs modale suppression
+        document.getElementById('modalCancelBtn').addEventListener('click', hideDeleteModal);
+        document.getElementById('modalConfirmBtn').addEventListener('click', function() {
+            if (accessToDelete) {
+                deleteAccess(accessToDelete.id);
+            }
+        });
+
+        // Fermer modale avec ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideDeleteModal();
+            }
+        });
+
+        // Fermer modale en cliquant en dehors
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDeleteModal();
+            }
+        });
+    });
+
+    // Exposer fonctions globales
+    window.openGoogleMaps = openGoogleMaps;
+    window.openApercuPage = openApercuPage;
+    window.openModifierPage = openModifierPage;
+    window.showDeleteModal = showDeleteModal;
+    window.changePage = changePage;
+</script>
+</body>
+</html>

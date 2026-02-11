@@ -1,0 +1,2163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modifier le Profil</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ===== RESET & BASE STYLES ===== */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --secondary: #8b5cf6;
+        --danger: #ef4444;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        --radius-sm: 0.375rem;
+        --radius: 0.5rem;
+        --radius-md: 0.75rem;
+        --radius-lg: 1rem;
+        --radius-xl: 1.5rem;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        color: var(--gray-800);
+        line-height: 1.5;
+    }
+
+    /* ===== LAYOUT & CONTAINERS ===== */
+    .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .app-wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    @media (min-width: 1024px) {
+        .app-wrapper {
+            grid-template-columns: 300px 1fr;
+        }
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-xl);
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .user-card {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .avatar-container {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 1.5rem;
+    }
+
+    .avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--primary);
+        box-shadow: var(--shadow-lg);
+        transition: var(--transition);
+    }
+
+    .avatar:hover {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        border: 4px solid var(--primary);
+    }
+
+    .avatar-upload-btn {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 40px;
+        height: 40px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid white;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .avatar-upload-btn:hover {
+        background: var(--primary-dark);
+        transform: scale(1.1);
+    }
+
+    .user-info h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--gray-900);
+    }
+
+    .user-email {
+        color: var(--gray-600);
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+    }
+
+    .user-role {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 0.25rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: var(--shadow);
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--gray-100);
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--gray-600);
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: 2.5rem;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .header {
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid var(--gray-100);
+    }
+
+    .header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .header p {
+        color: var(--gray-600);
+        font-size: 1.1rem;
+    }
+
+    /* ===== FORM SECTIONS ===== */
+    .form-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .form-section {
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        border: 1px solid var(--gray-200);
+        transition: var(--transition);
+    }
+
+    .form-section:hover {
+        border-color: var(--primary);
+        box-shadow: var(--shadow-md);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .section-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-900);
+    }
+
+    .section-subtitle {
+        font-size: 0.95rem;
+        color: var(--gray-600);
+        margin-top: 0.25rem;
+    }
+
+    /* ===== FORM CONTROLS ===== */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .form-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 600;
+        color: var(--gray-700);
+        font-size: 0.95rem;
+    }
+
+    .required {
+        color: var(--danger);
+    }
+
+    .optional {
+        font-size: 0.85rem;
+        color: var(--gray-500);
+        font-weight: normal;
+        background: var(--gray-100);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius);
+    }
+
+    .form-input {
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        font-family: inherit;
+        transition: var(--transition);
+        background: white;
+        color: var(--gray-800);
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-input::placeholder {
+        color: var(--gray-400);
+    }
+
+    .form-input:disabled {
+        background: var(--gray-100);
+        cursor: not-allowed;
+    }
+
+    .form-helper {
+        font-size: 0.85rem;
+        color: var(--gray-500);
+        margin-top: 0.25rem;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--gray-500);
+        cursor: pointer;
+        padding: 0.25rem;
+    }
+
+    .input-with-icon {
+        position: relative;
+    }
+
+    .input-with-icon i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-400);
+    }
+
+    .input-with-icon .form-input {
+        padding-left: 3rem;
+    }
+
+    /* ===== PASSWORD SECTION ===== */
+    .password-section {
+        position: relative;
+    }
+
+    .password-toggle-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        color: var(--gray-700);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: var(--transition);
+        margin-bottom: 1rem;
+    }
+
+    .password-toggle-btn:hover {
+        background: linear-gradient(135deg, var(--gray-200), var(--gray-300));
+        border-color: var(--gray-400);
+    }
+
+    .password-fields {
+        display: none;
+        animation: slideDown 0.3s ease;
+    }
+
+    .password-fields.show {
+        display: block;
+    }
+
+    /* ===== FILE UPLOAD ===== */
+    .file-upload-area {
+        border: 2px dashed var(--gray-300);
+        border-radius: var(--radius-lg);
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        background: white;
+    }
+
+    .file-upload-area:hover {
+        border-color: var(--primary);
+        background: var(--gray-50);
+    }
+
+    .file-upload-area.dragover {
+        border-color: var(--primary);
+        background: rgba(99, 102, 241, 0.05);
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+
+    .upload-text {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-subtext {
+        color: var(--gray-500);
+        margin-bottom: 1.5rem;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .file-preview {
+        margin-top: 2rem;
+        display: none;
+    }
+
+    .file-preview.show {
+        display: block;
+    }
+
+    .preview-image {
+        width: 150px;
+        height: 150px;
+        border-radius: var(--radius-lg);
+        object-fit: cover;
+        margin: 0 auto;
+        border: 3px solid var(--primary);
+        box-shadow: var(--shadow);
+    }
+
+    .file-info {
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .file-name {
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.25rem;
+    }
+
+    .file-size {
+        color: var(--gray-500);
+        font-size: 0.9rem;
+    }
+
+    .remove-file-btn {
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        background: var(--danger);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .remove-file-btn:hover {
+        background: #dc2626;
+    }
+
+    /* ===== FORM ACTIONS ===== */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--gray-200);
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        border-radius: var(--radius-lg);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        border: none;
+        font-family: inherit;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        flex: 1;
+        box-shadow: var(--shadow);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    .btn-secondary {
+        background: var(--gray-100);
+        color: var(--gray-700);
+        padding: 1rem 1.5rem;
+        border: 2px solid var(--gray-300);
+    }
+
+    .btn-secondary:hover {
+        background: var(--gray-200);
+        border-color: var(--gray-400);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+    }
+
+    /* ===== MODALS & OVERLAYS ===== */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+    }
+
+    .modal-overlay.show {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal {
+        background: white;
+        border-radius: var(--radius-xl);
+        width: 100%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: var(--shadow-xl);
+        animation: slideUp 0.3s ease;
+    }
+
+    .modal-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--gray-500);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: var(--radius);
+        transition: var(--transition);
+    }
+
+    .modal-close:hover {
+        background: var(--gray-100);
+        color: var(--gray-700);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--gray-200);
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    /* ===== ALERTS ===== */
+    .alert {
+        padding: 1rem 1.5rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+        display: none;
+        animation: slideIn 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+
+    .alert.show {
+        display: block;
+    }
+
+    .alert-error {
+        background: linear-gradient(135deg, #fee, #fecaca);
+        color: #991b1b;
+        border-color: #dc2626;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        color: #065f46;
+        border-color: #10b981;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #92400e;
+        border-color: #f59e0b;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        color: #1e40af;
+        border-color: var(--primary);
+    }
+
+    .alert-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .alert-body {
+        line-height: 1.6;
+    }
+
+    /* ===== LOADING OVERLAY ===== */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .loading-overlay.show {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid var(--gray-200);
+        border-top: 4px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--gray-700);
+    }
+
+    .progress-bar {
+        width: 200px;
+        height: 6px;
+        background: var(--gray-200);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    /* ===== CAMERA MODAL ===== */
+    .camera-preview {
+        width: 100%;
+        height: 400px;
+        background: black;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .camera-preview video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .camera-controls {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .camera-btn {
+        padding: 1rem 2rem;
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: var(--transition);
+    }
+
+    .camera-capture {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+    }
+
+    .camera-capture:hover {
+        transform: scale(1.05);
+    }
+
+    .camera-switch {
+        background: var(--gray-100);
+        color: var(--gray-700);
+        border: 2px solid var(--gray-300);
+    }
+
+    .camera-switch:hover {
+        background: var(--gray-200);
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes slideDown {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes slideIn {
+        from { transform: translateX(-20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+        .main-content {
+            padding: 1.5rem;
+        }
+
+        .form-section {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+
+        .sidebar {
+            position: static;
+            margin-bottom: 2rem;
+        }
+
+        .app-wrapper {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .header h1 {
+            font-size: 1.5rem;
+        }
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .modal {
+            padding: 0;
+        }
+
+        .modal-header,
+        .modal-body,
+        .modal-footer {
+            padding: 1rem;
+        }
+    }
+
+    /* ===== UTILITY CLASSES ===== */
+    .hidden {
+        display: none !important;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .mb-1 { margin-bottom: 0.5rem; }
+    .mb-2 { margin-bottom: 1rem; }
+    .mb-3 { margin-bottom: 1.5rem; }
+    .mb-4 { margin-bottom: 2rem; }
+    .mb-5 { margin-bottom: 2.5rem; }
+
+    .mt-1 { margin-top: 0.5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mt-3 { margin-top: 1.5rem; }
+    .mt-4 { margin-top: 2rem; }
+    .mt-5 { margin-top: 2.5rem; }
+
+    .flex {
+        display: flex;
+    }
+
+    .items-center {
+        align-items: center;
+    }
+
+    .justify-between {
+        justify-content: space-between;
+    }
+
+    .gap-1 { gap: 0.5rem; }
+    .gap-2 { gap: 1rem; }
+    .gap-3 { gap: 1.5rem; }
+    .gap-4 { gap: 2rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="app-wrapper">
+    <!-- Sidebar avec informations utilisateur -->
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar-container">
+          <div class="avatar-placeholder" id="avatarPlaceholder">
+            <!-- Initials will be inserted here -->
+          </div>
+          <img src="" alt="Photo de profil" class="avatar hidden" id="avatarImage">
+          <div class="avatar-upload-btn" id="avatarUploadBtn">
+            <i class="fas fa-camera"></i>
+          </div>
+        </div>
+
+        <div class="user-info">
+          <h2 id="currentUsername">Chargement...</h2>
+          <div class="user-email" id="currentEmail">Chargement...</div>
+          <div class="user-role" id="currentRole">UTILISATEUR</div>
+        </div>
+
+        <div class="stats">
+          <div class="stat-item">
+            <div class="stat-value" id="memberSince">-</div>
+            <div class="stat-label">Membre depuis</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="lastUpdate">-</div>
+            <div class="stat-label">Dernière mise à jour</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <button class="btn btn-secondary w-100" onclick="window.location.href='/menu/menu.html'">
+          <i class="fas fa-arrow-left"></i>
+          Retour au menu
+        </button>
+      </div>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="main-content">
+      <!-- Alertes -->
+      <div class="alert" id="alert">
+        <div class="alert-header">
+          <i class="fas fa-exclamation-circle"></i>
+          <span id="alertTitle">Titre</span>
+        </div>
+        <div class="alert-body" id="alertMessage">Message d'alerte</div>
+      </div>
+
+      <!-- En-tête -->
+      <div class="header">
+        <h1>
+          <i class="fas fa-user-edit"></i>
+          Modifier votre profil
+        </h1>
+        <p>Mettez à jour vos informations personnelles et votre photo de profil</p>
+      </div>
+
+      <!-- Formulaire -->
+      <form id="profileForm">
+        <div class="form-sections">
+          <!-- Section 1: Informations personnelles -->
+          <section class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <i class="fas fa-user"></i>
+              </div>
+              <div>
+                <h3 class="section-title">Informations personnelles</h3>
+                <p class="section-subtitle">Mettez à jour vos informations de base</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="username">
+                  <span>Nom d'utilisateur</span>
+                  <span class="optional">Optionnel</span>
+                </label>
+                <div class="input-with-icon">
+                  <i class="fas fa-user"></i>
+                  <input type="text" id="username" name="username" class="form-input"
+                         placeholder="Nouveau nom d'utilisateur" minlength="3">
+                </div>
+                <div class="form-helper">Minimum 3 caractères</div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="email">
+                  <span>Adresse email</span>
+                  <span class="optional">Optionnel</span>
+                </label>
+                <div class="input-with-icon">
+                  <i class="fas fa-envelope"></i>
+                  <input type="email" id="email" name="email" class="form-input"
+                         placeholder="Nouvelle adresse email">
+                </div>
+                <div class="form-helper">Format: exemple@domaine.com</div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="phoneNumber">
+                  <span>Numéro de téléphone</span>
+                  <span class="optional">Optionnel</span>
+                </label>
+                <div class="input-with-icon">
+                  <i class="fas fa-phone"></i>
+                  <input type="text" id="phoneNumber" name="phoneNumber" class="form-input"
+                         placeholder="Nouveau numéro de téléphone">
+                </div>
+                <div class="form-helper">Format: +33 1 23 45 67 89</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 2: Sécurité -->
+          <section class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <i class="fas fa-lock"></i>
+              </div>
+              <div>
+                <h3 class="section-title">Sécurité</h3>
+                <p class="section-subtitle">Modifiez votre mot de passe</p>
+              </div>
+            </div>
+
+            <button type="button" class="password-toggle-btn" id="togglePasswordBtn">
+              <i class="fas fa-key"></i>
+              Modifier le mot de passe
+            </button>
+
+            <div class="password-fields" id="passwordFields">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="currentPassword">
+                    <span>Mot de passe actuel</span>
+                    <span class="required">*</span>
+                  </label>
+                  <div class="input-with-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="currentPassword" name="currentPassword"
+                           class="form-input" placeholder="Votre mot de passe actuel">
+                    <button type="button" class="password-toggle" data-target="currentPassword">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                  </div>
+                  <div class="form-helper">Requis pour modifier le mot de passe</div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="newPassword">
+                    <span>Nouveau mot de passe</span>
+                    <span class="optional">Optionnel</span>
+                  </label>
+                  <div class="input-with-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="newPassword" name="newPassword"
+                           class="form-input" placeholder="Nouveau mot de passe" minlength="4">
+                    <button type="button" class="password-toggle" data-target="newPassword">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                  </div>
+                  <div class="form-helper">Minimum 4 caractères</div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="confirmPassword">
+                    <span>Confirmer le mot de passe</span>
+                  </label>
+                  <div class="input-with-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="confirmPassword" name="confirmPassword"
+                           class="form-input" placeholder="Confirmez le nouveau mot de passe">
+                    <button type="button" class="password-toggle" data-target="confirmPassword">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 3: Photo de profil -->
+          <section class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <i class="fas fa-camera"></i>
+              </div>
+              <div>
+                <h3 class="section-title">Photo de profil</h3>
+                <p class="section-subtitle">Téléchargez une nouvelle photo ou prenez-en une avec votre caméra</p>
+              </div>
+            </div>
+
+            <div class="file-upload-area" id="fileUploadArea">
+              <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+              </div>
+              <div class="upload-text">
+                Glissez-déposez votre photo ici
+              </div>
+              <div class="upload-subtext">
+                ou cliquez pour sélectionner un fichier
+              </div>
+              <button type="button" class="btn btn-secondary" id="selectFileBtn">
+                <i class="fas fa-folder-open"></i>
+                Parcourir les fichiers
+              </button>
+              <button type="button" class="btn btn-secondary mt-2" id="cameraBtn">
+                <i class="fas fa-camera"></i>
+                Prendre une photo
+              </button>
+              <input type="file" id="fileInput" class="file-input" accept="image/*">
+
+              <div class="file-preview" id="filePreview">
+                <img src="" alt="Aperçu" class="preview-image" id="previewImage">
+                <div class="file-info">
+                  <div class="file-name" id="fileName"></div>
+                  <div class="file-size" id="fileSize"></div>
+                  <button type="button" class="remove-file-btn" id="removeFileBtn">
+                    <i class="fas fa-trash"></i>
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Actions du formulaire -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            <i class="fas fa-save"></i>
+            Enregistrer les modifications
+          </button>
+          <button type="button" class="btn btn-secondary" id="resetBtn">
+            <i class="fas fa-redo"></i>
+            Réinitialiser
+          </button>
+          <button type="button" class="btn btn-danger" id="deletePhotoBtn" style="display: none;">
+            <i class="fas fa-trash"></i>
+            Supprimer la photo
+          </button>
+        </div>
+      </form>
+    </main>
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="cameraModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i class="fas fa-camera"></i>
+        Prendre une photo
+      </h3>
+      <button class="modal-close" id="closeCameraModal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="camera-preview">
+        <video id="cameraVideo" autoplay playsinline></video>
+      </div>
+      <div class="camera-controls">
+        <button class="camera-btn camera-capture" id="captureBtn">
+          <i class="fas fa-camera"></i>
+          Prendre la photo
+        </button>
+        <button class="camera-btn camera-switch" id="switchCameraBtn">
+          <i class="fas fa-sync-alt"></i>
+          Changer de caméra
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay de chargement -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Chargement en cours...</div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+</div>
+
+<script>
+  // ===== CONFIGURATION =====
+  const CONFIG = {
+      API: {
+          ME: '/api/users/me',
+          UPDATE: '/api/users/me/update',
+          LOGIN: '/api/auth/login'
+      },
+      ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
+      MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
+      VALIDATION: {
+          USERNAME_MIN: 3,
+          PASSWORD_MIN: 4
+      }
+  };
+
+  // ===== ÉTAT GLOBAL =====
+  const state = {
+      currentUser: null,
+      selectedFile: null,
+      filePreviewUrl: null,
+      passwordFieldsVisible: false,
+      isSubmitting: false,
+      cameraStream: null,
+      facingMode: 'user', // 'user' pour frontale, 'environment' pour arrière
+      hasExistingPhoto: false
+  };
+
+  // ===== ÉLÉMENTS DOM =====
+  const elements = {
+      // Alertes
+      alert: document.getElementById('alert'),
+      alertTitle: document.getElementById('alertTitle'),
+      alertMessage: document.getElementById('alertMessage'),
+
+      // Sidebar
+      currentUsername: document.getElementById('currentUsername'),
+      currentEmail: document.getElementById('currentEmail'),
+      currentRole: document.getElementById('currentRole'),
+      memberSince: document.getElementById('memberSince'),
+      lastUpdate: document.getElementById('lastUpdate'),
+      avatarPlaceholder: document.getElementById('avatarPlaceholder'),
+      avatarImage: document.getElementById('avatarImage'),
+      avatarUploadBtn: document.getElementById('avatarUploadBtn'),
+
+      // Formulaire
+      username: document.getElementById('username'),
+      email: document.getElementById('email'),
+      phoneNumber: document.getElementById('phoneNumber'),
+      currentPassword: document.getElementById('currentPassword'),
+      newPassword: document.getElementById('newPassword'),
+      confirmPassword: document.getElementById('confirmPassword'),
+
+      // Mot de passe
+      togglePasswordBtn: document.getElementById('togglePasswordBtn'),
+      passwordFields: document.getElementById('passwordFields'),
+      passwordToggles: document.querySelectorAll('.password-toggle'),
+
+      // Fichiers
+      fileUploadArea: document.getElementById('fileUploadArea'),
+      selectFileBtn: document.getElementById('selectFileBtn'),
+      cameraBtn: document.getElementById('cameraBtn'),
+      fileInput: document.getElementById('fileInput'),
+      filePreview: document.getElementById('filePreview'),
+      previewImage: document.getElementById('previewImage'),
+      fileName: document.getElementById('fileName'),
+      fileSize: document.getElementById('fileSize'),
+      removeFileBtn: document.getElementById('removeFileBtn'),
+      deletePhotoBtn: document.getElementById('deletePhotoBtn'),
+
+      // Caméra
+      cameraModal: document.getElementById('cameraModal'),
+      cameraVideo: document.getElementById('cameraVideo'),
+      captureBtn: document.getElementById('captureBtn'),
+      switchCameraBtn: document.getElementById('switchCameraBtn'),
+      closeCameraModal: document.getElementById('closeCameraModal'),
+
+      // Formulaire et actions
+      profileForm: document.getElementById('profileForm'),
+      submitBtn: document.getElementById('submitBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+
+      // Chargement
+      loadingOverlay: document.getElementById('loadingOverlay'),
+      progressFill: document.getElementById('progressFill'),
+      loadingText: document.getElementById('loadingText')
+  };
+
+  // ===== UTILITAIRES =====
+  class Utils {
+      static checkAuth() {
+          const token = localStorage.getItem('accessToken');
+          if (!token) {
+              this.showAlert('Erreur d\'authentification', 'Veuillez vous reconnecter', 'error');
+              setTimeout(() => window.location.href = '/connection/connection.html', 2000);
+              return false;
+          }
+          return true;
+      }
+
+      static showAlert(title, message, type = 'error', duration = 5000) {
+          const icons = {
+              error: 'fas fa-exclamation-circle',
+              success: 'fas fa-check-circle',
+              warning: 'fas fa-exclamation-triangle',
+              info: 'fas fa-info-circle'
+          };
+
+          elements.alertTitle.textContent = title;
+          elements.alertMessage.textContent = message;
+          elements.alert.className = `alert alert-${type} show`;
+          elements.alert.querySelector('.alert-header i').className = icons[type];
+
+          if (duration > 0) {
+              setTimeout(() => {
+                  elements.alert.classList.remove('show');
+                  setTimeout(() => {
+                      elements.alert.className = 'alert';
+                  }, 300);
+              }, duration);
+          }
+      }
+
+      static hideAlert() {
+          elements.alert.classList.remove('show');
+          setTimeout(() => {
+              elements.alert.className = 'alert';
+          }, 300);
+      }
+
+      static formatDate(dateString) {
+          if (!dateString) return '-';
+          const date = new Date(dateString);
+          return date.toLocaleDateString('fr-FR', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+          });
+      }
+
+      static formatDateTime(dateString) {
+          if (!dateString) return '-';
+          const date = new Date(dateString);
+          return date.toLocaleDateString('fr-FR', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+          });
+      }
+
+      static getInitials(username) {
+          if (!username) return '?';
+          const parts = username.split(' ');
+          if (parts.length >= 2) {
+              return (parts[0][0] + parts[1][0]).toUpperCase();
+          }
+          return username.substring(0, 2).toUpperCase();
+      }
+
+      static formatFileSize(bytes) {
+          if (bytes === 0) return '0 Bytes';
+          const k = 1024;
+          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      }
+
+      static isValidEmail(email) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return emailRegex.test(email);
+      }
+
+      static isValidPhone(phone) {
+          if (!phone) return true;
+          const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/;
+          return phoneRegex.test(phone.replace(/\s/g, ''));
+      }
+
+      static compressImage(file) {
+          return new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.readAsDataURL(file);
+
+              reader.onload = (e) => {
+                  const img = new Image();
+                  img.src = e.target.result;
+
+                  img.onload = () => {
+                      const canvas = document.createElement('canvas');
+                      const ctx = canvas.getContext('2d');
+
+                      let width = img.width;
+                      let height = img.height;
+
+                      // Redimensionner si trop grand (max 800px)
+                      const MAX_SIZE = 800;
+                      if (width > height && width > MAX_SIZE) {
+                          height = Math.round(height * (MAX_SIZE / width));
+                          width = MAX_SIZE;
+                      } else if (height > width && height > MAX_SIZE) {
+                          width = Math.round(width * (MAX_SIZE / height));
+                          height = MAX_SIZE;
+                      }
+
+                      canvas.width = width;
+                      canvas.height = height;
+                      ctx.drawImage(img, 0, 0, width, height);
+
+                      canvas.toBlob((blob) => {
+                          const compressedFile = new File([blob], 'photo.jpg', {
+                              type: 'image/jpeg',
+                              lastModified: Date.now()
+                          });
+                          resolve(compressedFile);
+                      }, 'image/jpeg', 0.75);
+                  };
+
+                  img.onerror = () => {
+                      reject(new Error('Erreur lors du chargement de l\'image'));
+                  };
+              };
+
+              reader.onerror = () => {
+                  reject(new Error('Erreur lors de la lecture du fichier'));
+              };
+          });
+      }
+
+      static showLoading(text = 'Chargement...') {
+          state.isSubmitting = true;
+          elements.loadingText.textContent = text;
+          elements.loadingOverlay.classList.add('show');
+          this.updateProgress(0);
+      }
+
+      static hideLoading() {
+          state.isSubmitting = false;
+          elements.loadingOverlay.classList.remove('show');
+          this.updateProgress(0);
+      }
+
+      static updateProgress(percent) {
+          elements.progressFill.style.width = `${percent}%`;
+      }
+
+      static showToast(message, type = 'success') {
+          const toast = document.createElement('div');
+          const colors = {
+              success: '#10b981',
+              error: '#ef4444',
+              warning: '#f59e0b',
+              info: '#6366f1'
+          };
+
+          const icons = {
+              success: 'fas fa-check-circle',
+              error: 'fas fa-exclamation-circle',
+              warning: 'fas fa-exclamation-triangle',
+              info: 'fas fa-info-circle'
+          };
+
+          toast.className = 'toast';
+          toast.style.cssText = `
+              position: fixed;
+              top: 20px;
+              right: 20px;
+              background: ${colors[type]};
+              color: white;
+              padding: 1rem 1.5rem;
+              border-radius: var(--radius-lg);
+              box-shadow: var(--shadow-xl);
+              z-index: 9999;
+              display: flex;
+              align-items: center;
+              gap: 0.75rem;
+              max-width: 400px;
+              animation: slideIn 0.3s ease;
+          `;
+
+          toast.innerHTML = `
+              <i class="${icons[type]}"></i>
+              <span>${message}</span>
+          `;
+
+          document.body.appendChild(toast);
+
+          setTimeout(() => {
+              toast.style.animation = 'slideOut 0.3s ease';
+              setTimeout(() => toast.remove(), 300);
+          }, 3000);
+
+          // Ajouter les styles d'animation
+          if (!document.querySelector('#toast-styles')) {
+              const style = document.createElement('style');
+              style.id = 'toast-styles';
+              style.textContent = `
+                  @keyframes slideIn {
+                      from { transform: translateX(100%); opacity: 0; }
+                      to { transform: translateX(0); opacity: 1; }
+                  }
+                  @keyframes slideOut {
+                      from { transform: translateX(0); opacity: 1; }
+                      to { transform: translateX(100%); opacity: 0; }
+                  }
+              `;
+              document.head.appendChild(style);
+          }
+      }
+  }
+
+  // ===== GESTION UTILISATEUR =====
+  class UserManager {
+      static async loadUserData() {
+          if (!Utils.checkAuth()) return;
+
+          try {
+              Utils.showLoading('Chargement de votre profil...');
+              Utils.updateProgress(30);
+
+              const response = await fetch(CONFIG.API.ME, {
+                  headers: {
+                      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+                      'Content-Type': 'application/json'
+                  }
+              });
+
+              if (!response.ok) {
+                  throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+              }
+
+              state.currentUser = await response.json();
+              Utils.updateProgress(70);
+
+              this.updateUI();
+              Utils.updateProgress(100);
+              Utils.hideLoading();
+
+          } catch (error) {
+              console.error('Erreur:', error);
+              Utils.showAlert('Erreur', 'Impossible de charger votre profil', 'error');
+              Utils.hideLoading();
+          }
+      }
+
+      static updateUI() {
+          if (!state.currentUser) return;
+
+          const user = state.currentUser;
+
+          // Sidebar
+          elements.currentUsername.textContent = user.username || 'Utilisateur';
+          elements.currentEmail.textContent = user.email || 'Non spécifié';
+          elements.currentRole.textContent = user.role || 'USER';
+          elements.memberSince.textContent = Utils.formatDate(user.createdAt);
+          elements.lastUpdate.textContent = Utils.formatDateTime(user.updatedAt);
+
+          // Avatar
+          this.updateAvatar(user.photoUrl);
+
+          // Formulaire
+          elements.username.value = user.username || '';
+          elements.email.value = user.email || '';
+          elements.phoneNumber.value = user.phoneNumber || '';
+
+          // Gestion de la photo existante
+          state.hasExistingPhoto = !!user.photoUrl;
+          if (user.photoUrl) {
+              elements.deletePhotoBtn.style.display = 'block';
+          }
+      }
+
+      static updateAvatar(photoUrl) {
+          if (photoUrl) {
+              // Ajouter un timestamp pour éviter le cache
+              const timestamp = new Date().getTime();
+              const urlWithTimestamp = `${photoUrl}?t=${timestamp}`;
+
+              elements.avatarImage.src = urlWithTimestamp;
+              elements.avatarImage.classList.remove('hidden');
+              elements.avatarPlaceholder.classList.add('hidden');
+
+              // Mettre à jour l'aperçu
+              elements.previewImage.src = urlWithTimestamp;
+              elements.filePreview.classList.add('show');
+          } else {
+              // Afficher les initiales
+              const initials = Utils.getInitials(state.currentUser?.username);
+              elements.avatarPlaceholder.textContent = initials;
+              elements.avatarPlaceholder.classList.remove('hidden');
+              elements.avatarImage.classList.add('hidden');
+          }
+      }
+  }
+
+  // ===== GESTION DES MOTS DE PASSE =====
+  class PasswordManager {
+      static init() {
+          elements.togglePasswordBtn.addEventListener('click', () => this.togglePasswordFields());
+
+          // Gestion des boutons "voir/masquer"
+          elements.passwordToggles.forEach(toggle => {
+              toggle.addEventListener('click', (e) => {
+                  const targetId = e.target.closest('button').dataset.target;
+                  this.togglePasswordVisibility(targetId);
+              });
+          });
+      }
+
+      static togglePasswordFields() {
+          state.passwordFieldsVisible = !state.passwordFieldsVisible;
+
+          if (state.passwordFieldsVisible) {
+              elements.passwordFields.classList.add('show');
+              elements.togglePasswordBtn.innerHTML = `
+                  <i class="fas fa-eye-slash"></i>
+                  Masquer la modification du mot de passe
+              `;
+          } else {
+              elements.passwordFields.classList.remove('show');
+              elements.togglePasswordBtn.innerHTML = `
+                  <i class="fas fa-key"></i>
+                  Modifier le mot de passe
+              `;
+              this.clearPasswordFields();
+          }
+      }
+
+      static togglePasswordVisibility(fieldId) {
+          const field = document.getElementById(fieldId);
+          const toggle = field.nextElementSibling;
+          const icon = toggle.querySelector('i');
+
+          if (field.type === 'password') {
+              field.type = 'text';
+              icon.className = 'fas fa-eye-slash';
+          } else {
+              field.type = 'password';
+              icon.className = 'fas fa-eye';
+          }
+      }
+
+      static clearPasswordFields() {
+          elements.currentPassword.value = '';
+          elements.newPassword.value = '';
+          elements.confirmPassword.value = '';
+      }
+
+      static validatePassword() {
+          const currentPassword = elements.currentPassword.value;
+          const newPassword = elements.newPassword.value;
+          const confirmPassword = elements.confirmPassword.value;
+
+          if (!state.passwordFieldsVisible) return true;
+
+          // Si un nouveau mot de passe est fourni
+          if (newPassword) {
+              // Vérifier le mot de passe actuel
+              if (!currentPassword) {
+                  Utils.showAlert('Mot de passe requis', 'Le mot de passe actuel est requis pour modifier le mot de passe', 'error');
+                  return false;
+              }
+
+              // Vérifier la longueur
+              if (newPassword.length < CONFIG.VALIDATION.PASSWORD_MIN) {
+                  Utils.showAlert(
+                      'Mot de passe trop court',
+                      `Le nouveau mot de passe doit contenir au moins ${CONFIG.VALIDATION.PASSWORD_MIN} caractères`,
+                      'error'
+                  );
+                  return false;
+              }
+
+              // Vérifier la confirmation
+              if (newPassword !== confirmPassword) {
+                  Utils.showAlert('Mots de passe différents', 'Les nouveaux mots de passe ne correspondent pas', 'error');
+                  return false;
+              }
+          } else if (currentPassword) {
+              // Cas où currentPassword est fourni sans newPassword
+              Utils.showAlert('Nouveau mot de passe requis', 'Le nouveau mot de passe est requis lorsque vous fournissez le mot de passe actuel', 'error');
+              return false;
+          }
+
+          return true;
+      }
+  }
+
+  // ===== GESTION DES FICHIERS =====
+  class FileManager {
+      static init() {
+          // Gestion du drag & drop
+          elements.fileUploadArea.addEventListener('dragover', (e) => {
+              e.preventDefault();
+              elements.fileUploadArea.classList.add('dragover');
+          });
+
+          elements.fileUploadArea.addEventListener('dragleave', () => {
+              elements.fileUploadArea.classList.remove('dragover');
+          });
+
+          elements.fileUploadArea.addEventListener('drop', (e) => {
+              e.preventDefault();
+              elements.fileUploadArea.classList.remove('dragover');
+              const file = e.dataTransfer.files[0];
+              if (file) this.handleFileSelect(file);
+          });
+
+          // Boutons
+          elements.selectFileBtn.addEventListener('click', () => elements.fileInput.click());
+          elements.cameraBtn.addEventListener('click', () => this.openCamera());
+          elements.fileInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files[0]));
+          elements.removeFileBtn.addEventListener('click', () => this.removeFile());
+          elements.deletePhotoBtn.addEventListener('click', () => this.deletePhoto());
+          elements.avatarUploadBtn.addEventListener('click', () => elements.fileInput.click());
+      }
+
+      static async handleFileSelect(file) {
+          if (!file) return;
+
+          // Validation
+          if (!this.validateFile(file)) return;
+
+          try {
+              Utils.showLoading('Traitement de l\'image...');
+              Utils.updateProgress(30);
+
+              // Compression
+              const compressedFile = await Utils.compressImage(file);
+              Utils.updateProgress(70);
+
+              // Créer une URL d'aperçu
+              const previewUrl = URL.createObjectURL(compressedFile);
+
+              // Mettre à jour l'état
+              state.selectedFile = compressedFile;
+              state.filePreviewUrl = previewUrl;
+
+              // Mettre à jour l'interface
+              this.updateFilePreview(compressedFile, previewUrl);
+
+              // Masquer le bouton de suppression de la photo existante
+              elements.deletePhotoBtn.style.display = 'none';
+
+              Utils.updateProgress(100);
+              Utils.hideLoading();
+              Utils.showToast('Photo sélectionnée avec succès', 'success');
+
+          } catch (error) {
+              Utils.hideLoading();
+              console.error('Erreur:', error);
+              Utils.showAlert('Erreur', 'Impossible de traiter l\'image', 'error');
+          }
+      }
+
+      static validateFile(file) {
+          // Type de fichier
+          if (!CONFIG.ALLOWED_IMAGE_TYPES.includes(file.type)) {
+              Utils.showAlert('Format invalide', 'Seuls les formats JPG, PNG, GIF et WebP sont acceptés', 'error');
+              return false;
+          }
+
+          // Taille
+          if (file.size > CONFIG.MAX_FILE_SIZE) {
+              Utils.showAlert('Fichier trop volumineux', 'L\'image ne doit pas dépasser 5 Mo', 'error');
+              return false;
+          }
+
+          return true;
+      }
+
+      static updateFilePreview(file, previewUrl) {
+          // Aperçu
+          elements.previewImage.src = previewUrl;
+          elements.fileName.textContent = file.name;
+          elements.fileSize.textContent = Utils.formatFileSize(file.size);
+          elements.filePreview.classList.add('show');
+
+          // Avatar
+          elements.avatarImage.src = previewUrl;
+          elements.avatarImage.classList.remove('hidden');
+          elements.avatarPlaceholder.classList.add('hidden');
+      }
+
+      static removeFile() {
+          if (confirm('Supprimer cette photo ?')) {
+              // Nettoyer les URLs
+              if (state.filePreviewUrl) {
+                  URL.revokeObjectURL(state.filePreviewUrl);
+              }
+
+              // Réinitialiser l'état
+              state.selectedFile = null;
+              state.filePreviewUrl = null;
+
+              // Réinitialiser l'interface
+              elements.filePreview.classList.remove('show');
+              elements.fileInput.value = '';
+
+              // Réafficher la photo existante ou les initiales
+              if (state.hasExistingPhoto) {
+                  UserManager.updateAvatar(state.currentUser?.photoUrl);
+                  elements.deletePhotoBtn.style.display = 'block';
+              } else {
+                  UserManager.updateAvatar(null);
+              }
+
+              Utils.showToast('Photo supprimée', 'info');
+          }
+      }
+
+      static deletePhoto() {
+          if (confirm('Supprimer votre photo de profil ?')) {
+              state.hasExistingPhoto = false;
+              state.selectedFile = null;
+              elements.deletePhotoBtn.style.display = 'none';
+
+              // Réinitialiser l'affichage
+              UserManager.updateAvatar(null);
+              elements.filePreview.classList.remove('show');
+
+              Utils.showToast('La photo sera supprimée après enregistrement', 'warning');
+          }
+      }
+
+      static async openCamera() {
+          try {
+              // Demander l'accès à la caméra
+              state.cameraStream = await navigator.mediaDevices.getUserMedia({
+                  video: {
+                      facingMode: state.facingMode,
+                      width: { ideal: 1280 },
+                      height: { ideal: 720 }
+                  }
+              });
+
+              // Afficher le modal
+              elements.cameraVideo.srcObject = state.cameraStream;
+              elements.cameraModal.classList.add('show');
+
+          } catch (error) {
+              console.error('Erreur caméra:', error);
+              Utils.showAlert('Erreur caméra', 'Impossible d\'accéder à la caméra', 'error');
+          }
+      }
+
+      static closeCamera() {
+          // Arrêter le flux vidéo
+          if (state.cameraStream) {
+              state.cameraStream.getTracks().forEach(track => track.stop());
+              state.cameraStream = null;
+          }
+
+          // Fermer le modal
+          elements.cameraModal.classList.remove('show');
+          elements.cameraVideo.srcObject = null;
+      }
+
+      static switchCamera() {
+          state.facingMode = state.facingMode === 'user' ? 'environment' : 'user';
+          this.closeCamera();
+          this.openCamera();
+      }
+
+      static capturePhoto() {
+          const canvas = document.createElement('canvas');
+          const video = elements.cameraVideo;
+
+          // Définir les dimensions
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+
+          // Dessiner l'image
+          const ctx = canvas.getContext('2d');
+          if (state.facingMode === 'user') {
+              // Inverser horizontalement pour la caméra frontale
+              ctx.translate(canvas.width, 0);
+              ctx.scale(-1, 1);
+          }
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          // Convertir en blob
+          canvas.toBlob((blob) => {
+              const file = new File([blob], 'photo-camera.jpg', {
+                  type: 'image/jpeg',
+                  lastModified: Date.now()
+              });
+
+              this.closeCamera();
+              this.handleFileSelect(file);
+          }, 'image/jpeg', 0.8);
+      }
+  }
+
+  // ===== VALIDATION DU FORMULAIRE =====
+  class FormValidator {
+      static validateForm() {
+          const username = elements.username.value.trim();
+          const email = elements.email.value.trim();
+          const phoneNumber = elements.phoneNumber.value.trim();
+
+          // Validation du nom d'utilisateur
+          if (username && username.length < CONFIG.VALIDATION.USERNAME_MIN) {
+              Utils.showAlert(
+                  'Nom d\'utilisateur invalide',
+                  `Le nom d'utilisateur doit contenir au moins ${CONFIG.VALIDATION.USERNAME_MIN} caractères`,
+                  'error'
+              );
+              return false;
+          }
+
+          // Validation de l'email
+          if (email && !Utils.isValidEmail(email)) {
+              Utils.showAlert('Email invalide', 'Veuillez entrer une adresse email valide', 'error');
+              return false;
+          }
+
+          // Validation du téléphone
+          if (phoneNumber && !Utils.isValidPhone(phoneNumber)) {
+              Utils.showAlert('Téléphone invalide', 'Veuillez entrer un numéro de téléphone valide', 'error');
+              return false;
+          }
+
+          // Validation du mot de passe
+          if (!PasswordManager.validatePassword()) {
+              return false;
+          }
+
+          return true;
+      }
+
+      static hasChanges() {
+          const username = elements.username.value.trim();
+          const email = elements.email.value.trim();
+          const phoneNumber = elements.phoneNumber.value.trim();
+          const currentPassword = elements.currentPassword.value;
+          const newPassword = elements.newPassword.value;
+
+          const hasTextChanges = (
+              username !== (state.currentUser?.username || '') ||
+              email !== (state.currentUser?.email || '') ||
+              phoneNumber !== (state.currentUser?.phoneNumber || '')
+          );
+
+          const hasPasswordChanges = state.passwordFieldsVisible &&
+              (currentPassword || newPassword);
+
+          return hasTextChanges || hasPasswordChanges || state.selectedFile || !state.hasExistingPhoto;
+      }
+  }
+
+  // ===== GESTION DU FORMULAIRE =====
+  class FormManager {
+      static init() {
+          elements.profileForm.addEventListener('submit', (e) => this.handleSubmit(e));
+          elements.resetBtn.addEventListener('click', () => this.resetForm());
+
+          // Gestion de la caméra
+          elements.captureBtn.addEventListener('click', () => FileManager.capturePhoto());
+          elements.switchCameraBtn.addEventListener('click', () => FileManager.switchCamera());
+          elements.closeCameraModal.addEventListener('click', () => FileManager.closeCamera());
+
+          // Fermer la caméra en cliquant à l'extérieur
+          elements.cameraModal.addEventListener('click', (e) => {
+              if (e.target === elements.cameraModal) {
+                  FileManager.closeCamera();
+              }
+          });
+      }
+
+      static async handleSubmit(e) {
+          e.preventDefault();
+
+          if (state.isSubmitting) return;
+
+          // Masquer les alertes précédentes
+          Utils.hideAlert();
+
+          // Validation
+          if (!FormValidator.validateForm()) return;
+
+          // Vérifier les changements
+          if (!FormValidator.hasChanges()) {
+              Utils.showAlert('Aucune modification', 'Vous n\'avez apporté aucune modification', 'warning');
+              return;
+          }
+
+          // Préparer les données
+          const formData = this.prepareFormData();
+
+          // Désactiver le bouton
+          elements.submitBtn.disabled = true;
+          elements.submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement en cours...';
+
+          try {
+              Utils.showLoading('Mise à jour du profil...');
+              Utils.updateProgress(30);
+
+              const response = await fetch(CONFIG.API.UPDATE, {
+                  method: 'PUT',
+                  headers: {
+                      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                  },
+                  body: formData
+              });
+
+              Utils.updateProgress(70);
+
+              const result = await response.json();
+
+              if (!response.ok) {
+                  throw new Error(result.error || 'Erreur lors de la mise à jour');
+              }
+
+              Utils.updateProgress(100);
+              Utils.hideLoading();
+
+              // Succès
+              Utils.showAlert('Succès', 'Votre profil a été mis à jour avec succès !', 'success', 3000);
+              Utils.showToast('Profil mis à jour avec succès !', 'success');
+
+              // Recharger les données utilisateur
+              await UserManager.loadUserData();
+
+              // Réinitialiser le formulaire
+              this.resetForm();
+
+          } catch (error) {
+              console.error('Erreur:', error);
+              Utils.showAlert('Erreur', error.message || 'Une erreur est survenue', 'error');
+              Utils.hideLoading();
+          } finally {
+              elements.submitBtn.disabled = false;
+              elements.submitBtn.innerHTML = '<i class="fas fa-save"></i> Enregistrer les modifications';
+          }
+      }
+
+      static prepareFormData() {
+          const formData = new FormData();
+
+          const username = elements.username.value.trim();
+          const email = elements.email.value.trim();
+          const phoneNumber = elements.phoneNumber.value.trim();
+          const currentPassword = elements.currentPassword.value;
+          const newPassword = elements.newPassword.value;
+
+          // Ajouter les champs textuels si modifiés
+          if (username !== (state.currentUser?.username || '')) {
+              formData.append('username', username);
+          }
+
+          if (email !== (state.currentUser?.email || '')) {
+              formData.append('email', email);
+          }
+
+          if (phoneNumber !== (state.currentUser?.phoneNumber || '')) {
+              formData.append('phoneNumber', phoneNumber);
+          }
+
+          // Ajouter les mots de passe
+          if (currentPassword) {
+              formData.append('currentPassword', currentPassword);
+          }
+
+          if (newPassword) {
+              formData.append('newPassword', newPassword);
+          }
+
+          // Ajouter le fichier
+          if (state.selectedFile) {
+              formData.append('file', state.selectedFile);
+          } else if (!state.hasExistingPhoto && state.currentUser?.photoUrl) {
+              // Pour supprimer la photo, nous n'avons pas besoin d'envoyer de paramètre spécial
+              // car le backend ne supprime que si file est null et que l'utilisateur a une photo
+              // Dans notre cas, nous n'envoyons simplement pas de fichier
+          }
+
+          return formData;
+      }
+
+      static resetForm() {
+          // Réinitialiser les champs aux valeurs actuelles
+          elements.username.value = state.currentUser?.username || '';
+          elements.email.value = state.currentUser?.email || '';
+          elements.phoneNumber.value = state.currentUser?.phoneNumber || '';
+
+          // Réinitialiser les mots de passe
+          PasswordManager.clearPasswordFields();
+          if (state.passwordFieldsVisible) {
+              PasswordManager.togglePasswordFields();
+          }
+
+          // Réinitialiser les fichiers
+          if (state.filePreviewUrl) {
+              URL.revokeObjectURL(state.filePreviewUrl);
+              state.filePreviewUrl = null;
+          }
+          state.selectedFile = null;
+          elements.fileInput.value = '';
+          elements.filePreview.classList.remove('show');
+
+          // Réafficher la photo existante si nécessaire
+          if (state.hasExistingPhoto) {
+              UserManager.updateAvatar(state.currentUser?.photoUrl);
+              elements.deletePhotoBtn.style.display = 'block';
+          } else {
+              UserManager.updateAvatar(null);
+          }
+
+          Utils.showToast('Formulaire réinitialisé', 'info');
+      }
+  }
+
+  // ===== INITIALISATION DE L'APPLICATION =====
+  class App {
+      static async init() {
+          // Vérifier l'authentification
+          if (!Utils.checkAuth()) return;
+
+          // Initialiser les managers
+          PasswordManager.init();
+          FileManager.init();
+          FormManager.init();
+
+          // Charger les données utilisateur
+          await UserManager.loadUserData();
+      }
+  }
+
+  // ===== DÉMARRAGE =====
+  document.addEventListener('DOMContentLoaded', () => {
+      App.init();
+  });
+
+  // ===== GESTION DE LA DÉCONNEXION =====
+  window.addEventListener('beforeunload', () => {
+      // Nettoyer les URLs
+      if (state.filePreviewUrl) {
+          URL.revokeObjectURL(state.filePreviewUrl);
+      }
+  });
+</script>
+</body>
+</html>
