@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ma Team</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    :root {
+        --primary-color: #7B61FF;
+        --secondary-color: #FF6B9D;
+        --accent-color: #00D4FF;
+        --light-color: #f8f9fa;
+        --dark-color: #1A1A2E;
+        --card-bg: #ffffff;
+        --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+    }
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: var(--dark-color);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    header {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: var(--shadow);
+        position: relative;
+    }
+
+    .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .header-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .header-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .header-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .logo {
+        font-size: 2.5rem;
+    }
+
+    h1 {
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+        font-weight: 800;
+    }
+
+    .subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    main {
+        flex: 1;
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .welcome-section {
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+        text-align: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .welcome-section h2 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        font-size: 1.8rem;
+    }
+
+    .welcome-section p {
+        color: #555;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+        font-size: 1.1rem;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .action-card {
+        background-color: var(--card-bg);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .action-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn {
+        display: inline-block;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 700;
+        text-align: center;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(123, 97, 255, 0.4);
+        font-size: 1.1rem;
+        width: 100%;
+        max-width: 200px;
+    }
+
+    .btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 20px rgba(123, 97, 255, 0.6);
+    }
+
+    footer {
+        background-color: rgba(26, 26, 46, 0.8);
+        color: white;
+        text-align: center;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .social-links {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .social-links a {
+        color: white;
+        font-size: 1.5rem;
+        transition: var(--transition);
+    }
+
+    .social-links a:hover {
+        color: var(--accent-color);
+        transform: translateY(-3px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+        }
+
+        main {
+            padding: 1rem;
+        }
+
+        .welcome-section {
+            padding: 1.5rem;
+        }
+
+        .actions-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .card-header {
+            padding: 1.2rem;
+        }
+
+        .header-top {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .header-buttons {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        header {
+            padding: 1rem;
+        }
+
+        .logo-container {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+        }
+
+        .card-header {
+            padding: 1rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .header-btn {
+            padding: 0.5rem 0.8rem;
+            font-size: 0.9rem;
+        }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-top">
+    <div class="header-buttons">
+      <button class="header-btn" id="btnMenu">
+        <i class="fas fa-home"></i> Menu
+      </button>
+      <button class="header-btn" id="btnLogout">
+        <i class="fas fa-sign-out-alt"></i> Déco
+      </button>
+    </div>
+  </div>
+
+  <div class="logo-container">
+    <i class="fas fa-users logo"></i>
+    <div>
+      <h1>Ma Team</h1>
+      <p class="subtitle">Partage, vibes et connexions</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="welcome-section">
+    <h2>Salut la team ! 👋</h2>
+    <p>Ici c'est l'espace où on partage, on discute et on crée des liens. Fais-toi plaisir !</p>
+  </section>
+
+  <div class="actions-grid">
+    <div class="action-card">
+      <div class="card-header">
+        <i class="fas fa-newspaper card-icon"></i>
+        <h3 class="card-title">Voir les publications</h3>
+      </div>
+      <div class="card-body">
+        <a href="affichermessages.html" class="btn">Check !</a>
+      </div>
+    </div>
+
+    <div class="action-card">
+      <div class="card-header">
+        <i class="fas fa-comments card-icon"></i>
+        <h3 class="card-title">DM</h3>
+      </div>
+      <div class="card-body">
+        <a href="messagerie.html" class="btn">Let's go !</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-content">
+    <p>&copy; 2023 Ma Team. Tous droits réservés.</p>
+    <div class="social-links">
+      <a href="#"><i class="fab fa-tiktok"></i></a>
+      <a href="#"><i class="fab fa-instagram"></i></a>
+      <a href="#"><i class="fab fa-snapchat"></i></a>
+      <a href="#"><i class="fab fa-discord"></i></a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Vérifier l'authentification
+  const token = localStorage.getItem('accessToken');
+  if (!token) {
+    alert('Vous devez être connecté pour accéder à cette page');
+    window.location.href = '/connection/connection.html';
+  }
+
+  async function checkAuth() {
+    try {
+      const response = await fetch('/api/users/me', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!response.ok) throw new Error('Token invalide');
+      return await response.json();
+    } catch (err) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      alert('Session expirée');
+      window.location.href = '/connection/connection.html';
+    }
+  }
+
+  // Animation d'entrée des cartes
+  document.addEventListener('DOMContentLoaded', function() {
+      // Vérifier l'authentification au chargement
+      checkAuth();
+
+      const cards = document.querySelectorAll('.action-card');
+
+      cards.forEach((card, index) => {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+
+          setTimeout(() => {
+              card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+              card.style.opacity = '1';
+              card.style.transform = 'translateY(0)';
+          }, index * 200);
+      });
+
+      // Effet de survol amélioré
+      cards.forEach(card => {
+          card.addEventListener('mouseenter', function() {
+              this.style.transform = 'translateY(-10px) scale(1.02)';
+          });
+
+          card.addEventListener('mouseleave', function() {
+              this.style.transform = 'translateY(0) scale(1)';
+          });
+      });
+
+      // Animation du bouton
+      const buttons = document.querySelectorAll('.btn');
+      buttons.forEach(button => {
+          button.addEventListener('mouseenter', function() {
+              this.style.transform = 'translateY(-3px) scale(1.05)';
+          });
+
+          button.addEventListener('mouseleave', function() {
+              this.style.transform = 'translateY(0) scale(1)';
+          });
+      });
+
+      // Boutons header
+      document.getElementById('btnMenu').addEventListener('click', function() {
+          window.location.href = '/menu/menu.html';
+      });
+
+      // 🔹 Bouton Déconnexion - Même logique que dans le menu
+      document.getElementById('btnLogout').addEventListener('click', async () => {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+          // Si pas de refreshToken, déconnexion simple
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          alert('Déconnexion réussie');
+          window.location.href = '/connection/connection.html';
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json' },
+            body: JSON.stringify({ refreshToken })
+          });
+          if (response.ok) {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            alert('Déconnexion réussie');
+            window.location.href = '/connection/connection.html';
+          } else {
+            alert('Erreur lors de la déconnexion');
+          }
+        } catch (err) {
+          alert('Erreur réseau lors de la déconnexion');
+        }
+      });
+  });
+</script>
+</body>
+</html>

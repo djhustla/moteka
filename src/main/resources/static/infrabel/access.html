@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Détails de l'Accès</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .back-button {
+            color: white;
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #3498db;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .access-card {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            padding: clamp(16px, 3vw, 25px);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .access-id {
+            background: #3498db;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            white-space: nowrap;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .info-group {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .info-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .info-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #495057;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+        }
+
+        .info-value {
+            display: block;
+            padding: clamp(10px, 2vw, 12px) clamp(12px, 2vw, 15px);
+            background-color: white;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            font-size: clamp(14px, 3vw, 16px);
+            min-height: 44px;
+            word-break: break-word;
+            hyphens: auto;
+        }
+
+        .info-value.empty {
+            color: #6c757d;
+            font-style: italic;
+            background-color: #e9ecef;
+        }
+
+        .gps-link {
+            color: #3498db;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .gps-link:hover {
+            background-color: #e8f4fc;
+            text-decoration: none;
+        }
+
+        @media (hover: hover) {
+            .gps-link:hover {
+                transform: translateY(-1px);
+            }
+        }
+
+        .gps-icon {
+            font-size: 1em;
+            flex-shrink: 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: clamp(20px, 4vw, 30px);
+            color: #3498db;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .spinner {
+            width: clamp(30px, 6vw, 40px);
+            height: clamp(30px, 6vw, 40px);
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .error, .info-box, .warning-box {
+            padding: clamp(12px, 2vw, 15px);
+            border-radius: 8px;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideDown 0.3s ease-out;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            border: none;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .error::before {
+            content: "⚠️";
+            font-size: 1em;
+        }
+
+        .info-box::before {
+            content: "💡";
+            font-size: 1em;
+        }
+
+        .warning-box::before {
+            content: "⚠️";
+            font-size: 1em;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 12px;
+            }
+            .access-card {
+                padding: 12px;
+            }
+            .info-value {
+                padding: 8px 10px;
+            }
+        }
+
+        .btn-primary {
+            color: white;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #1c5a7a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .metadata {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .metadata-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .metadata-label {
+            font-weight: 600;
+        }
+
+        .metadata-value {
+            font-family: monospace;
+        }
+
+        .action-footer {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .footer-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .footer-buttons button {
+            flex: 1;
+            min-width: 150px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <button onclick="goBack()" class="back-button">
+            ← Retour à la recherche
+        </button>
+        <div class="action-buttons">
+            <button onclick="openModifierPage()" class="btn btn-warning">
+                ✏️ Modifier
+            </button>
+        </div>
+    </div>
+
+    <h1>📋 Détails de l'Accès</h1>
+
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div>Chargement des détails...</div>
+    </div>
+
+    <div id="errorMessage" class="error hidden"></div>
+    <div id="infoMessage" class="info-box hidden"></div>
+
+    <div id="accessCard" class="access-card hidden">
+        <div class="access-id" id="accessId">Chargement...</div>
+
+        <div class="info-group">
+            <span class="info-label">📛 Nom de l'accès</span>
+            <div class="info-value" id="nomAcces">Chargement...</div>
+        </div>
+
+        <div class="info-group">
+            <span class="info-label">🛤️ Ligne/Voie/BK</span>
+            <div class="info-value" id="ligneBkVoie">Chargement...</div>
+        </div>
+
+        <div class="info-group">
+            <span class="info-label">🏠 Adresse</span>
+            <div class="info-value" id="adresse">Chargement...</div>
+        </div>
+
+        <div class="info-group">
+            <span class="info-label">📝 Description</span>
+            <div class="info-value" id="description">Chargement...</div>
+        </div>
+
+        <div class="info-group">
+            <span class="info-label">📍 Coordonnées GPS</span>
+            <div class="info-value" id="coordonnees">Chargement...</div>
+        </div>
+
+        <div class="metadata">
+            <div class="metadata-item">
+                <span class="metadata-label">Créé le :</span>
+                <span class="metadata-value" id="createdAt"></span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">Mis à jour le :</span>
+                <span class="metadata-value" id="updatedAt"></span>
+            </div>
+        </div>
+
+        <button onclick="openGoogleMaps()" class="btn-primary" id="mapsBtn" style="display: none;">
+            <span>🗺️ Ouvrir dans Google Maps</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = '/api/acces';
+
+    // Récupérer l'ID depuis l'URL
+    function getAccessIdFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('id');
+    }
+
+    // Fonction pour afficher les messages
+    function showMessage(type, message, duration = 5000) {
+        const elementId = type + 'Message';
+        const element = document.getElementById(elementId);
+
+        if (element) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    element.classList.add('hidden');
+                }, duration);
+            }
+        }
+    }
+
+    // Fonction pour formater la date
+    function formatDateTime(dateTimeString) {
+        if (!dateTimeString) return 'Non disponible';
+
+        try {
+            const date = new Date(dateTimeString);
+            return date.toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {
+            return dateTimeString;
+        }
+    }
+
+    // Fonction pour ouvrir la page de modification
+    function openModifierPage() {
+        const accessId = getAccessIdFromURL();
+        if (accessId) {
+            window.location.href = `/infrabel/modifierAccess.html?id=${accessId}`;
+        } else {
+            showMessage('error', 'ID d\'accès non disponible');
+        }
+    }
+
+    // Fonction pour charger les détails de l'accès
+    async function loadAccessDetails() {
+        const accessId = getAccessIdFromURL();
+
+        if (!accessId) {
+            showMessage('error', 'ID d\'accès non spécifié dans l\'URL');
+            showLoading(false);
+            return;
+        }
+
+        document.getElementById('accessId').textContent = `ID: ${accessId}`;
+
+        try {
+            showLoading(true);
+
+            const response = await fetch(`${API_BASE_URL}/${accessId}`);
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Accès non trouvé');
+                } else {
+                    throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+                }
+            }
+
+            const access = await response.json();
+
+            // Afficher les données
+            displayAccessDetails(access);
+
+        } catch (error) {
+            console.error('Erreur lors du chargement:', error);
+            showMessage('error', `Erreur: ${error.message}`);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // Fonction pour afficher les détails de l'accès
+    function displayAccessDetails(access) {
+        // Afficher la carte
+        document.getElementById('accessCard').classList.remove('hidden');
+
+        // Remplir les champs avec les données
+        document.getElementById('nomAcces').textContent = access.nomAcces || '';
+        document.getElementById('ligneBkVoie').textContent = access.ligneBkVoie || '';
+
+        // Adresse
+        const adresseElement = document.getElementById('adresse');
+        if (access.adresse) {
+            adresseElement.textContent = access.adresse;
+            adresseElement.classList.remove('empty');
+        } else {
+            adresseElement.textContent = 'Adresse non encodée';
+            adresseElement.classList.add('empty');
+        }
+
+        // Description
+        const descriptionElement = document.getElementById('description');
+        if (access.description) {
+            descriptionElement.textContent = access.description;
+            descriptionElement.classList.remove('empty');
+        } else {
+            descriptionElement.textContent = 'Description non encodée';
+            descriptionElement.classList.add('empty');
+        }
+
+        // Coordonnées GPS
+        const coordonneesElement = document.getElementById('coordonnees');
+        const mapsBtn = document.getElementById('mapsBtn');
+
+        if (access.latitude && access.longitude) {
+            coordonneesElement.innerHTML = `
+                <a href="javascript:void(0)"
+                   onclick="openGoogleMaps(${access.latitude}, ${access.longitude})"
+                   class="gps-link"
+                   title="Ouvrir dans Google Maps"
+                   aria-label="Voir sur Google Maps">
+                    <span class="gps-icon">📍</span>
+                    ${access.latitude.toFixed(6)}, ${access.longitude.toFixed(6)}
+                </a>
+            `;
+            mapsBtn.style.display = 'flex';
+        } else {
+            coordonneesElement.textContent = 'Coordonnées non définies';
+            coordonneesElement.classList.add('empty');
+            mapsBtn.style.display = 'none';
+        }
+
+        // Métadonnées
+        document.getElementById('createdAt').textContent = formatDateTime(access.createdAt);
+        document.getElementById('updatedAt').textContent = formatDateTime(access.updatedAt);
+    }
+
+    // Fonction pour ouvrir Google Maps
+    function openGoogleMaps(latitude, longitude) {
+        // Si les coordonnées sont passées en paramètre
+        if (latitude && longitude) {
+            openMapsWithCoords(latitude, longitude);
+            return;
+        }
+
+        // Sinon, essayer de récupérer depuis les éléments HTML
+        const coordText = document.getElementById('coordonnees').textContent;
+        const match = coordText.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+
+        if (match) {
+            openMapsWithCoords(parseFloat(match[1]), parseFloat(match[2]));
+        } else {
+            showMessage('warning', 'Coordonnées GPS non disponibles');
+        }
+    }
+
+    // Fonction pour ouvrir Google Maps avec coordonnées
+    function openMapsWithCoords(latitude, longitude) {
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        let mapsUrl;
+
+        if (isAndroid) {
+            mapsUrl = `intent://maps.google.com/maps?q=${latitude},${longitude}&z=15#Intent;scheme=https;package=com.google.android.apps.maps;end`;
+        } else if (isIOS) {
+            mapsUrl = `comgooglemaps://?q=${latitude},${longitude}&center=${latitude},${longitude}&zoom=15`;
+            setTimeout(function() {
+                window.location.href = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15`;
+            }, 250);
+        } else {
+            mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}&z=15`;
+        }
+
+        if (isAndroid || isIOS) {
+            if (isAndroid) {
+                window.location.href = mapsUrl;
+            } else {
+                window.open(mapsUrl, '_blank');
+            }
+        } else {
+            window.open(mapsUrl, '_blank');
+        }
+    }
+
+    // Fonction pour afficher/masquer le loading
+    function showLoading(show) {
+        const loadingElement = document.getElementById('loading');
+        const accessCard = document.getElementById('accessCard');
+
+        if (show) {
+            loadingElement.classList.remove('hidden');
+            accessCard.classList.add('hidden');
+        } else {
+            loadingElement.classList.add('hidden');
+        }
+    }
+
+    // Fonction pour retourner en arrière
+    function goBack() {
+        window.history.back();
+    }
+
+    // Initialisation au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Charger les détails de l'accès
+        loadAccessDetails();
+
+        // Permettre de recharger avec F5
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'F5') {
+                e.preventDefault();
+                loadAccessDetails();
+                showMessage('info', 'Rechargement des données...', 2000);
+            }
+        });
+    });
+
+    // Exposer les fonctions globalement
+    window.openGoogleMaps = openGoogleMaps;
+    window.openModifierPage = openModifierPage;
+</script>
+</body>
+</html>

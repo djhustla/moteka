@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu principal</title>
+    <style>
+        /* Reset */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          padding: 20px;
+          position: relative;
+        }
+
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .menu-container {
+          text-align: center;
+          background: white;
+          padding: 0;
+          border-radius: 24px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          width: 100%;
+          max-width: 450px;
+          overflow: hidden;
+          position: relative;
+          z-index: 1;
+        }
+
+        .header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          padding: 50px 30px;
+          color: white;
+        }
+
+        h1 {
+          font-size: 2.5rem;
+          font-weight: 700;
+          margin-bottom: 10px;
+          letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+          font-size: 1rem;
+          opacity: 0.9;
+          font-weight: 400;
+        }
+
+        .menu-content {
+          padding: 40px 30px;
+        }
+
+        .menu-buttons {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+          margin-bottom: 25px;
+        }
+
+        button {
+          padding: 16px 20px;
+          border: none;
+          border-radius: 14px;
+          font-size: 1.1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          font-family: inherit;
+        }
+
+        .btn-live {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+          margin-bottom: 15px;
+        }
+
+        .btn-live:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-live:active {
+          transform: translateY(0);
+        }
+
+        .btn-inscription {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-inscription:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-inscription:active {
+          transform: translateY(0);
+        }
+
+        .btn-validation {
+          background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+          color: white;
+          box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-validation:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 25px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-validation:active {
+          transform: translateY(0);
+        }
+
+        .btn-connection {
+          background: white;
+          color: #667eea;
+          border: 2px solid #667eea;
+        }
+
+        .btn-connection:hover {
+          background: #f8f9ff;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .btn-connection:active {
+          transform: translateY(0);
+        }
+
+        .divider {
+          height: 1px;
+          background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+          margin: 25px 0;
+        }
+
+        .forgot-password {
+          padding: 12px 20px;
+          background: #f3f4f6;
+          color: #9ca3af;
+          border-radius: 12px;
+          font-size: 0.95rem;
+          font-weight: 500;
+          cursor: not-allowed;
+          opacity: 0.6;
+          border: none;
+          width: 100%;
+          font-family: inherit;
+        }
+
+        /* ===== STYLES DE LA POPUP ===== */
+        .popup-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          display: none;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+
+        .popup-container {
+          background: white;
+          padding: 35px;
+          border-radius: 20px;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+          width: 90%;
+          max-width: 400px;
+          text-align: center;
+          animation: popupFadeIn 0.3s ease-out;
+        }
+
+        @keyframes popupFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .popup-title {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #333;
+          margin-bottom: 15px;
+        }
+
+        .popup-message {
+          font-size: 1rem;
+          color: #666;
+          margin-bottom: 25px;
+          line-height: 1.5;
+        }
+
+        .popup-buttons {
+          display: flex;
+          gap: 15px;
+          justify-content: center;
+        }
+
+        .popup-btn {
+          padding: 12px 30px;
+          border-radius: 12px;
+          font-weight: 600;
+          font-size: 1rem;
+          cursor: pointer;
+          border: none;
+          transition: all 0.2s;
+          flex: 1;
+        }
+
+        .popup-btn-yes {
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+          color: white;
+        }
+
+        .popup-btn-yes:hover {
+          background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+          transform: translateY(-2px);
+        }
+
+        .popup-btn-no {
+          background: #f3f4f6;
+          color: #4b5563;
+          border: 2px solid #e5e7eb;
+        }
+
+        .popup-btn-no:hover {
+          background: #e5e7eb;
+          transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          body {
+            padding: 15px;
+          }
+
+          .menu-container {
+            max-width: 100%;
+            border-radius: 20px;
+          }
+
+          .header {
+            padding: 40px 25px;
+          }
+
+          h1 {
+            font-size: 2rem;
+          }
+
+          .menu-content {
+            padding: 30px 25px;
+          }
+
+          button {
+            font-size: 1rem;
+            padding: 14px 18px;
+          }
+
+          .popup-container {
+            padding: 25px;
+          }
+
+          .popup-title {
+            font-size: 1.3rem;
+          }
+
+          .popup-buttons {
+            flex-direction: column;
+            gap: 10px;
+          }
+
+          .popup-btn {
+            padding: 14px 20px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .header {
+            padding: 35px 20px;
+          }
+
+          h1 {
+            font-size: 1.75rem;
+          }
+
+          .subtitle {
+            font-size: 0.9rem;
+          }
+
+          .menu-content {
+            padding: 25px 20px;
+          }
+
+          button {
+            font-size: 0.95rem;
+            padding: 13px 16px;
+          }
+
+          .forgot-password {
+            font-size: 0.85rem;
+          }
+
+          .popup-container {
+            padding: 20px;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .header {
+            padding: 30px 15px;
+          }
+
+          h1 {
+            font-size: 1.5rem;
+          }
+
+          .menu-content {
+            padding: 20px 15px;
+          }
+
+          .menu-buttons {
+            gap: 12px;
+          }
+        }
+    </style>
+</head>
+<body>
+
+<div class="menu-container">
+    <div class="header">
+        <h1>Bienvenue</h1>
+        <p class="subtitle">Accédez à votre espace</p>
+    </div>
+
+    <div class="menu-content">
+        <div class="menu-buttons">
+            <!-- BOUTON LIVE -->
+            <button class="btn-live" id="btnLive">
+                Écoutez le dernier Live !!!
+            </button>
+
+            <!-- BOUTON INSCRIPTION -->
+            <button class="btn-inscription" id="btnInscription">Inscription</button>
+
+            <!-- NOUVEAU BOUTON : VALIDER LE COMPTE -->
+            <button class="btn-validation" id="btnValidation">
+                Valider le compte
+            </button>
+
+            <!-- BOUTON CONNEXION -->
+            <button class="btn-connection" id="btnConnection">Connexion</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <button class="forgot-password" disabled>Mot de passe perdu ??</button>
+    </div>
+</div>
+
+<!-- Popup de confirmation de déconnexion -->
+<div class="popup-overlay" id="logoutPopup">
+    <div class="popup-container">
+        <h2 class="popup-title">Session active détectée</h2>
+        <p class="popup-message">
+            Vous êtes toujours connecté en tant que <span id="currentUsername" style="font-weight: bold; color: #667eea;"></span>.<br>
+            Voulez-vous vraiment vous déconnecter ?
+        </p>
+        <div class="popup-buttons">
+            <button class="popup-btn popup-btn-yes" id="popupYes">OUI, me déconnecter</button>
+            <button class="popup-btn popup-btn-no" id="popupNo">NON, continuer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Variables globales
+    let currentRefreshToken = null;
+    let currentAccessToken = null;
+    let currentUsername = null;
+    let currentUserId = null;
+
+    // Vérifier l'état de la connexion au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+      checkLoginStatus();
+    });
+
+    // Fonction pour vérifier si l'utilisateur est connecté
+    async function checkLoginStatus() {
+      try {
+        // Récupérer les tokens depuis localStorage
+        currentAccessToken = localStorage.getItem('accessToken');
+        currentRefreshToken = localStorage.getItem('refreshToken');
+
+        // Si aucun token n'est présent, on ne fait rien
+        if (!currentAccessToken) {
+          return;
+        }
+
+        // Vérifier si l'utilisateur est réellement connecté avec session non expirée
+        const isUserConnected = await checkUserConnected();
+
+        if (isUserConnected.connected) {
+          // Utilisateur connecté avec session valide → afficher la popup
+          currentUsername = isUserConnected.username;
+          currentUserId = isUserConnected.userId;
+          showLogoutPopup();
+        } else {
+          // Utilisateur non connecté ou session expirée → nettoyer localStorage
+          clearLocalStorage();
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du login:', error);
+        clearLocalStorage();
+      }
+    }
+
+    // Fonction pour vérifier si l'utilisateur est réellement connecté
+    async function checkUserConnected() {
+      try {
+        // Appeler l'endpoint qui retourne les infos de l'utilisateur connecté
+        const response = await fetch('/api/users/me', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + currentAccessToken,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          return {
+            connected: true,
+            username: userData.username,
+            userId: userData.id
+          };
+        } else if (response.status === 401) {
+          // Token expiré ou invalide
+          return { connected: false };
+        } else {
+          // Autre erreur
+          return { connected: false };
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification de connexion:', error);
+        return { connected: false };
+      }
+    }
+
+    // Fonction pour afficher la popup de déconnexion
+    function showLogoutPopup() {
+      const popup = document.getElementById('logoutPopup');
+      const usernameSpan = document.getElementById('currentUsername');
+
+      if (currentUsername) {
+        usernameSpan.textContent = currentUsername;
+      } else {
+        usernameSpan.textContent = "utilisateur";
+      }
+
+      popup.style.display = 'flex';
+    }
+
+    // Fonction pour cacher la popup
+    function hideLogoutPopup() {
+      const popup = document.getElementById('logoutPopup');
+      popup.style.display = 'none';
+    }
+
+    // Fonction pour déconnecter l'utilisateur
+    async function logoutUser() {
+      try {
+        // Appeler l'API de logout si un refreshToken existe
+        if (currentRefreshToken) {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ refreshToken: currentRefreshToken })
+          });
+        }
+
+        // Nettoyer le localStorage
+        clearLocalStorage();
+
+        // Recharger la page pour afficher l'index normal
+        window.location.reload();
+
+      } catch (error) {
+        console.error('Erreur lors du logout:', error);
+        // En cas d'erreur, nettoyer quand même le localStorage
+        clearLocalStorage();
+        window.location.reload();
+      }
+    }
+
+    // Fonction pour nettoyer le localStorage
+    function clearLocalStorage() {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('username');
+      localStorage.removeItem('currentUserData');
+    }
+
+    // Gestionnaires d'événements pour les boutons de la popup
+    document.getElementById('popupYes').addEventListener('click', async function() {
+      // Désactiver le bouton pour éviter les clics multiples
+      this.disabled = true;
+      this.textContent = 'Déconnexion en cours...';
+
+      await logoutUser();
+    });
+
+    document.getElementById('popupNo').addEventListener('click', function() {
+      hideLogoutPopup();
+      // Rediriger vers le menu
+      window.location.href = '/menu/menu.html';
+    });
+
+    // Gestionnaires d'événements pour les boutons originaux
+    document.getElementById('btnLive').addEventListener('click', function() {
+      window.location.href = '/le_dernier_live.html';
+    });
+
+    document.getElementById('btnInscription').addEventListener('click', function() {
+      window.location.href = 'inscription/inscription.html';
+    });
+
+    // NOUVEAU BOUTON : VALIDER LE COMPTE
+    document.getElementById('btnValidation').addEventListener('click', function() {
+      window.location.href = 'inscription/valider_compte.html';
+    });
+
+    document.getElementById('btnConnection').addEventListener('click', function() {
+      // Si une session est active, montrer la popup au lieu de rediriger
+      if (currentAccessToken && currentUsername) {
+        showLogoutPopup();
+      } else {
+        window.location.href = 'connection/connection.html';
+      }
+    });
+
+    // Optionnel : fermer la popup en cliquant en dehors
+    document.getElementById('logoutPopup').addEventListener('click', function(event) {
+      if (event.target === this) {
+        hideLogoutPopup();
+      }
+    });
+</script>
+
+</body>
+</html>

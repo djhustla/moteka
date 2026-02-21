@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abonnement Soutien - 2€/mois</title>
+  <style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f6f9fc;
+    }
+    .card {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 7px 14px rgba(0,0,0,0.1);
+        text-align: center;
+        width: 100%;
+        max-width: 350px;
+    }
+    .price {
+        font-size: 48px;
+        font-weight: bold;
+        color: #32325d;
+        margin: 10px 0;
+    }
+    .period {
+        font-size: 18px;
+        color: #6b7c93;
+    }
+    h2 { color: #32325d; margin-top: 0; }
+    p { color: #6b7c93; margin-bottom: 30px; }
+
+    #abo-button {
+        width: 100%;
+        background-color: #24b47e;
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    #abo-button:hover {
+        background-color: #1fa370;
+        transform: translateY(-1px);
+    }
+    #abo-button:disabled {
+        background-color: #aab7c4;
+        cursor: not-allowed;
+    }
+    .error { color: #df1b41; margin-top: 15px; font-size: 14px; display: none; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Abonnement Mensuel</h2>
+  <div class="price">2,00 € <span class="period">/ mois</span></div>
+  <p>Soutenez notre projet avec un ordre permanent de 2 € par mois.</p>
+
+  <button id="abo-button">S'abonner maintenant</button>
+  <div id="error-message" class="error"></div>
+</div>
+
+<script>
+  document.getElementById('abo-button').addEventListener('click', async () => {
+      const btn = document.getElementById('abo-button');
+      const errorDiv = document.getElementById('error-message');
+
+      // Désactiver le bouton pendant le chargement
+      btn.disabled = true;
+      btn.innerText = "Chargement...";
+      errorDiv.style.display = "none";
+
+      try {
+          // 1. Appel de ton nouveau endpoint Java
+          const response = await fetch("/create-subscription", {
+              method: "POST"
+          });
+
+          if (!response.ok) throw new Error("Erreur serveur");
+
+          const data = await response.json();
+
+          if (data.url) {
+              // 2. Redirection automatique vers la page de paiement sécurisée de Stripe
+              window.location.href = data.url;
+          } else {
+              throw new Error(data.error || "Impossible de créer la session");
+          }
+
+      } catch (e) {
+          console.error(e);
+          errorDiv.innerText = "Une erreur est survenue. Veuillez réessayer.";
+          errorDiv.style.display = "block";
+          btn.disabled = false;
+          btn.innerText = "S'abonner maintenant";
+      }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liste des Utilisateurs</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh; padding: 20px; position: relative;
+    }
+    body::before {
+      content: ''; position: fixed; top:0; left:0; width:100%; height:100%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events:none; z-index:0;
+    }
+    .container { max-width:900px; margin:0 auto; position:relative; z-index:1; }
+    .header { text-align:center; margin-bottom:20px; }
+    .header h1 { color:white; font-size:2.5rem; font-weight:700; margin-bottom:10px; text-shadow: 0 2px 10px rgba(0,0,0,0.2);}
+    .header p { color: rgba(255,255,255,0.9); font-size:1rem; }
+
+    /* BOUTONS FIXES AVEC COULEURS */
+    .button-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 12px;
+      z-index: 1000;
+    }
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    .logout-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    .logout-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    }
+
+    /* SECTION DE RECHERCHE */
+    .search-section {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .search-header {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .search-input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      background: #f8f9ff;
+      transition: all 0.3s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    .search-btn {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+      white-space: nowrap;
+    }
+    .search-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+    }
+    .search-btn:active {
+      transform: translateY(0);
+    }
+    .search-btn:disabled {
+      background: #e5e7eb;
+      color: #9ca3af;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .search-info {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    /* LISTE DES UTILISATEURS */
+    .user-list { display:flex; flex-direction:column; gap:16px; }
+    .user-card { position:relative; display:flex; align-items:center; background:white; border-radius:16px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.1); transition:all 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .user-card:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(0,0,0,0.15); }
+    .user-photo { width:80px; height:80px; border-radius:50%; object-fit:cover; margin-right:20px; border:3px solid #667eea; flex-shrink:0; }
+    .user-info { flex:1; }
+    .username { font-size:1.3rem; font-weight:700; color:#374151; margin-bottom:4px; }
+    .user-role { font-size:0.9rem; color:#9ca3af; font-weight:500; }
+    .loading, .error, .empty { text-align:center; padding:40px; background:white; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+    .loading { color:#667eea; font-size:1.1rem; }
+    .error { color:#dc2626; font-size:1.1rem; }
+    .empty { color:#6b7280; font-size:1.1rem; }
+
+    /* Menu flottant */
+    .user-menu {
+      position:absolute;
+      top:50%; right:20px;
+      transform: translateY(-50%);
+      background:white;
+      border-radius:12px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 0.3s;
+      z-index:10;
+    }
+    .user-card:hover .user-menu {
+      opacity:1;
+      pointer-events:auto;
+    }
+    .user-menu a {
+      padding:10px 16px;
+      text-decoration:none;
+      font-weight:600;
+      font-size:0.95rem;
+      display:block;
+      transition:background 0.2s;
+    }
+    .user-menu a.message { background:#3b82f6; color:white; }
+    .user-menu a.message:hover { background:#2563eb; }
+    .user-menu a.profile { background:#16a34a; color:white; }
+    .user-menu a.profile:hover { background:#15803d; }
+
+    /* Badge pour les résultats de recherche */
+    .search-results-badge {
+      background: #dbeafe;
+      color: #2563eb;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 10px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 768px) {
+      .button-container {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-bottom: 20px;
+        flex-direction: row;
+        justify-content: center;
+      }
+      .search-box {
+        flex-direction: column;
+      }
+      .search-btn {
+        width: 100%;
+      }
+      .user-card { flex-direction:column; text-align:center; }
+      .user-photo { margin-right:0; margin-bottom:15px; }
+      .user-menu { position:static; transform:none; opacity:1; pointer-events:auto; margin-top:15px; flex-direction:row; }
+      .user-menu a { flex:1; text-align:center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Liste des Utilisateurs</h1>
+    <p>Découvrez les membres de la communauté</p>
+  </div>
+
+  <!-- SECTION DE RECHERCHE -->
+  <div class="search-section">
+    <div class="search-header">🔍 Rechercher un utilisateur</div>
+    <div class="search-box">
+      <input type="text" class="search-input" id="searchInput" placeholder="Entrez un nom d'utilisateur...">
+      <button class="search-btn" id="btnSearch">Rechercher</button>
+    </div>
+    <div class="search-info" id="searchInfo">
+      Entrez un nom d'utilisateur ou laissez vide pour voir tous les utilisateurs
+    </div>
+  </div>
+
+  <!-- BOUTONS FIXES AVEC COULEURS -->
+  <div class="button-container">
+    <a href="/menu/menu.html" class="back-button">← Retour au menu</a>
+    <button class="logout-button" id="btnLogout">Déconnection</button>
+  </div>
+
+  <div class="user-list" id="userList">
+    <div class="loading">Chargement des utilisateurs...</div>
+  </div>
+</div>
+
+<script>
+  class UserListManager {
+    constructor() {
+      this.token = localStorage.getItem('accessToken');
+      this.userList = document.getElementById("userList");
+      this.searchInput = document.getElementById("searchInput");
+      this.btnSearch = document.getElementById("btnSearch");
+      this.searchInfo = document.getElementById("searchInfo");
+      this.isSearchMode = false;
+      this.currentSearchTerm = "";
+      this.init();
+    }
+
+    init() {
+      this.checkAuthentication();
+      this.bindEvents();
+      this.loadUsers();
+    }
+
+    checkAuthentication() {
+      if (!this.token) {
+        alert('Vous devez être connecté pour voir la liste des utilisateurs');
+        window.location.href = '/connection/connection.html';
+        return false;
+      }
+      return true;
+    }
+
+    bindEvents() {
+      document.getElementById('btnLogout').addEventListener('click', () => {
+        this.logout();
+      });
+
+      // Recherche au clic
+      this.btnSearch.addEventListener('click', () => {
+        this.performSearch();
+      });
+
+      // Recherche avec la touche Entrée
+      this.searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          this.performSearch();
+        }
+      });
+
+      // Réinitialiser la recherche quand le champ est vidé
+      this.searchInput.addEventListener('input', (e) => {
+        if (e.target.value.trim() === "" && this.isSearchMode) {
+          this.resetSearch();
+        }
+      });
+    }
+
+    async loadUsers() {
+      try {
+        console.log('🔍 Chargement de tous les utilisateurs...');
+
+        const response = await fetch('/api/users/all', {
+          headers: {
+            'Authorization': 'Bearer ' + this.token,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        console.log('📊 Statut de la réponse:', response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ Erreur de réponse:', errorText);
+          throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('📦 Données reçues:', data);
+
+        let users = [];
+
+        if (Array.isArray(data)) {
+          users = data;
+        } else if (data && Array.isArray(data.users)) {
+          users = data.users;
+        } else if (data && data.content && Array.isArray(data.content)) {
+          users = data.content;
+        } else {
+          console.warn('⚠️ Format de réponse inattendu:', data);
+          users = [];
+        }
+
+        this.renderUsers(users, "Tous les utilisateurs");
+
+      } catch (error) {
+        console.error('💥 Erreur détaillée:', error);
+        this.showError(error.message);
+      }
+    }
+
+    async performSearch() {
+      const searchTerm = this.searchInput.value.trim();
+
+      if (!searchTerm) {
+        this.resetSearch();
+        return;
+      }
+
+      // Activer le mode recherche
+      this.isSearchMode = true;
+      this.currentSearchTerm = searchTerm;
+
+      // Afficher le loading
+      this.btnSearch.disabled = true;
+      this.btnSearch.textContent = 'Recherche...';
+      this.searchInfo.textContent = `Recherche de "${searchTerm}" en cours...`;
+      this.userList.innerHTML = '<div class="loading">Recherche en cours...</div>';
+
+      try {
+        console.log(`🔍 Recherche d'utilisateurs avec: "${searchTerm}"`);
+
+        const response = await fetch(`/api/users/search_contains?username=${encodeURIComponent(searchTerm)}`, {
+          headers: {
+            'Authorization': 'Bearer ' + this.token,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        console.log('📊 Statut de la recherche:', response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('📦 Résultats de recherche:', data);
+
+        // Gestion des formats de réponse
+        let users = [];
+        let message = `Résultats pour "${searchTerm}"`;
+
+        if (Array.isArray(data)) {
+          users = data;
+        } else if (data && Array.isArray(data.users)) {
+          users = data.users;
+          if (data.message) {
+            message = data.message;
+          } else if (data.count !== undefined) {
+            message = `${data.count} utilisateur(s) trouvé(s) pour "${searchTerm}"`;
+          }
+        } else if (data && data.content && Array.isArray(data.content)) {
+          users = data.content;
+        } else {
+          console.warn('⚠️ Format de réponse inattendu pour la recherche:', data);
+          users = [];
+        }
+
+        this.renderUsers(users, message);
+
+      } catch (error) {
+        console.error('💥 Erreur lors de la recherche:', error);
+        this.searchInfo.textContent = `Erreur lors de la recherche: ${error.message}`;
+        this.userList.innerHTML = `
+          <div class="error">
+            <p>Erreur lors de la recherche</p>
+            <p style="font-size:0.9rem; margin-top:10px; color:#6b7280;">
+              Détail: ${error.message}
+            </p>
+            <button onclick="userManager.performSearch()" style="margin-top:15px; padding:8px 16px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer;">
+              Réessayer
+            </button>
+          </div>
+        `;
+      } finally {
+        this.btnSearch.disabled = false;
+        this.btnSearch.textContent = 'Rechercher';
+      }
+    }
+
+    resetSearch() {
+      this.isSearchMode = false;
+      this.currentSearchTerm = "";
+      this.searchInput.value = "";
+      this.searchInfo.textContent = "Entrez un nom d'utilisateur ou laissez vide pour voir tous les utilisateurs";
+      this.loadUsers();
+    }
+
+    renderUsers(users, title = "Utilisateurs") {
+      this.userList.innerHTML = "";
+
+      // Mettre à jour l'info de recherche
+      if (this.isSearchMode) {
+        this.searchInfo.textContent = title;
+      }
+
+      if (!users || users.length === 0) {
+        if (this.isSearchMode) {
+          this.userList.innerHTML = `
+            <div class="empty">
+              <p>Aucun utilisateur trouvé pour "${this.currentSearchTerm}"</p>
+              <button onclick="userManager.resetSearch()" style="margin-top:15px; padding:8px 16px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer;">
+                Voir tous les utilisateurs
+              </button>
+            </div>
+          `;
+        } else {
+          this.userList.innerHTML = `
+            <div class="empty">
+              <p>Aucun utilisateur trouvé dans la communauté</p>
+              <button onclick="userManager.loadUsers()" style="margin-top:15px; padding:8px 16px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer;">
+                Actualiser
+              </button>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      // Ajouter un badge si en mode recherche
+      const titleElement = document.createElement("div");
+      if (this.isSearchMode) {
+        titleElement.innerHTML = `
+          <div style="text-align: center; margin-bottom: 20px;">
+            <span style="font-weight: 600; color: #374151;">Résultats de recherche</span>
+            <span class="search-results-badge">${users.length} trouvé(s)</span>
+            <button onclick="userManager.resetSearch()" style="margin-left: 10px; padding: 4px 12px; background: #e5e7eb; color: #374151; border: none; border-radius: 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+              Annuler la recherche
+            </button>
+          </div>
+        `;
+        this.userList.appendChild(titleElement);
+      }
+
+      users.forEach(user => {
+        if (!user || !user.id) {
+          console.warn('⚠️ Utilisateur invalide:', user);
+          return;
+        }
+
+        const card = this.createUserCard(user);
+        this.userList.appendChild(card);
+      });
+
+      console.log(`✅ ${users.length} utilisateur(s) affiché(s)`);
+    }
+
+    createUserCard(user) {
+      const card = document.createElement("div");
+      card.className = "user-card";
+
+      // Photo de profil
+      const img = document.createElement("img");
+      img.className = "user-photo";
+      img.alt = `Photo de ${user.username || 'utilisateur'}`;
+
+      if (user.photoUrl && this.isValidUrl(user.photoUrl)) {
+        img.src = user.photoUrl;
+      } else {
+        img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || 'U')}&size=80&background=667eea&color=fff`;
+      }
+
+      img.onerror = () => {
+        img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || 'U')}&size=80&background=667eea&color=fff`;
+      };
+
+      // Informations utilisateur
+      const info = document.createElement("div");
+      info.className = "user-info";
+
+      const name = document.createElement("div");
+      name.className = "username";
+      name.textContent = user.username || 'Utilisateur sans nom';
+
+      const role = document.createElement("div");
+      role.className = "user-role";
+      role.textContent = user.role || "Membre";
+
+      info.appendChild(name);
+      info.appendChild(role);
+
+      // Menu flottant
+      const menu = this.createUserMenu(user);
+
+      card.appendChild(img);
+      card.appendChild(info);
+      card.appendChild(menu);
+
+      return card;
+    }
+
+    createUserMenu(user) {
+      const menu = document.createElement("div");
+      menu.className = "user-menu";
+
+      // Lien message
+      const msgLink = document.createElement("a");
+      msgLink.href = `/menu/ma_communaute/conversation.html?userId=${user.id}`;
+      msgLink.textContent = "💬 Message";
+      msgLink.className = "message";
+
+      // Lien profil
+      const profileLink = document.createElement("a");
+      profileLink.href = `/menu/profil_user.html?userId=${user.id}`;
+      profileLink.textContent = "👤 Profil";
+      profileLink.className = "profile";
+
+      menu.appendChild(msgLink);
+      menu.appendChild(profileLink);
+
+      return menu;
+    }
+
+    isValidUrl(string) {
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    showError(message) {
+      this.userList.innerHTML = `
+        <div class="error">
+          <p>Erreur lors du chargement des utilisateurs</p>
+          <p style="font-size:0.9rem; margin-top:10px; color:#6b7280;">
+            Détail: ${message}
+          </p>
+          <button onclick="userManager.loadUsers()" style="margin-top:15px; padding:8px 16px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer;">
+            Réessayer
+          </button>
+          <button onclick="userManager.checkApiStructure()" style="margin-top:10px; padding:8px 16px; background:#6b7280; color:white; border:none; border-radius:8px; cursor:pointer;">
+            Vérifier l'API
+          </button>
+        </div>
+      `;
+    }
+
+    async checkApiStructure() {
+      try {
+        console.log('🔍 Vérification de la structure de l\'API...');
+
+        const response = await fetch('/api/users/all', {
+          headers: {
+            'Authorization': 'Bearer ' + this.token
+          }
+        });
+
+        const data = await response.json();
+        console.log('📋 Structure complète de la réponse:', data);
+
+        alert('Structure de la réponse affichée dans la console (F12)');
+      } catch (error) {
+        console.error('Erreur lors de la vérification:', error);
+        alert('Erreur lors de la vérification de l\'API');
+      }
+    }
+
+    async logout() {
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        if (refreshToken) {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken })
+          });
+        }
+
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        alert('Déconnexion réussie');
+        window.location.href = '/connection/connection.html';
+
+      } catch (err) {
+        console.error('Erreur lors de la déconnexion:', err);
+        // Déconnexion forcée même en cas d'erreur
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/connection/connection.html';
+      }
+    }
+  }
+
+  // Initialisation de l'application
+  let userManager;
+  document.addEventListener('DOMContentLoaded', () => {
+    userManager = new UserListManager();
+  });
+
+  // Export pour les fonctions globales
+  window.userManager = userManager;
+</script>
+
+</body>
+</html>

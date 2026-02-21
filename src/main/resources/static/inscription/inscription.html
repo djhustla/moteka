@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inscription</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
+        }
+
+        .form-container {
+          background: white;
+          border-radius: 20px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          width: 100%;
+          max-width: 500px;
+          overflow: hidden;
+        }
+
+        .header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          padding: 40px 30px 20px 30px;
+          text-align: center;
+          color: white;
+          position: relative;
+        }
+
+        .header h2 {
+          font-size: 2rem;
+          font-weight: 600;
+        }
+
+        .header p {
+          font-size: 0.95rem;
+          opacity: 0.9;
+        }
+
+        .back-btn {
+          position: absolute;
+          top: 15px;
+          left: 15px;
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+          border: none;
+          padding: 8px 14px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: 0.3s;
+        }
+
+        .back-btn:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        .form-content {
+          padding: 40px 30px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+
+        label {
+          display: block;
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 8px;
+          font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"] {
+          width: 100%;
+          padding: 14px 16px;
+          border: 2px solid #e5e7eb;
+          border-radius: 12px;
+          font-size: 1rem;
+          transition: all 0.3s;
+        }
+
+        input:focus {
+          outline: none;
+          border-color: #667eea;
+          box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .phone-example {
+          font-size: 0.85rem;
+          color: #6b7280;
+          margin-top: 5px;
+          margin-bottom: 8px;
+        }
+
+        .phone-example strong {
+          color: #667eea;
+        }
+
+        .phone-input-container {
+          position: relative;
+        }
+
+        .country-code {
+          position: absolute;
+          left: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #6b7280;
+          font-weight: 500;
+          pointer-events: none;
+          background: white;
+          padding: 0 8px;
+          font-size: 1rem;
+        }
+
+        .phone-input {
+          padding-left: 70px !important;
+        }
+
+        .photo-section {
+          margin: 25px 0;
+          padding: 20px;
+          background: #f8f9ff;
+          border-radius: 12px;
+        }
+
+        .photo-preview {
+          width: 120px;
+          height: 120px;
+          border: 3px dashed #667eea;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
+          border-radius: 12px;
+          background: white;
+          margin: 0 auto 15px;
+        }
+
+        .photo-preview span { font-size: 3rem; color: #9ca3af; }
+
+        .photo-preview img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .photo-button,
+        button[type="submit"] {
+          width: 100%;
+          padding: 15px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 1rem;
+          font-weight: 600;
+          margin-top: 10px;
+          transition: 0.3s;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .info-box {
+          background: #f0f9ff;
+          border: 1px solid #bae6fd;
+          border-radius: 12px;
+          padding: 16px;
+          margin: 20px 0;
+          font-size: 0.9rem;
+          color: #0369a1;
+        }
+
+        .info-box strong {
+          display: block;
+          margin-bottom: 8px;
+          color: #0c4a6e;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+          .header h2 { font-size: 1.6rem; }
+          .form-content { padding: 25px 20px; }
+          .photo-preview {
+            width: 100px;
+            height: 100px;
+          }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <div class="header">
+        <button class="back-btn" onclick="window.location.href='/index.html'">⬅️ Accueil</button>
+        <h2>Inscription</h2>
+        <p>Créez votre compte avec validation par Email</p>
+    </div>
+
+    <div class="form-content">
+        <div class="info-box">
+            <strong>✉️ Validation par Email</strong>
+            Après l'inscription, vous recevez un email de validation pour votre compte.
+        </div>
+
+        <form id="signupForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" required
+                       placeholder="Votre pseudo (minimum 3 caractères)">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Adresse email</label>
+                <input type="email" id="email" name="email" required
+                       placeholder="exemple@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="phoneNumber">Numéro de téléphone</label>
+                <div class="phone-example">
+                    Format: <strong>+32412345678</strong> (Belgique)
+                </div>
+                <div class="phone-input-container">
+                    <span class="country-code">+32</span>
+                    <input type="tel" id="phoneNumber" name="phoneNumber"
+                           class="phone-input" required
+                           placeholder="412345678"
+                           pattern="4[0-9]{8}"
+                           title="Numéro belge: commence par 4 suivi de 8 chiffres">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" required
+                       placeholder="Minimum 4 caractères">
+            </div>
+
+            <div class="photo-section">
+                <label class="photo-section-title">Photo de profil</label>
+                <div class="photo-preview" id="photoPreview"><span>📷</span></div>
+                <button type="button" class="photo-button" id="choosePhoto">Choisir une photo</button>
+                <input type="file" id="photo" name="file" accept="image/*" style="display:none;" required>
+            </div>
+
+            <button type="submit" id="submitBtn">S'inscrire et recevoir l'email de validation</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const chooseBtn = document.getElementById("choosePhoto");
+    const fileInput = document.getElementById("photo");
+    const photoPreview = document.getElementById("photoPreview");
+    const phoneInput = document.getElementById("phoneNumber");
+    const submitBtn = document.getElementById("submitBtn");
+
+    // ===== FORMATAGE DU NUMÉRO DE TÉLÉPHONE =====
+    phoneInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+
+        // S'assurer que ça commence par 4 pour les numéros belges mobiles
+        if (value.length > 0 && !value.startsWith('4')) {
+            value = '4' + value.replace(/^4+/, '');
+        }
+
+        // Limiter à 9 chiffres (après le +32)
+        if (value.length > 9) {
+            value = value.substring(0, 9);
+        }
+
+        e.target.value = value;
+    });
+
+    // ===== VALIDATION DU NUMÉRO =====
+    function validatePhoneNumber(phone) {
+        // Format: +324xxxxxxxx
+        const phoneRegex = /^\+324[0-9]{8}$/;
+        if (!phoneRegex.test(phone)) {
+            return {
+                valid: false,
+                message: "Format invalide. Exemple: +32412345678"
+            };
+        }
+
+        // Vérification basique du format belge
+        if (!phone.startsWith('+324')) {
+            return {
+                valid: false,
+                message: "Numéro belge mobile doit commencer par +324"
+            };
+        }
+
+        // Vérifier la longueur totale
+        if (phone.length !== 12) { // +324 + 8 chiffres = 12 caractères
+            return {
+                valid: false,
+                message: "Numéro invalide. Format attendu: +32412345678"
+            };
+        }
+
+        return { valid: true };
+    }
+
+    // ===== GESTION DE LA PHOTO =====
+    const ACCEPTED_FORMATS = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+    chooseBtn.addEventListener("click", () => fileInput.click());
+
+    function compressImage(file, callback) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > 800) {
+                        height = Math.round(height * (800 / width));
+                        width = 800;
+                    }
+                } else {
+                    if (height > 800) {
+                        width = Math.round(width * (800 / height));
+                        height = 800;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob((blob) => {
+                    callback(blob);
+                }, 'image/jpeg', 0.75);
+            };
+            img.onerror = () => {
+                showAlert('Erreur de lecture', 'Impossible de lire l\'image.');
+                fileInput.value = '';
+                photoPreview.innerHTML = '<span>📷</span>';
+            };
+        };
+        reader.onerror = () => {
+            showAlert('Erreur de lecture', 'Impossible de lire le fichier.');
+            fileInput.value = '';
+            photoPreview.innerHTML = '<span>📷</span>';
+        };
+    }
+
+    fileInput.addEventListener("change", () => {
+        const file = fileInput.files[0];
+        if (file) {
+            if (!ACCEPTED_FORMATS.includes(file.type)) {
+                showAlert('Format non supporté', 'JPG, PNG, GIF ou WebP uniquement.');
+                fileInput.value = '';
+                photoPreview.innerHTML = '<span>📷</span>';
+                return;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                showAlert('Fichier trop volumineux', 'Max 5 Mo.');
+                fileInput.value = '';
+                photoPreview.innerHTML = '<span>📷</span>';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                photoPreview.innerHTML = `<img src="${e.target.result}" alt="Aperçu">`;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            photoPreview.innerHTML = '<span>📷</span>';
+        }
+    });
+
+    // ===== FONCTIONS D'ALERTE =====
+    function showAlert(title, message, type = 'error') {
+        const backgroundColor = type === 'error' ? '#dc2626' :
+                              type === 'success' ? '#10b981' :
+                              type === 'warning' ? '#f59e0b' : '#dc2626';
+
+        const alertDiv = document.createElement('div');
+        alertDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${backgroundColor};
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 10000;
+            max-width: 400px;
+            animation: fadeIn 0.3s ease;
+            font-family: inherit;
+        `;
+
+        alertDiv.innerHTML = `
+            <strong>${type === 'error' ? '❌ Erreur' : type === 'success' ? '✅ Succès' : '⚠️ Attention'}</strong>
+            <div style="margin-top: 8px; font-size: 0.9em; opacity: 0.9;">${message}</div>
+        `;
+
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            alertDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                if (alertDiv.parentNode) alertDiv.parentNode.removeChild(alertDiv);
+            }, 300);
+        }, 5000);
+
+        if (!document.querySelector('#alertStyles')) {
+            const style = document.createElement('style');
+            style.id = 'alertStyles';
+            style.textContent = `
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    function showSuccess(message) {
+        showAlert('Succès', message, 'success');
+    }
+
+    // ===== SOUMISSION DU FORMULAIRE =====
+    document.getElementById("signupForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const phoneNumber = "+32" + phoneInput.value.trim(); // Ajouter le +32
+        const file = fileInput.files[0];
+
+        // Validation de base
+        if (!username || !email || !password || !phoneInput.value || !file) {
+            showAlert('Erreur', 'Tous les champs sont requis.');
+            return;
+        }
+
+        if (username.length < 3) {
+            showAlert('Username trop court', 'Minimum 3 caractères.');
+            return;
+        }
+
+        if (password.length < 4) {
+            showAlert('Mot de passe trop court', 'Minimum 4 caractères.');
+            return;
+        }
+
+        // Validation du numéro de téléphone
+        const phoneValidation = validatePhoneNumber(phoneNumber);
+        if (!phoneValidation.valid) {
+            showAlert('Numéro invalide', phoneValidation.message);
+            return;
+        }
+
+        // Validation de l'email simple
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showAlert('Email invalide', 'Veuillez entrer une adresse email valide.');
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Compression de l'image...";
+
+        // Compression de l'image
+        compressImage(file, async (compressedBlob) => {
+            submitBtn.textContent = "Envoi des données...";
+
+            // Création du FormData avec tous les champs
+            const formData = new FormData();
+            formData.append("username", username);
+            formData.append("email", email);
+            formData.append("password", password);
+            formData.append("phoneNumber", phoneNumber); // Ajout du numéro de téléphone
+            formData.append("file", compressedBlob, "photo.jpg");
+
+            try {
+                console.log("Envoi de l'inscription à:", "/api/users/register");
+                console.log("Données envoyées:", {
+                    username,
+                    email,
+                    phoneNumber,
+                    passwordLength: password.length,
+                    fileSize: compressedBlob.size
+                });
+
+                const resp = await fetch("/api/users/register", {
+                    method: "POST",
+                    body: formData
+                });
+
+                console.log("Réponse HTTP:", resp.status, resp.statusText);
+
+                let result;
+                try {
+                    result = await resp.json();
+                    console.log("Réponse JSON:", result);
+                } catch (jsonError) {
+                    const text = await resp.text();
+                    console.log("Réponse texte:", text);
+                    result = { error: text || "Erreur inconnue" };
+                }
+
+                if (resp.ok) {
+                    // Inscription réussie
+                    showSuccess(result.message || 'Inscription réussie !');
+
+                    // Stocker les infos pour la page de validation (email)
+                    localStorage.setItem('pendingValidation', JSON.stringify({
+                        email: email,
+                        username: username
+                    }));
+
+                    // Redirection vers la page de validation du code (email)
+                    setTimeout(() => {
+                        window.location.href = "/inscription/valider_compte.html";
+                    }, 2000);
+
+                } else {
+                    // Erreur d'inscription
+                    const errorMessage = result.error ||
+                                       result.message ||
+                                       "Erreur lors de l'inscription";
+                    showAlert('Erreur inscription', errorMessage);
+                    console.error('Erreur détaillée:', result);
+                }
+
+            } catch (err) {
+                console.error('Erreur réseau:', err);
+                showAlert('Erreur réseau',
+                    "Impossible de se connecter au serveur. Vérifiez votre connexion.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "S'inscrire et recevoir l'email de validation";
+            }
+        });
+    });
+
+    // ===== AUTO-FOCUS SUR LE PREMIER CHAMP =====
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('username').focus();
+    });
+</script>
+
+</body>
+</html>

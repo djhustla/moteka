@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes Playlists</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: #333;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .header {
+        background: white;
+        border-radius: 20px;
+        padding: 25px 30px;
+        text-align: center;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        position: relative;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        font-size: 1.1rem;
+        color: #6b7280;
+    }
+
+    .action-buttons {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-back {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .btn-back:hover {
+        background: #e5e7eb;
+        transform: translateY(-2px);
+    }
+
+    .btn-logout {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-logout:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+    }
+
+    .playlists-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .playlist-card {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 3px solid transparent;
+    }
+
+    .playlist-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        border-color: #667eea;
+    }
+
+    .playlist-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+
+    .playlist-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 15px;
+    }
+
+    .btn-playlist {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .btn-playlist:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .loading {
+        text-align: center;
+        padding: 60px 20px;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .error {
+        background: white;
+        border-radius: 16px;
+        padding: 40px 30px;
+        text-align: center;
+        grid-column: 1 / -1;
+    }
+
+    .error-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+    }
+
+    .error h3 {
+        font-size: 1.5rem;
+        color: #1f2937;
+        margin-bottom: 10px;
+    }
+
+    .error p {
+        color: #6b7280;
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+
+    .btn-retry {
+        background: #667eea;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        background: white;
+        border-radius: 16px;
+        padding: 60px 30px;
+        text-align: center;
+        grid-column: 1 / -1;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        color: #1f2937;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #6b7280;
+        font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .header {
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2rem;
+        }
+        .action-buttons {
+            position: static;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .playlists-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        body {
+            padding: 15px;
+        }
+        .header {
+            padding: 15px;
+        }
+        h1 {
+            font-size: 1.7rem;
+        }
+        .btn {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        .playlist-card {
+            padding: 20px;
+        }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🎵 Mes Playlists</h1>
+    <p class="subtitle">Découvrez toutes vos playlists musicales</p>
+    <div class="action-buttons">
+      <a href="/menu/menu.html" class="btn btn-back">⬅ Retour au menu</a>
+      <button class="btn btn-logout" onclick="logout()">🚪 Déconnexion</button>
+    </div>
+  </div>
+
+  <div id="content">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      Chargement de vos playlists...
+    </div>
+  </div>
+</div>
+
+<script>
+  class PlaylistManager {
+      constructor() {
+          this.token = localStorage.getItem('accessToken');
+          this.init();
+      }
+
+      init() {
+          this.checkAuthentication();
+          this.loadPlaylists();
+      }
+
+      checkAuthentication() {
+          if (!this.token) {
+              alert('Vous devez être connecté pour accéder à cette page');
+              window.location.href = '/connection/connection.html';
+          }
+      }
+
+      async loadPlaylists() {
+          const content = document.getElementById('content');
+
+          try {
+              console.log('🔄 Chargement des playlists...');
+
+              const response = await fetch('/api/playlists', {
+                  headers: {
+                      'Authorization': 'Bearer ' + this.token,
+                      'Content-Type': 'application/json'
+                  }
+              });
+
+              if (!response.ok) {
+                  throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+              }
+
+              const data = await response.json();
+              console.log('✅ Playlists chargées:', data);
+              this.displayPlaylists(data);
+
+          } catch (error) {
+              console.error('❌ Erreur:', error);
+              this.showError(error.message);
+          }
+      }
+
+      displayPlaylists(data) {
+          const content = document.getElementById('content');
+          const playlists = data.playlists || data;
+
+          if (!playlists || playlists.length === 0) {
+              content.innerHTML = this.getEmptyStateHTML();
+              return;
+          }
+
+          content.innerHTML = this.getPlaylistsGridHTML(playlists);
+      }
+
+      getEmptyStateHTML() {
+          return `
+              <div class="empty-state">
+                  <div class="empty-icon">🎵</div>
+                  <h3>Aucune playlist trouvée</h3>
+                  <p>Vous n'avez pas encore de playlists disponibles.</p>
+              </div>
+          `;
+      }
+
+      getPlaylistsGridHTML(playlists) {
+          let html = `<div class="playlists-grid">`;
+
+          playlists.forEach(playlist => {
+              const playlistName = playlist.name || playlist;
+              const playlistFileName = playlistName + '.txt';
+
+              html += `
+                  <div class="playlist-card">
+                      <div class="playlist-icon">🎶</div>
+                      <div class="playlist-name">${this.escapeHtml(playlistName)}</div>
+                      <button class="btn-playlist" onclick="playlistManager.openPlaylist('${this.escapeHtml(playlistFileName)}')">
+                          🎵 Écouter ${this.escapeHtml(playlistName)}
+                      </button>
+                  </div>
+              `;
+          });
+
+          html += `</div>`;
+          return html;
+      }
+
+      showError(message) {
+          const content = document.getElementById('content');
+          content.innerHTML = `
+              <div class="error">
+                  <div class="error-icon">❌</div>
+                  <h3>Erreur de chargement</h3>
+                  <p>Impossible de charger les playlists: ${this.escapeHtml(message)}</p>
+                  <button class="btn-retry" onclick="playlistManager.loadPlaylists()">🔄 Réessayer</button>
+              </div>
+          `;
+      }
+
+      openPlaylist(playlistFileName) {
+          console.log('📁 Ouverture de la playlist:', playlistFileName);
+          const encodedFileName = encodeURIComponent(playlistFileName);
+          const playlistUrl = `playlist.html?src=${encodedFileName}`;
+          window.location.href = playlistUrl;
+      }
+
+      escapeHtml(unsafe) {
+          return unsafe
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+      }
+  }
+
+  // Déconnexion
+  function logout() {
+      const refreshToken = localStorage.getItem('refreshToken');
+
+      if (refreshToken) {
+          fetch('/api/auth/logout', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ refreshToken })
+          }).catch(err => console.error('Erreur déconnexion:', err));
+      }
+
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      alert('Déconnexion réussie');
+      window.location.href = '/connection/connection.html';
+  }
+
+  // Initialisation
+  let playlistManager;
+  document.addEventListener('DOMContentLoaded', () => {
+      playlistManager = new PlaylistManager();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Hustla - Lecteur Audio</title>
+    <style>
+        /* ==================================== */
+        /* BASE & LAYOUT                        */
+        /* ==================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        /* --- ARRIÈRE-PLAN MAUVE TRANSPARENT --- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* ==================================== */
+        /* NOUVEAU LECTEUR SOBRE & STYLÉ        */
+        /* ==================================== */
+        .media-player {
+            width: 100%;
+            background: rgba(20, 20, 30, 0.7);
+            border-radius: 20px;
+            padding: 30px 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(100, 126, 234, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .track-info {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .track-title {
+            color: #FFFFFF;
+            font-size: 1.4rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .artist-name {
+            color: #667eea;
+            font-size: 1rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        /* BARRE DE LECTURE ONDULÉE */
+        .waveform-container {
+            width: 100%;
+            height: 120px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            background: rgba(10, 10, 20, 0.6);
+            padding: 20px 0;
+            cursor: pointer;
+        }
+
+        .waveform {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 0 5px;
+        }
+
+        .wave-line {
+            flex: 1;
+            max-width: 4px;
+            margin: 0 2px;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 2px 2px 0 0;
+            transition: height 0.1s ease-out;
+            opacity: 0.7;
+            min-height: 10%;
+        }
+
+        .progress-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: rgba(102, 126, 234, 0.15);
+            pointer-events: none;
+            border-right: 2px solid #667eea;
+            transition: width 0.1s linear;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        /* CONTROLES DU LECTEUR */
+        .player-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 0 10px;
+        }
+
+        .control-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #FFFFFF;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 50%;
+        }
+
+        .control-btn:hover::before {
+            opacity: 0.3;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .control-btn:active {
+            transform: translateY(-2px);
+        }
+
+        .control-btn svg {
+            width: 24px;
+            height: 24px;
+            position: relative;
+            z-index: 1;
+            fill: #FFFFFF;
+        }
+
+        /* ==================================== */
+        /* ICÔNES SOCIALES (GRILLE 2X2) - LOGOS PLUS GROS */
+        /* ==================================== */
+        .icons-grid-container {
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .follow-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 2rem;
+            margin-bottom: 30px;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            text-align: center;
+            font-weight: 300;
+            text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 50px;
+            justify-items: center;
+            align-items: center;
+            width: 100%;
+            padding: 10px;
+        }
+
+        /* LOGOS BEAUCOUP PLUS GROS - CERCLES AGRANDIS */
+        .icon-wrapper {
+            width: 100%;
+            max-width: 130px;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+
+        .icon-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: brightness(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .icon-wrapper:hover {
+            transform: scale(1.25);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.4), 0 15px 40px rgba(0, 0, 0, 0.9);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .icon-wrapper:hover img {
+            filter: brightness(1.2);
+            transform: scale(1.05);
+        }
+
+        .icon-wrapper[data-network="instagram"]:hover {
+            border-color: #E4405F;
+            box-shadow: 0 0 50px #E4405F, 0 0 70px rgba(228, 64, 95, 0.6);
+        }
+
+        .icon-wrapper[data-network="tiktok"]:hover {
+            border-color: #00F2EA;
+            box-shadow: 0 0 50px #00F2EA, 0 0 70px rgba(0, 242, 234, 0.6);
+        }
+
+        .icon-wrapper[data-network="snapchat"]:hover {
+            border-color: #FFFC00;
+            box-shadow: 0 0 50px #FFFC00, 0 0 70px rgba(255, 252, 0, 0.6);
+        }
+
+        .icon-wrapper[data-network="facebook"]:hover {
+            border-color: #1877F2;
+            box-shadow: 0 0 50px #1877F2, 0 0 70px rgba(24, 119, 242, 0.6);
+        }
+
+        /* États de chargement et d'erreur */
+        .loading-state {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 20px;
+            color: #E4405F;
+            font-size: 1rem;
+            font-weight: 300;
+            background: rgba(228, 64, 95, 0.1);
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        /* Barre de progression de chargement */
+        .loading-progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .loading-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #FFD700, #FFA500);
+            width: 0%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            position: relative;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            animation: shimmer 1.5s infinite;
+        }
+
+        .loading-progress-text {
+            color: #FFD700;
+            font-size: 0.9rem;
+            font-weight: 300;
+            text-align: center;
+            margin-top: 5px;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes shimmer {
+            0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+            100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        }
+
+        /* ==================================== */
+        /* RESPONSIVE - ÉCRAN TÉLÉPHONE         */
+        /* ==================================== */
+        @media (max-width: 768px) {
+            .main-content {
+                gap: 40px;
+            }
+
+            .media-player {
+                padding: 25px 20px;
+            }
+
+            .waveform-container {
+                height: 100px;
+                margin-bottom: 15px;
+            }
+
+            .player-controls {
+                padding: 0 5px;
+            }
+
+            .control-btn {
+                width: 55px;
+                height: 55px;
+            }
+
+            .control-btn svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .follow-text {
+                font-size: 1.8rem;
+                letter-spacing: 6px;
+                margin-bottom: 25px;
+            }
+
+            .icons-grid {
+                gap: 40px;
+            }
+
+            .icon-wrapper {
+                max-width: 110px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .media-player {
+                padding: 20px 15px;
+            }
+
+            .track-title {
+                font-size: 1.2rem;
+            }
+
+            .waveform-container {
+                height: 80px;
+                margin-bottom: 15px;
+            }
+
+            .wave-line {
+                max-width: 3px;
+            }
+
+            .player-controls {
+                padding: 0;
+            }
+
+            .control-btn {
+                width: 50px;
+                height: 50px;
+            }
+
+            .control-btn svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .follow-text {
+                font-size: 1.5rem;
+                letter-spacing: 4px;
+                margin-bottom: 20px;
+            }
+
+            .icons-grid {
+                gap: 30px;
+            }
+
+            .icon-wrapper {
+                max-width: 90px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .icons-grid {
+                gap: 25px;
+            }
+
+            .icon-wrapper {
+                max-width: 80px;
+            }
+
+            .player-controls {
+                gap: 5px;
+            }
+
+            .control-btn {
+                width: 45px;
+                height: 45px;
+            }
+
+            .control-btn svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .control-btn {
+                width: 42px;
+                height: 42px;
+            }
+
+            .control-btn svg {
+                width: 15px;
+                height: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="main-content">
+
+    <!-- NOUVEAU LECTEUR -->
+    <div class="media-player" id="mediaPlayer">
+        <div class="track-info">
+            <div class="track-title" id="trackTitle">Chargement du mix...</div>
+            <div class="artist-name">DJ HUSTLA</div>
+
+            <!-- Barre de progression de chargement -->
+            <div id="loadingProgressContainer" style="display: none;">
+                <div class="loading-progress-container">
+                    <div class="loading-progress-bar" id="loadingProgressBar"></div>
+                </div>
+                <div class="loading-progress-text" id="loadingProgressText">0%</div>
+            </div>
+        </div>
+
+        <!-- BARRE DE LECTURE ONDULÉE -->
+        <div class="waveform-container" id="waveformContainer">
+            <div class="waveform" id="waveform">
+                <!-- Les barres d'onde sont générées par JavaScript -->
+            </div>
+            <div class="progress-overlay" id="progressOverlay"></div>
+        </div>
+
+        <div class="time-display">
+            <span class="current-time" id="currentTime">0:00</span>
+            <span class="total-time" id="totalTime">0:00</span>
+        </div>
+
+        <!-- CONTROLES -->
+        <div class="player-controls">
+            <button class="control-btn prev-btn" id="prevBtn" title="Piste précédente" disabled>
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                </svg>
+            </button>
+
+            <button class="control-btn play-btn" id="playBtn" title="Play" disabled>
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            </button>
+
+            <button class="control-btn pause-btn" id="pauseBtn" title="Pause" disabled>
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+            </button>
+
+            <button class="control-btn next-btn" id="nextBtn" title="Piste suivante" disabled>
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                </svg>
+            </button>
+
+            <button class="control-btn stop-btn" id="stopBtn" title="Stop" disabled>
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6h12v12H6z"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Lecteur audio caché -->
+        <audio id="audioPlayer" preload="metadata" playsinline crossorigin="anonymous"></audio>
+    </div>
+
+    <!-- RÉSEAUX SOCIAUX - LOGOS PLUS GROS -->
+    <div class="icons-grid-container">
+        <div class="follow-text">FOLLOW ME</div>
+        <div class="icons-grid">
+            <!-- Instagram -->
+            <a href="javascript:void(0)" class="icon-wrapper" data-network="instagram" id="instagramBtn" title="Instagram">
+                <img src="https://github.com/djhustla/music-storage/raw/main/logos_reseaux/instagram.png" alt="Instagram">
+            </a>
+
+            <!-- TikTok -->
+            <a href="javascript:void(0)" class="icon-wrapper" data-network="tiktok" id="tiktokBtn" title="TikTok">
+                <img src="https://github.com/djhustla/music-storage/raw/main/logos_reseaux/tiktok.png" alt="TikTok">
+            </a>
+
+            <!-- Snapchat -->
+            <a href="javascript:void(0)" class="icon-wrapper" data-network="snapchat" id="snapchatBtn" title="Snapchat">
+                <img src="https://github.com/djhustla/music-storage/raw/main/logos_reseaux/snap.png" alt="Snapchat">
+            </a>
+
+            <!-- Facebook -->
+            <a href="javascript:void(0)" class="icon-wrapper" data-network="facebook" id="facebookBtn" title="Facebook">
+                <img src="https://github.com/djhustla/music-storage/raw/main/logos_reseaux/facebook.png" alt="Facebook">
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const API_URL = '/api/dropbox/liens';
+
+    const socialConfig = {
+        instagram: {
+            webUrl: "https://www.instagram.com/djhustla32",
+            appUrl: "instagram://user?username=djhustla32",
+            logoUrl: "https://github.com/djhustla/music-storage/raw/main/logos_reseaux/instagram.png"
+        },
+        tiktok: {
+            webUrl: "https://www.tiktok.com/@djhustla32",
+            appUrl: "tiktok://@djhustla32",
+            logoUrl: "https://github.com/djhustla/music-storage/raw/main/logos_reseaux/tiktok.png"
+        },
+        facebook: {
+            webUrl: "https://www.facebook.com/djhustla.kumbo",
+            appUrl: "fb://profile/djhustla.kumbo",
+            logoUrl: "https://github.com/djhustla/music-storage/raw/main/logos_reseaux/facebook.png"
+        },
+        snapchat: {
+            webUrl: "https://www.snapchat.com/@djhustla.bel",
+            appUrl: "snapchat://add/djhustla.bel",
+            logoUrl: "https://github.com/djhustla/music-storage/raw/main/logos_reseaux/snap.png"
+        }
+    };
+
+    let isPlaying = false;
+    let audioContext = null;
+    let analyser = null;
+    let dataArray = null;
+    let source = null;
+    let waveBars = [];
+
+    let allMixUrls = [];
+    let currentMixIndex = -1;
+    let isLoadingComplete = false;
+
+    let serviceWorkerRegistration = null;
+
+    function openSocialApp(network) {
+        const config = socialConfig[network];
+        if (!config) return;
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (isMobile && config.appUrl) {
+            window.location.href = config.appUrl;
+            setTimeout(() => {
+                if (!document.hidden) {
+                    window.location.href = config.webUrl;
+                }
+            }, 500);
+        } else {
+            window.open(config.webUrl, '_blank');
+        }
+    }
+
+    function fixDropboxUrl(url) {
+        if (!url) return { streamUrl: '', downloadUrl: '' };
+
+        let cleanUrl = url.replace(/&e=\d+/g, '').replace(/&st=[^&]+/g, '');
+        if (cleanUrl.includes('/scl/fi/')) {
+            const streamUrl = cleanUrl
+                .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                .replace('?dl=0', '').replace('&dl=0', '');
+            const downloadUrl = cleanUrl.replace('?dl=0', '?dl=1').replace('&dl=0', '?dl=1');
+            return { streamUrl, downloadUrl };
+        }
+        return {
+            streamUrl: cleanUrl.replace('?dl=0', '?raw=1'),
+            downloadUrl: cleanUrl.replace('?dl=0', '?dl=1')
+        };
+    }
+
+    function getFileNameFromUrl(url) {
+        try {
+            const urlObj = new URL(url);
+            const pathParts = urlObj.pathname.split('/');
+            let filename = pathParts[pathParts.length - 1];
+            filename = decodeURIComponent(filename.split('?')[0]);
+            return filename.replace('.mp3', '').replace(/_/g, ' ').replace(/-/g, ' ') || 'Mix DJ Hustla';
+        } catch {
+            return 'Mix DJ Hustla';
+        }
+    }
+
+    function formatTime(seconds) {
+        if (isNaN(seconds) || seconds < 0) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function updateLoadingProgress(progress, message) {
+        const progressBar = document.getElementById('loadingProgressBar');
+        const progressText = document.getElementById('loadingProgressText');
+        const progressContainer = document.getElementById('loadingProgressContainer');
+        const trackTitle = document.getElementById('trackTitle');
+
+        if (progressBar && progressText) {
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `${Math.floor(progress)}%`;
+        }
+
+        if (progressContainer) {
+            progressContainer.style.display = progress > 0 && progress < 100 ? 'block' : 'none';
+        }
+
+        if (trackTitle && message) {
+            trackTitle.textContent = message;
+        }
+    }
+
+    function createWaveform() {
+        const waveform = document.getElementById('waveform');
+        if (!waveform) return;
+
+        const width = waveform.offsetWidth || 300;
+        const barCount = Math.floor(width / 8);
+
+        waveform.innerHTML = '';
+        waveBars = [];
+
+        for (let i = 0; i < barCount; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'wave-line';
+            bar.style.height = `${10 + Math.random() * 40}%`;
+            waveform.appendChild(bar);
+            waveBars.push(bar);
+        }
+    }
+
+    function setupAudioAnalyser(audio) {
+        try {
+            if (audioContext) {
+                audioContext.close().catch(console.warn);
+            }
+
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            analyser.smoothingTimeConstant = 0.8;
+
+            source = audioContext.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+
+            const bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+
+            console.log('✅ Analyseur audio initialisé');
+            return true;
+        } catch (error) {
+            console.error('❌ Erreur initialisation analyseur:', error);
+            return false;
+        }
+    }
+
+    function animateWaveform() {
+        if (!analyser || !isPlaying) {
+            if (isPlaying) {
+                requestAnimationFrame(animateWaveform);
+            }
+            return;
+        }
+
+        analyser.getByteFrequencyData(dataArray);
+
+        const barCount = waveBars.length;
+        const step = Math.floor(dataArray.length / barCount);
+
+        waveBars.forEach((bar, i) => {
+            const dataIndex = i * step;
+            const value = dataArray[dataIndex] || 0;
+            const percent = (value / 255) * 100;
+            const height = Math.max(10, percent);
+
+            bar.style.height = `${height}%`;
+            bar.style.opacity = 0.5 + (value / 255) * 0.5;
+        });
+
+        requestAnimationFrame(animateWaveform);
+    }
+
+    function updateControlButtons() {
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const audio = document.getElementById('audioPlayer');
+
+        const audioReady = audio && audio.src && audio.readyState >= 2;
+
+        playBtn.disabled = !audioReady;
+        pauseBtn.disabled = !audioReady || !isPlaying;
+        stopBtn.disabled = !audioReady;
+
+        playBtn.style.opacity = audioReady ? (isPlaying ? '0.5' : '1') : '0.5';
+        pauseBtn.style.opacity = (audioReady && isPlaying) ? '1' : '0.5';
+        stopBtn.style.opacity = audioReady ? '1' : '0.5';
+    }
+
+    function updateNavigationButtons() {
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        const hasPrevious = currentMixIndex > 0;
+        prevBtn.disabled = !hasPrevious;
+        prevBtn.style.opacity = hasPrevious ? '1' : '0.5';
+
+        const hasNext = currentMixIndex < allMixUrls.length - 1;
+        nextBtn.disabled = !hasNext;
+        nextBtn.style.opacity = hasNext ? '1' : '0.5';
+
+        prevBtn.title = hasPrevious ? `Piste précédente (${currentMixIndex}/${allMixUrls.length - 1})` : 'Première piste';
+        nextBtn.title = hasNext ? `Piste suivante (${currentMixIndex + 2}/${allMixUrls.length})` : 'Dernière piste';
+    }
+
+    async function loadTrack(index) {
+        if (index < 0 || index >= allMixUrls.length) {
+            console.error('❌ Index invalide:', index);
+            return false;
+        }
+
+        const audio = document.getElementById('audioPlayer');
+        const trackTitle = document.getElementById('trackTitle');
+        const progressOverlay = document.getElementById('progressOverlay');
+        const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
+
+        if (isPlaying) {
+            audio.pause();
+            isPlaying = false;
+        }
+
+        currentMixIndex = index;
+        const mixUrl = allMixUrls[index];
+
+        const urls = fixDropboxUrl(mixUrl);
+        const fileName = getFileNameFromUrl(mixUrl);
+        const displayName = fileName;
+
+        trackTitle.textContent = displayName;
+        console.log(`🎵 Chargement piste ${index + 1}/${allMixUrls.length}: ${displayName}`);
+
+        progressOverlay.style.width = '0%';
+        currentTimeEl.textContent = '0:00';
+        totalTimeEl.textContent = '0:00';
+
+        audio.src = urls.streamUrl;
+        audio.load();
+
+        updateControlButtons();
+        updateNavigationButtons();
+
+        return new Promise((resolve) => {
+            const onLoaded = () => {
+                console.log('✅ Audio chargé, durée:', formatTime(audio.duration));
+                totalTimeEl.textContent = formatTime(audio.duration);
+                audio.removeEventListener('loadedmetadata', onLoaded);
+
+                updateControlButtons();
+                resolve(true);
+            };
+
+            const onError = (e) => {
+                console.error('❌ Erreur de chargement audio:', e);
+                trackTitle.textContent = 'Erreur de chargement';
+                audio.removeEventListener('error', onError);
+                updateControlButtons();
+                resolve(false);
+            };
+
+            audio.addEventListener('loadedmetadata', onLoaded);
+            audio.addEventListener('error', onError);
+
+            setTimeout(() => {
+                if (audio.readyState < 2) {
+                    console.warn('⚠️ Timeout de chargement audio');
+                    audio.removeEventListener('loadedmetadata', onLoaded);
+                    audio.removeEventListener('error', onError);
+                    resolve(false);
+                }
+            }, 15000);
+        });
+    }
+
+    async function playCurrentTrack() {
+        const audio = document.getElementById('audioPlayer');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+
+        if (!audio || !audio.src) {
+            console.error('❌ Aucune piste chargée');
+            return false;
+        }
+
+        if (isPlaying) {
+            console.log('ℹ️ La lecture est déjà en cours');
+            return true;
+        }
+
+        try {
+            if (!audioContext || audioContext.state === 'suspended') {
+                setupAudioAnalyser(audio);
+                await audioContext.resume();
+            }
+
+            await audio.play();
+            isPlaying = true;
+
+            updateControlButtons();
+
+            animateWaveform();
+
+            console.log('▶️ Lecture démarrée');
+            return true;
+        } catch (error) {
+            console.error('❌ Erreur de lecture:', error);
+            isPlaying = false;
+            updateControlButtons();
+
+            if (error.name === 'NotAllowedError') {
+                alert('Cliquez sur Play pour démarrer la lecture. Certains navigateurs bloquent la lecture automatique.');
+            }
+            return false;
+        }
+    }
+
+    function pauseCurrentTrack() {
+        const audio = document.getElementById('audioPlayer');
+
+        if (audio && isPlaying) {
+            audio.pause();
+            isPlaying = false;
+            updateControlButtons();
+            console.log('⏸️ Lecture en pause');
+        }
+    }
+
+    function stopCurrentTrack() {
+        const audio = document.getElementById('audioPlayer');
+        const progressOverlay = document.getElementById('progressOverlay');
+        const currentTimeEl = document.getElementById('currentTime');
+
+        if (audio) {
+            audio.pause();
+            audio.currentTime = 0;
+            isPlaying = false;
+
+            progressOverlay.style.width = '0%';
+            currentTimeEl.textContent = '0:00';
+
+            updateControlButtons();
+            console.log('⏹️ Lecture arrêtée');
+        }
+    }
+
+    async function playPreviousTrack() {
+        if (currentMixIndex <= 0) {
+            console.log('⚠️ Déjà sur la première piste');
+            return;
+        }
+
+        const prevIndex = currentMixIndex - 1;
+        console.log(`⏮️ Passage à piste ${prevIndex + 1}/${allMixUrls.length}`);
+
+        try {
+            await loadTrack(prevIndex);
+            await playCurrentTrack();
+        } catch (error) {
+            console.error('❌ Erreur lors du chargement de la piste précédente:', error);
+        }
+    }
+
+    async function playNextTrack() {
+        if (currentMixIndex >= allMixUrls.length - 1) {
+            console.log('⚠️ Déjà sur la dernière piste');
+            return;
+        }
+
+        const nextIndex = currentMixIndex + 1;
+        console.log(`⏭️ Passage à piste ${nextIndex + 1}/${allMixUrls.length}`);
+
+        try {
+            await loadTrack(nextIndex);
+            await playCurrentTrack();
+        } catch (error) {
+            console.error('❌ Erreur lors du chargement de la piste suivante:', error);
+        }
+    }
+
+    async function fetchAllMixUrls() {
+        try {
+            console.log('🔄 Récupération des liens depuis l\'API...');
+
+            updateLoadingProgress(10, "Connexion à l'API...");
+
+            const response = await fetch(API_URL);
+
+            updateLoadingProgress(40, "Traitement des données...");
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            updateLoadingProgress(70, "Extraction des liens...");
+
+            if (!data.success) {
+                throw new Error(data.message || 'Erreur de l\'API');
+            }
+
+            if (!data.liens || data.liens.length === 0) {
+                throw new Error('Aucun mix trouvé dans la liste');
+            }
+
+            updateLoadingProgress(100, "Playlist chargée !");
+
+            console.log(`✅ ${data.liens.length} liens récupérés`);
+            return data.liens;
+
+        } catch (error) {
+            console.error('❌ Erreur lors de la récupération des liens:', error);
+            updateLoadingProgress(0, "Erreur de chargement");
+            throw error;
+        }
+    }
+
+    function handleVisibilityChange() {
+        const audio = document.getElementById('audioPlayer');
+
+        if (!audio || !audio.src) return;
+
+        if (document.hidden) {
+            console.log('🌙 Page cachée - la musique continue...');
+        } else {
+            console.log('🌞 Page visible à nouveau');
+
+            if (isPlaying && audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    console.log('✅ AudioContext réactivé');
+                    animateWaveform();
+                }).catch(err => {
+                    console.error('❌ Erreur lors de la réactivation AudioContext:', err);
+                });
+            }
+
+            updateControlButtons();
+        }
+    }
+
+    async function initPlayerWithFirstTrack() {
+        const trackTitle = document.getElementById('trackTitle');
+
+        try {
+            trackTitle.textContent = 'Chargement des mixes...';
+
+            allMixUrls = await fetchAllMixUrls();
+
+            if (allMixUrls.length > 0) {
+                console.log(`📊 Playlist chargée: ${allMixUrls.length} pistes`);
+
+                await loadTrack(0);
+                updateControlButtons();
+
+                console.log('✅ Lecteur prêt - Cliquez sur Play pour démarrer');
+            } else {
+                throw new Error('Aucune piste disponible');
+            }
+
+        } catch (error) {
+            console.error('❌ Erreur d\'initialisation:', error);
+            trackTitle.textContent = 'Erreur de chargement';
+
+            const mediaPlayer = document.getElementById('mediaPlayer');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-state';
+            errorDiv.innerHTML = `
+                <p>Impossible de charger les mixes</p>
+                <p><small>${error.message}</small></p>
+                <button onclick="window.location.reload()" style="
+                    margin-top: 10px;
+                    padding: 8px 16px;
+                    background: #667eea;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                ">Réessayer</button>
+            `;
+            mediaPlayer.appendChild(errorDiv);
+
+            updateControlButtons();
+        }
+    }
+
+    async function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            try {
+                serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js', {
+                    scope: '/'
+                });
+                console.log('✅ Service Worker enregistré:', serviceWorkerRegistration);
+
+                if ('mediaSession' in navigator) {
+                    setupMediaSession();
+                }
+            } catch (error) {
+                console.warn('⚠️ Service Worker non disponible:', error);
+            }
+        }
+    }
+
+    function setupMediaSession() {
+        navigator.mediaSession.setActionHandler('play', () => {
+            playCurrentTrack();
+        });
+
+        navigator.mediaSession.setActionHandler('pause', () => {
+            pauseCurrentTrack();
+        });
+
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+            playPreviousTrack();
+        });
+
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+            playNextTrack();
+        });
+
+        updateMediaSessionMetadata();
+    }
+
+    function updateMediaSessionMetadata() {
+        if ('mediaSession' in navigator && currentMixIndex >= 0) {
+            const fileName = getFileNameFromUrl(allMixUrls[currentMixIndex]);
+
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: fileName,
+                artist: 'DJ HUSTLA',
+                artwork: [
+                    { src: 'https://github.com/djhustla/music-storage/raw/main/logos_reseaux/instagram.png', sizes: '512x512', type: 'image/png' }
+                ]
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        createWaveform();
+
+        document.querySelectorAll('.icon-wrapper').forEach(icon => {
+            icon.addEventListener('click', function(e) {
+                e.preventDefault();
+                const network = this.getAttribute('data-network');
+                openSocialApp(network);
+            });
+        });
+
+        setTimeout(() => {
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            if (playBtn) playBtn.addEventListener('click', playCurrentTrack);
+            if (pauseBtn) pauseBtn.addEventListener('click', pauseCurrentTrack);
+            if (stopBtn) stopBtn.addEventListener('click', stopCurrentTrack);
+            if (prevBtn) prevBtn.addEventListener('click', playPreviousTrack);
+            if (nextBtn) nextBtn.addEventListener('click', playNextTrack);
+        }, 100);
+
+        const waveformContainer = document.getElementById('waveformContainer');
+        const audio = document.getElementById('audioPlayer');
+
+        if (waveformContainer) {
+            waveformContainer.addEventListener('click', function(e) {
+                if (!audio || isNaN(audio.duration) || audio.duration <= 0) return;
+
+                const rect = waveformContainer.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const percentClick = clickX / rect.width;
+                const newTime = percentClick * audio.duration;
+
+                audio.currentTime = newTime;
+                console.log('⏩ Navigation vers:', formatTime(newTime));
+            });
+        }
+
+        if (audio) {
+            audio.addEventListener('timeupdate', function() {
+                const progressOverlay = document.getElementById('progressOverlay');
+                const currentTimeEl = document.getElementById('currentTime');
+
+                if (!isNaN(audio.duration) && audio.duration > 0 && progressOverlay && currentTimeEl) {
+                    const progress = (audio.currentTime / audio.duration) * 100;
+                    progressOverlay.style.width = `${progress}%`;
+                    currentTimeEl.textContent = formatTime(audio.currentTime);
+                }
+
+                updateMediaSessionMetadata();
+            });
+
+            audio.addEventListener('loadedmetadata', function() {
+                const totalTimeEl = document.getElementById('totalTime');
+                if (totalTimeEl) {
+                    totalTimeEl.textContent = formatTime(audio.duration);
+                }
+            });
+
+            audio.addEventListener('ended', function() {
+                console.log('⏹️ Piste terminée');
+                isPlaying = false;
+                updateControlButtons();
+
+                if (currentMixIndex < allMixUrls.length - 1) {
+                    setTimeout(playNextTrack, 1000);
+                }
+            });
+
+            audio.addEventListener('error', function(e) {
+                console.error('❌ Erreur audio:', e);
+                const trackTitle = document.getElementById('trackTitle');
+                if (trackTitle) trackTitle.textContent = 'Erreur de lecture audio';
+                isPlaying = false;
+                updateControlButtons();
+            });
+        }
+
+        window.addEventListener('resize', createWaveform);
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        window.addEventListener('blur', function() {
+            console.log('🔴 Fenêtre perdue le focus - musique continue');
+        });
+
+        window.addEventListener('focus', function() {
+            console.log('🟢 Fenêtre a repris le focus');
+            updateControlButtons();
+        });
+
+        initPlayerWithFirstTrack();
+
+        registerServiceWorker();
+    });
+</script>
+</body>
+</html>

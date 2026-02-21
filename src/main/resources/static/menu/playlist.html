@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Playlist</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #9b59b6;
+      margin:0;
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      position:relative;
+      min-height: 100vh;
+    }
+
+    .buttons-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display:flex;
+      gap:10px;
+      z-index:1000;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px 15px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .buttons-container button {
+      background:#fff;
+      color:#8e44ad;
+      border: 2px solid #8e44ad;
+      padding: 10px 16px;
+      border-radius:12px;
+      font-size:0.9rem;
+      font-weight:600;
+      cursor:pointer;
+      box-shadow:0 4px 10px rgba(0,0,0,0.15);
+      transition:all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .buttons-container button:hover {
+      background:#8e44ad;
+      color:#fff;
+      transform: translateY(-2px);
+    }
+
+    h1 {
+      margin: 80px 0 20px 0;
+      color:#fff;
+      text-align: center;
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
+      padding: 0 15px;
+    }
+
+    .container {
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap:20px;
+      width:100%;
+      max-width:1200px;
+      margin-top: 20px;
+    }
+
+    /* CARD RESPONSIVE */
+    .card {
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.15);
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    }
+
+    /* RESPONSIVE POUR MOBILE */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+
+      .container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .card {
+        width: 100vw;
+        margin-left: -15px;
+        margin-right: -15px;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      }
+
+      .buttons-container {
+        top: 15px;
+        right: 15px;
+        left: 15px;
+        justify-content: space-between;
+        padding: 12px 15px;
+      }
+
+      .buttons-container button {
+        flex: 1;
+        margin: 0 5px;
+        padding: 12px 10px;
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      h1 {
+        margin: 70px 0 15px 0;
+        font-size: 1.6rem;
+      }
+
+      .card {
+        margin-left: -10px;
+        margin-right: -10px;
+        border-radius: 10px;
+        padding: 12px;
+      }
+
+      .buttons-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        padding: 10px 12px;
+      }
+
+      .buttons-container button {
+        padding: 10px 8px;
+        font-size: 0.8rem;
+      }
+    }
+
+    iframe.youtube {
+      width:100%;
+      height:200px;
+      border-radius:12px;
+      border: none;
+    }
+
+    iframe.spotify {
+      margin:12px 0;
+      width:100%;
+      height:80px;
+      border-radius:8px;
+      border: none;
+    }
+
+    .info {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:12px;
+      gap: 10px;
+    }
+
+    .info img {
+      width:60px;
+      height:60px;
+      border-radius:8px;
+      object-fit:cover;
+      flex-shrink: 0;
+    }
+
+    .title {
+      font-size:1rem;
+      font-weight:bold;
+      color:#222;
+      flex:1;
+      text-align:left;
+      line-height: 1.3;
+    }
+
+    .pagination {
+      margin:30px 0;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:center;
+      padding: 0 15px;
+    }
+
+    .pagination button {
+      padding:10px 16px;
+      border:none;
+      border-radius:10px;
+      background:#fff;
+      color:#8e44ad;
+      font-weight:600;
+      cursor:pointer;
+      box-shadow:0 3px 8px rgba(0,0,0,0.15);
+      transition:all 0.3s ease;
+      min-width: 44px;
+    }
+
+    .pagination button.active,
+    .pagination button:hover {
+      background:#8e44ad;
+      color:#fff;
+      transform: translateY(-2px);
+    }
+
+    .loading {
+      color: white;
+      font-size: 1.2rem;
+      margin: 40px 0;
+      text-align: center;
+    }
+
+    .error {
+      color: #ff6b6b;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      margin: 30px 0;
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .playlist-info {
+      color: white;
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 1.1rem;
+      padding: 0 15px;
+    }
+
+    /* Animation de chargement */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      animation: fadeIn 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+
+<div class="buttons-container">
+  <button id="btnRetour">🔙 Retour</button>
+  <button id="btnLogout">🚪 Déconnexion</button>
+</div>
+
+<h1 id="pageTitle">🎵 Playlist</h1>
+<div class="playlist-info" id="playlistInfo"></div>
+<div class="loading" id="loading">Chargement de la playlist...</div>
+<div class="container" id="playlist"></div>
+<div class="pagination" id="pagination"></div>
+
+<script>
+  document.getElementById("btnRetour").addEventListener("click", () => {
+    window.location.href = "/menu/playlist_menu/afficher_playlist.html";
+  });
+
+  document.getElementById("btnLogout").addEventListener("click", () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    alert('Déconnexion réussie');
+    window.location.href = '/connection/connection.html';
+  });
+
+  let allSongs = [];
+  let currentPage = 1;
+  const itemsPerPage = 20;
+
+  async function loadPlaylist() {
+    const params = new URLSearchParams(window.location.search);
+    let src = params.get("src") || "fr.txt";
+
+    // IMPORTANT: Décoder le nom du fichier pour gérer les espaces
+    src = decodeURIComponent(src);
+
+    const playlistName = src.replace('.txt', '');
+    document.getElementById("pageTitle").textContent = `🎵 ${playlistName}`;
+    document.getElementById("playlistInfo").textContent = `Lecture de la playlist: ${playlistName}`;
+
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("playlist").innerHTML = "";
+
+    console.log("📁 Chargement du fichier:", src);
+
+    try {
+      const proxyUrl = 'https://corsproxy.io/?';
+      // MODIFICATION ICI : Changement de playlist_list vers mes_playlists
+      const targetUrl =    `https://raw.githubusercontent.com/djhustla/music-storage/main/playlist_list/${src}`;
+
+      console.log("🎯 URL complète:", targetUrl);
+
+      const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+      if (!response.ok) throw new Error(`Fichier "${src}" non trouvé sur le serveur`);
+
+      const text = await response.text();
+
+      // Parser le fichier playlist
+      allSongs = text.trim().split('\n')
+        .filter(line => line.trim() !== '')
+        .map(line => {
+          try {
+            return JSON.parse(line);
+          } catch (e) {
+            console.warn("Ligne JSON invalide ignorée:", line);
+            return null;
+          }
+        })
+        .filter(Boolean);
+
+      document.getElementById("loading").style.display = "none";
+
+      if (allSongs.length === 0) {
+        document.getElementById('playlist').innerHTML =
+          `<div class="error">Aucun morceau trouvé dans la playlist "${playlistName}"</div>`;
+        return;
+      }
+
+      console.log(`✅ ${allSongs.length} morceaux chargés depuis ${src}`);
+      renderPage(currentPage);
+      renderPagination();
+
+    } catch (err) {
+      console.error("❌ Erreur:", err);
+      document.getElementById("loading").style.display = "none";
+      document.getElementById('playlist').innerHTML =
+        `<div class="error">
+          <h3>Erreur de chargement</h3>
+          <p>Impossible de charger la playlist "${src}"</p>
+          <p><small>${err.message}</small></p>
+          <button onclick="loadPlaylist()" style="margin-top:10px; padding:12px 20px; background:#8e44ad; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
+            🔄 Réessayer
+          </button>
+        </div>`;
+    }
+  }
+
+  function renderPage(page) {
+    const container = document.getElementById('playlist');
+    container.innerHTML = '';
+
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const songsToShow = allSongs.slice(start, end);
+
+    songsToShow.forEach(music => {
+      const title = music.titreComplet || "Sans titre";
+      const imgUrl = music.photo || "";
+      const spotifyUrl = music.spotifyUrl || "";
+      const youtubeUrl = music.youtubeUrl || "";
+
+      const spotifyEmbed = spotifyUrl.replace("open.spotify.com/track", "open.spotify.com/embed/track");
+
+      let youtubeEmbed = "";
+      if (youtubeUrl) {
+        let youtubeId = youtubeUrl.split('v=')[1];
+        if (youtubeId) {
+          const amp = youtubeId.indexOf('&');
+          if (amp !== -1) youtubeId = youtubeId.substring(0, amp);
+          youtubeEmbed = `https://www.youtube.com/embed/${youtubeId}`;
+        }
+      }
+
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      let htmlContent = '';
+
+      // Ajouter YouTube si disponible
+      if (youtubeEmbed) {
+        htmlContent += `<iframe class="youtube" src="${youtubeEmbed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      }
+
+      // Ajouter Spotify si disponible
+      if (spotifyEmbed) {
+        htmlContent += `<iframe class="spotify" src="${spotifyEmbed}" frameborder="0" allow="encrypted-media"></iframe>`;
+      }
+
+      // Informations de la musique
+      htmlContent += `
+        <div class="info">
+          <div class="title">${title}</div>
+          ${imgUrl ? `<img src="${imgUrl}" alt="${title}" onerror="this.style.display='none'">` : ''}
+        </div>
+      `;
+
+      card.innerHTML = htmlContent;
+      container.appendChild(card);
+    });
+  }
+
+  function renderPagination() {
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+    const totalPages = Math.ceil(allSongs.length / itemsPerPage);
+
+    if (totalPages <= 1) return;
+
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = i;
+      if (i === currentPage) btn.classList.add('active');
+      btn.addEventListener('click', () => {
+        currentPage = i;
+        renderPage(currentPage);
+        renderPagination();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      pagination.appendChild(btn);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', loadPlaylist);
+</script>
+
+</body>
+</html>

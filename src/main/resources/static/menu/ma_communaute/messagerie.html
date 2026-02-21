@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mes Conversations</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: white;
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+      letter-spacing: -0.5px;
+    }
+
+    .top-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .container {
+      background: white;
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .conversations-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px 25px;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-bottom: 3px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .conversations-list {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .conversations-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .conversations-list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    .conversations-list::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+    }
+
+    .conversation {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 20px 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .conversation:last-child {
+      border-bottom: none;
+    }
+
+    .conversation::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transform: scaleY(0);
+      transition: transform 0.3s;
+    }
+
+    .conversation:hover {
+      background: linear-gradient(to right, #f8f9ff, white);
+      padding-left: 30px;
+    }
+
+    .conversation:hover::before {
+      transform: scaleY(1);
+    }
+
+    .username {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .username::before {
+      content: '💬';
+      font-size: 1.3rem;
+    }
+
+    .badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 50%;
+      min-width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.6);
+      }
+    }
+
+    .no-conv {
+      text-align: center;
+      color: #9ca3af;
+      padding: 60px 20px;
+      font-size: 1.1rem;
+    }
+
+    .no-conv::before {
+      content: '📭';
+      display: block;
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+      }
+
+      .btn {
+        font-size: 0.95rem;
+        padding: 10px 18px;
+      }
+
+      .conversations-header {
+        padding: 18px 20px;
+        font-size: 1.1rem;
+      }
+
+      .conversation {
+        padding: 16px 20px;
+      }
+
+      .username {
+        font-size: 1rem;
+      }
+
+      .badge {
+        min-width: 24px;
+        height: 24px;
+        font-size: 0.8rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      .top-buttons {
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .btn {
+        font-size: 0.9rem;
+        padding: 9px 16px;
+      }
+
+      .container {
+        border-radius: 16px;
+      }
+
+      .conversation {
+        flex-direction: row;
+        gap: 10px;
+        padding: 14px 18px;
+      }
+
+      .no-conv {
+        padding: 40px 20px;
+        font-size: 1rem;
+      }
+
+      .no-conv::before {
+        font-size: 3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+  <h1>Mes Conversations</h1>
+
+  <div class="top-buttons">
+    <button class="btn" id="menuBtn">Retour au menu</button>
+    <button class="btn" id="logoutBtn">Déconnexion</button>
+  </div>
+
+  <div class="container">
+    <div class="conversations-header">💬 Conversations récentes</div>
+    <div class="conversations-list" id="conversationsContainer">
+      <div class="no-conv">Chargement des conversations...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    alert("Vous devez être connecté");
+    window.location.href = "/connection/connection.html";
+  }
+
+  const container = document.getElementById("conversationsContainer");
+
+  document.getElementById("menuBtn").addEventListener("click", () => {
+    window.location.href = "/menu/menu.html";
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("accessToken");
+    window.location.href = "/connection/connection.html";
+  });
+
+  async function loadConversations() {
+    try {
+      const resp = await fetch("/api/conversations", {
+        headers: { Authorization: "Bearer " + token },
+      });
+
+      if (!resp.ok) throw new Error("Erreur lors du chargement des conversations");
+
+      const conversations = await resp.json();
+
+      if (conversations.length === 0) {
+        container.innerHTML = '<div class="no-conv">Aucune conversation trouvée.</div>';
+        return;
+      }
+
+      container.innerHTML = "";
+      conversations.forEach((conv) => {
+        const div = document.createElement("div");
+        div.className = "conversation";
+        div.innerHTML = `
+          <div class="username">${conv.otherUsername}</div>
+          ${
+            conv.unreadCount && conv.unreadCount > 0
+              ? `<div class="badge">${conv.unreadCount}</div>`
+              : ""
+          }
+        `;
+        div.addEventListener("click", () => {
+          window.location.href = "/menu/ma_communaute/conversation.html?userId=" + conv.otherUserId;
+        });
+        container.appendChild(div);
+      });
+    } catch (err) {
+      console.error(err);
+      container.innerHTML = '<div class="no-conv">Erreur de chargement.</div>';
+    }
+  }
+
+  loadConversations();
+</script>
+</body>
+</html>

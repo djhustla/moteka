@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Musical Parfait</title>
+    <style>
+        /* Reset et styles de base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* En-tête */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+        .header .subtitle { font-size: 0.95rem; opacity: 0.9; }
+
+        /* Barre d'action avec les 3 boutons alignés */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background: #f8f9ff;
+            border-bottom: 2px solid #e5e7eb;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            flex: 1;
+            min-width: 160px;
+            white-space: nowrap;
+        }
+
+        .btn-main { background: #667eea; color: white; }
+        .btn-prev { background: #764ba2; color: white; }
+        .btn-logout { background: #ef4444; color: white; }
+
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        /* Contenu principal */
+        .content { padding: 30px; flex: 1; display: flex; flex-direction: column; }
+
+        .message { padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 2px solid; text-align: center; display: none; }
+        .loading-message { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; display: block; }
+        .error-message { background: #fee; color: #dc2626; border-color: #fecaca; }
+
+        /* Grille et Cartes épurées */
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .user-card {
+            background: #f8f9ff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .user-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        /* Photo Rectangulaire */
+        .user-photo-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 180px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            background: #eee;
+            border: 3px solid #667eea;
+        }
+
+        .user-avatar { width: 100%; height: 100%; object-fit: cover; }
+
+        .avatar-placeholder {
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; color: white;
+        }
+
+        .user-name { font-weight: 700; font-size: 1.3rem; color: #374151; margin-bottom: 20px; word-break: break-word; }
+
+        .btn-profile {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-profile:hover { filter: brightness(1.1); transform: scale(1.02); }
+
+        .empty-state { text-align: center; padding: 40px; color: #6b7280; display: none; }
+
+        .footer { text-align: center; padding: 15px; color: #6b7280; font-size: 0.85rem; border-top: 2px solid #e5e7eb; margin-top: auto; }
+
+        @media (max-width: 768px) {
+            .action-buttons { flex-direction: column; }
+            .btn { width: 100%; }
+            .users-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>💫 Match Musical Parfait</h1>
+        <p class="subtitle">Utilisateurs avec exactement les mêmes préférences que vous</p>
+    </div>
+
+    <div class="action-buttons">
+        <a href="/menu/menu.html" class="btn btn-main">🏠 Retour au menu principal</a>
+        <a href="/menu/connection_musical_menu.html" class="btn btn-prev">⬅️ Menu précédent</a>
+        <button id="logoutBtn" class="btn btn-logout">🚪 Déconnexion</button>
+    </div>
+
+    <div class="content">
+        <div class="message loading-message" id="loadingMessage">🔍 Recherche de vos matchs parfaits...</div>
+        <div class="message error-message" id="errorMessage">❌ <span id="errorText"></span></div>
+
+        <div class="users-grid" id="usersGrid"></div>
+
+        <div class="empty-state" id="emptyState">
+            <p>Aucun match parfait trouvé pour le moment.</p>
+            <button onclick="location.reload()" style="margin-top:15px; cursor:pointer; padding:10px 20px; border-radius:8px; border:none; background:#667eea; color:white;">🔄 Actualiser</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2024 Music Social • Harmonisation totale</p>
+    </div>
+</div>
+
+<script>
+    const CONFIG = {
+        apiBaseUrl: '/api/users/me/same-music-favoris',
+        token: localStorage.getItem('accessToken')
+    };
+
+    const DOM = {
+        loadingMessage: document.getElementById('loadingMessage'),
+        errorMessage: document.getElementById('errorMessage'),
+        errorText: document.getElementById('errorText'),
+        usersGrid: document.getElementById('usersGrid'),
+        emptyState: document.getElementById('emptyState'),
+        logoutBtn: document.getElementById('logoutBtn')
+    };
+
+    class PerfectMatchManager {
+        constructor() {
+            this.init();
+        }
+
+        async init() {
+            if (!CONFIG.token) {
+                window.location.href = '/connection/connection.html';
+                return;
+            }
+            this.setupEventListeners();
+            await this.loadMatches();
+        }
+
+        setupEventListeners() {
+            DOM.logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                window.location.href = '/connection/connection.html';
+            });
+        }
+
+        async loadMatches() {
+            try {
+                DOM.loadingMessage.style.display = 'block';
+                const response = await fetch(CONFIG.apiBaseUrl, {
+                    headers: { 'Authorization': `Bearer ${CONFIG.token}` }
+                });
+
+                if (!response.ok) throw new Error('Erreur lors du chargement des matchs');
+
+                const data = await response.json();
+                DOM.loadingMessage.style.display = 'none';
+
+                const users = data.users || [];
+                if (users.length > 0) {
+                    this.renderUsers(users);
+                } else {
+                    DOM.emptyState.style.display = 'block';
+                }
+            } catch (error) {
+                DOM.loadingMessage.style.display = 'none';
+                DOM.errorText.textContent = error.message;
+                DOM.errorMessage.style.display = 'block';
+            }
+        }
+
+        renderUsers(users) {
+            DOM.usersGrid.innerHTML = '';
+            users.forEach(user => {
+                const card = document.createElement('div');
+                card.className = 'user-card';
+
+                const photoHtml = user.photoUrl
+                    ? `<img src="${user.photoUrl}" class="user-avatar" onerror="this.parentElement.innerHTML='<div class=\"avatar-placeholder\">${user.username.charAt(0).toUpperCase()}</div>'">`
+                    : `<div class="avatar-placeholder">${user.username ? user.username.charAt(0).toUpperCase() : '?'}</div>`;
+
+                card.innerHTML = `
+                    <div class="user-photo-container">${photoHtml}</div>
+                    <div class="user-name">${this.escapeHtml(user.username)}</div>
+                    <a href="/menu/profil_user.html?userId=${user.id}" class="btn-profile">👤 Voir le profil</a>
+                `;
+                DOM.usersGrid.appendChild(card);
+            });
+        }
+
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => new PerfectMatchManager());
+</script>
+</body>
+</html>

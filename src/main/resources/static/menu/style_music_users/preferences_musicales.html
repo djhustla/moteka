@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes Préférences Musicales</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height:100vh;
+      padding:20px;
+      color:#333;
+    }
+
+    .container {
+      max-width:1000px;
+      margin:0 auto;
+    }
+
+    .header {
+      background: white;
+      border-radius:20px;
+      padding:30px;
+      text-align:center;
+      margin-bottom:25px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.1);
+      position:relative;
+    }
+
+    h1 {
+      font-size:2.2rem;
+      font-weight:700;
+      color:#1f2937;
+      margin-bottom:10px;
+    }
+
+    .subtitle {
+      font-size:1rem;
+      color:#6b7280;
+      margin-bottom:15px;
+    }
+
+    .stats {
+      display:flex;
+      justify-content:center;
+      gap:30px;
+      margin-top:20px;
+    }
+
+    .stat-item {
+      text-align:center;
+    }
+
+    .stat-number {
+      font-size:2rem;
+      font-weight:bold;
+      color:#667eea;
+      display:block;
+    }
+
+    .stat-label {
+      font-size:0.9rem;
+      color:#6b7280;
+    }
+
+    .back-btn, .logout-btn {
+      position:absolute;
+      top:20px;
+      padding:10px 16px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      transition:0.3s;
+    }
+
+    .back-btn {
+      left:20px;
+      background:#f3f4f6;
+      color:#374151;
+    }
+
+    .logout-btn {
+      right:20px;
+      background:#ef4444;
+      color:white;
+    }
+
+    .back-btn:hover { background:#e5e7eb; }
+    .logout-btn:hover { background:#dc2626; }
+
+    .content {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:25px;
+    }
+
+    @media (max-width:768px) {
+      .content {
+        grid-template-columns:1fr;
+      }
+    }
+
+    .section {
+      background:white;
+      border-radius:16px;
+      padding:25px;
+      box-shadow:0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+      font-size:1.4rem;
+      color:#1f2937;
+      margin-bottom:20px;
+      padding-bottom:10px;
+      border-bottom:2px solid #667eea;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .preferences-list {
+      display:flex;
+      flex-direction:column;
+      gap:15px;
+    }
+
+    .preference-item {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:15px;
+      background:#f8f9fa;
+      border-radius:10px;
+      border-left:4px solid #667eea;
+      transition:all 0.3s;
+    }
+
+    .preference-item:hover {
+      background:#e3f2fd;
+      transform:translateX(5px);
+    }
+
+    .genre-name {
+      font-weight:600;
+      color:#1f2937;
+      font-size:1.1rem;
+    }
+
+    .preference-rating {
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .rating-stars {
+      display:flex;
+      gap:2px;
+    }
+
+    .star {
+      color:#ffd700;
+      font-size:1.2rem;
+    }
+
+    .rating-value {
+      background:#667eea;
+      color:white;
+      padding:4px 8px;
+      border-radius:12px;
+      font-size:0.8rem;
+      font-weight:600;
+      min-width:30px;
+      text-align:center;
+    }
+
+    .no-preferences {
+      text-align:center;
+      padding:40px 20px;
+      color:#6b7280;
+    }
+
+    .no-preferences-icon {
+      font-size:3rem;
+      margin-bottom:15px;
+      opacity:0.5;
+    }
+
+    .action-buttons {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:15px;
+      margin-top:20px;
+    }
+
+    .btn {
+      padding:12px 20px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:0.9rem;
+      transition:all 0.3s;
+      text-align:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+
+    .btn-primary {
+      background:#667eea;
+      color:white;
+    }
+
+    .btn-secondary {
+      background:#f3f4f6;
+      color:#374151;
+    }
+
+    .btn:hover {
+      transform:translateY(-2px);
+      box-shadow:0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .user-info {
+      text-align:center;
+      margin-bottom:20px;
+    }
+
+    .user-avatar {
+      width:80px;
+      height:80px;
+      border-radius:50%;
+      object-fit:cover;
+      margin:0 auto 15px;
+      border:3px solid #667eea;
+    }
+
+    .user-name {
+      font-size:1.3rem;
+      font-weight:600;
+      color:#1f2937;
+      margin-bottom:5px;
+    }
+
+    .user-email {
+      color:#6b7280;
+      font-size:0.9rem;
+    }
+
+    .loading {
+      text-align:center;
+      padding:50px;
+      color:white;
+      font-size:1.2rem;
+      grid-column:1/-1;
+    }
+
+    .spinner {
+      width:40px;
+      height:40px;
+      border:4px solid rgba(255,255,255,0.3);
+      border-top:4px solid white;
+      border-radius:50%;
+      animation:spin 1s linear infinite;
+      margin:0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform:rotate(0deg); }
+      100% { transform:rotate(360deg); }
+    }
+
+    @media (max-width:768px) {
+      .header { padding:25px 20px; }
+      h1 { font-size:1.8rem; }
+      .stats { gap:20px; }
+      .stat-number { font-size:1.7rem; }
+    }
+
+    @media (max-width:480px) {
+      .header { padding:20px 15px; }
+      h1 { font-size:1.5rem; }
+      .back-btn, .logout-btn {
+        position:static;
+        margin:5px;
+        width:calc(50% - 10px);
+        display:inline-block;
+      }
+      .action-buttons {
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <button class="back-btn" onclick="window.location.href='/menu/menu.html'">⬅️ Retour</button>
+    <h1>🎵 Mes Préférences Musicales</h1>
+    <p class="subtitle">Vos genres musicaux favoris et leurs cotes de préférence</p>
+
+    <div class="stats">
+      <div class="stat-item">
+        <span class="stat-number" id="totalGenres">0</span>
+        <span class="stat-label">Genres favoris</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" id="averageRating">0</span>
+        <span class="stat-label">Note moyenne</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" id="topGenre">-</span>
+        <span class="stat-label">Genre préféré</span>
+      </div>
+    </div>
+
+    <button class="logout-btn" onclick="logout()">🚪 Déconnexion</button>
+  </div>
+
+  <div class="content">
+    <div id="loadingState" class="loading">
+      <div class="spinner"></div>
+      <p>Chargement de vos préférences musicales...</p>
+    </div>
+
+    <div id="mainContent" style="display:none;">
+      <!-- Section des préférences -->
+      <div class="section">
+        <h2 class="section-title">🎶 Mes Genres Favoris</h2>
+        <div id="preferencesList" class="preferences-list">
+          <!-- Les préférences seront ajoutées ici dynamiquement -->
+        </div>
+      </div>
+
+      <!-- Section actions et informations -->
+      <div class="section">
+        <div class="user-info">
+          <img id="userAvatar" src="" alt="Avatar" class="user-avatar" onerror="this.src='/default-avatar.png'">
+          <div class="user-name" id="userName">Utilisateur</div>
+          <div class="user-email" id="userEmail">email@example.com</div>
+        </div>
+
+        <h2 class="section-title">⚡ Actions</h2>
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="window.location.href='/menu/gestion-genres.html'">
+            ✏️ Gérer mes préférences
+          </button>
+          <button class="btn btn-secondary" onclick="window.location.href='/menu/style_music_users/style_music_users.html'">
+            🔍 Trouver des âmes sœurs
+          </button>
+          <button class="btn btn-primary" onclick="window.location.href='/menu/ma_communaute/communaute.html'">
+            👥 Ma communauté
+          </button>
+          <button class="btn btn-secondary" onclick="window.location.href='/menu/profil.html'">
+            👤 Mon profil
+          </button>
+        </div>
+
+        <div style="margin-top:20px; padding:15px; background:#f8f9fa; border-radius:10px;">
+          <h3 style="color:#1f2937; margin-bottom:10px;">💡 Comment ça marche ?</h3>
+          <p style="color:#6b7280; font-size:0.9rem; line-height:1.4;">
+            Vos préférences musicales vous aident à trouver des utilisateurs avec des goûts similaires.
+            Plus la cote est élevée (1-10), plus vous aimez ce genre musical.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem('accessToken');
+  if (!token) {
+    alert('Vous devez être connecté');
+    window.location.href = '/connection/connection.html';
+  }
+
+  async function loadMusicPreferences() {
+    try {
+      const response = await fetch('/api/users/me/music-preferences', {
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      displayPreferences(data);
+
+    } catch (error) {
+      console.error('Erreur:', error);
+      document.getElementById('loadingState').innerHTML = `
+        <div style="color:white; text-align:center;">
+          <div style="font-size:3rem; margin-bottom:15px;">❌</div>
+          <h3>Erreur de chargement</h3>
+          <p>Impossible de charger vos préférences musicales.</p>
+          <button onclick="loadMusicPreferences()" style="margin-top:15px; padding:10px 20px; background:white; border:none; border-radius:8px; cursor:pointer;">
+            🔄 Réessayer
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  function displayPreferences(data) {
+    // Masquer le chargement et afficher le contenu
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'grid';
+
+    // Mettre à jour les informations utilisateur
+    if (data.user) {
+      document.getElementById('userName').textContent = data.user.username || 'Utilisateur';
+      document.getElementById('userEmail').textContent = data.user.email || '';
+      if (data.user.photoUrl) {
+        document.getElementById('userAvatar').src = data.user.photoUrl;
+      }
+    }
+
+    const preferences = data.preferences || data.musicFavoris || [];
+
+    // Mettre à jour les statistiques
+    document.getElementById('totalGenres').textContent = preferences.length;
+
+    // Calculer la note moyenne
+    const averageRating = preferences.length > 0
+      ? (preferences.reduce((sum, pref) => sum + (pref.cotePreference || 0), 0) / preferences.length).toFixed(1)
+      : '0';
+    document.getElementById('averageRating').textContent = averageRating;
+
+    // Trouver le genre préféré
+    const topGenre = preferences.length > 0
+      ? preferences.reduce((max, pref) => (pref.cotePreference > max.cotePreference ? pref : max), preferences[0])
+      : null;
+    document.getElementById('topGenre').textContent = topGenre ? topGenre.musicGenre.description.substring(0, 10) + '...' : '-';
+
+    // Afficher la liste des préférences
+    const preferencesList = document.getElementById('preferencesList');
+
+    if (preferences.length === 0) {
+      preferencesList.innerHTML = `
+        <div class="no-preferences">
+          <div class="no-preferences-icon">🎵</div>
+          <h3>Aucune préférence musicale</h3>
+          <p>Commencez par ajouter vos genres musicaux favoris !</p>
+          <button onclick="window.location.href='/menu/gestion-genres.html'"
+                  style="margin-top:15px; padding:12px 24px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer;">
+            ➕ Ajouter mes préférences
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    // Générer les étoiles pour la cote
+    function generateStars(rating) {
+      const stars = [];
+      for (let i = 1; i <= 10; i++) {
+        stars.push(`<span class="star">${i <= rating ? '★' : '☆'}</span>`);
+      }
+      return stars.join('');
+    }
+
+    // Afficher chaque préférence
+    preferencesList.innerHTML = preferences.map(pref => `
+      <div class="preference-item">
+        <div class="genre-name">${escapeHtml(pref.musicGenre.description)}</div>
+        <div class="preference-rating">
+          <div class="rating-stars" title="Cote: ${pref.cotePreference}/10">
+            ${generateStars(pref.cotePreference)}
+          </div>
+          <span class="rating-value">${pref.cotePreference}/10</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  async function logout() {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ refreshToken })
+      });
+    }
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    window.location.href = '/connection/connection.html';
+  }
+
+  // Charger les préférences au démarrage
+  loadMusicPreferences();
+</script>
+</body>
+</html>

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recherche</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+      position:relative;
+    }
+
+    .container {
+      background:white;
+      border-radius:24px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.3);
+      overflow:hidden;
+      width:100%;
+      max-width:600px;
+      position:relative;
+      z-index:1;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding:50px 30px;
+      text-align:center;
+      color:white;
+    }
+
+    h1 {
+      font-size:2.5rem;
+      font-weight:700;
+      margin-bottom:8px;
+      letter-spacing:-0.5px;
+    }
+
+    .subtitle {
+      font-size:1rem;
+      opacity:0.9;
+      font-weight:400;
+    }
+
+    .content {
+      padding:30px;
+    }
+
+    .search-section {
+      margin-bottom:40px;
+    }
+
+    .search-box {
+      display:flex;
+      gap:12px;
+      margin-bottom:20px;
+    }
+
+    .search-input {
+      flex:1;
+      padding:16px 20px;
+      border:2px solid #e5e7eb;
+      border-radius:14px;
+      font-size:1rem;
+      font-family:inherit;
+      transition: all 0.3s;
+      background:#f8f9ff;
+    }
+
+    .search-input:focus {
+      outline:none;
+      border-color:#667eea;
+      box-shadow:0 0 0 3px rgba(102,126,234,0.1);
+    }
+
+    .search-btn {
+      padding:16px 25px;
+      border:none;
+      border-radius:14px;
+      font-size:1rem;
+      font-weight:600;
+      cursor:pointer;
+      transition: all 0.3s;
+      font-family:inherit;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color:white;
+      box-shadow:0 4px 12px rgba(102,126,234,0.3);
+      white-space:nowrap;
+    }
+
+    .search-btn:hover {
+      transform:translateY(-2px);
+      box-shadow:0 6px 20px rgba(102,126,234,0.4);
+    }
+
+    .search-btn:active {
+      transform:translateY(0);
+    }
+
+    .search-btn:disabled {
+      background: #e5e7eb;
+      color: #9ca3af;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .results-section {
+      margin-top: 20px;
+    }
+
+    .results-container {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      background: #f8f9ff;
+    }
+
+    .user-card {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: background-color 0.2s;
+    }
+
+    .user-card:hover {
+      background-color: #f0f4ff;
+    }
+
+    .user-card:last-child {
+      border-bottom: none;
+    }
+
+    .user-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #667eea;
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: #374151;
+      margin-bottom: 5px;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .action-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .action-btn::before {
+      font-size: 0.9rem;
+    }
+
+    .profile-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(102,126,234,0.3);
+    }
+
+    .profile-btn::before {
+      content: "👤";
+    }
+
+    .profile-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+    }
+
+    .dm-btn {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(72,187,120,0.3);
+    }
+
+    .dm-btn::before {
+      content: "💬";
+    }
+
+    .dm-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(72,187,120,0.4);
+    }
+
+    .no-results {
+      text-align: center;
+      color: #6b7280;
+      padding: 40px 20px;
+      font-style: italic;
+    }
+
+    .loading {
+      text-align: center;
+      color: #667eea;
+      padding: 20px;
+      font-weight: 500;
+    }
+
+    .error-message {
+      text-align: center;
+      color: #ef4444;
+      padding: 20px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .search-info {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
+
+    .fixed-buttons {
+      display:flex;
+      gap:12px;
+      margin-top:30px;
+    }
+
+    .fixed-btn {
+      flex:1;
+      padding:14px 20px;
+      border:none;
+      border-radius:14px;
+      font-size:1rem;
+      font-weight:600;
+      cursor:pointer;
+      transition: all 0.3s;
+      font-family:inherit;
+      text-align:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+
+    .fixed-btn::before {
+      content:attr(data-icon);
+      font-size:1.2rem;
+    }
+
+    .back-btn {
+      background: linear-gradient(135deg, #a8a8a8 0%, #7a7a7a 100%);
+      color:white;
+      box-shadow:0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .back-btn:hover {
+      transform:translateY(-2px);
+      box-shadow:0 6px 15px rgba(0,0,0,0.3);
+    }
+
+    .logout-btn {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+      color:white;
+      box-shadow:0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    .logout-btn:hover {
+      transform:translateY(-2px);
+      box-shadow:0 6px 15px rgba(255, 107, 107, 0.4);
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        border-radius:20px;
+      }
+
+      .header {
+        padding:40px 25px;
+      }
+
+      h1 {
+        font-size:2rem;
+      }
+
+      .content {
+        padding:25px;
+      }
+
+      .search-box {
+        flex-direction:column;
+      }
+
+      .fixed-buttons {
+        flex-direction:column;
+      }
+
+      .user-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+      }
+
+      .user-info {
+        text-align: center;
+      }
+
+      .user-actions {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Recherche</h1>
+    <p class="subtitle">Trouvez des utilisateurs par nom</p>
+  </div>
+
+  <div class="content">
+    <div class="search-section">
+      <div class="search-box">
+        <input type="text" class="search-input" id="searchInput" placeholder="Entrez un nom d'utilisateur..." value="">
+        <button class="search-btn" id="btnSearch">Rechercher</button>
+      </div>
+
+      <div class="results-section" id="resultsSection">
+        <div class="search-info" id="searchInfo">
+          Entrez un nom d'utilisateur pour commencer la recherche
+        </div>
+        <div class="results-container" id="resultsContainer">
+          <!-- Les résultats seront affichés ici dynamiquement -->
+        </div>
+      </div>
+    </div>
+
+    <div class="fixed-buttons">
+      <button class="fixed-btn back-btn" id="btnBack" data-icon="⬅️">
+        Retour au menu
+      </button>
+
+      <button class="fixed-btn logout-btn" id="btnLogout" data-icon="🚪">
+        Déconnexion
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Vérifier l'authentification
+  const token = localStorage.getItem('accessToken');
+  if (!token) {
+    alert('Vous devez être connecté pour accéder à cette page');
+    window.location.href = '/connection/connection.html';
+  }
+
+  // Éléments DOM
+  const searchInput = document.getElementById('searchInput');
+  const btnSearch = document.getElementById('btnSearch');
+  const resultsContainer = document.getElementById('resultsContainer');
+  const searchInfo = document.getElementById('searchInfo');
+
+  // Fonction pour effectuer la recherche
+  async function performSearch() {
+    const searchTerm = searchInput.value.trim();
+
+    if (!searchTerm) {
+      searchInfo.textContent = 'Veuillez entrer un terme de recherche';
+      resultsContainer.innerHTML = '';
+      return;
+    }
+
+    // Afficher le loading
+    btnSearch.disabled = true;
+    btnSearch.textContent = 'Recherche...';
+    searchInfo.textContent = `Recherche de "${searchTerm}" en cours...`;
+    resultsContainer.innerHTML = '<div class="loading">Chargement des résultats...</div>';
+
+    try {
+      const response = await fetch(`/api/users/search_contains?username=${encodeURIComponent(searchTerm)}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Afficher les résultats
+      displayResults(data, searchTerm);
+
+    } catch (error) {
+      console.error('Erreur lors de la recherche:', error);
+      searchInfo.textContent = `Erreur lors de la recherche: ${error.message}`;
+      resultsContainer.innerHTML = '<div class="error-message">Une erreur est survenue lors de la recherche</div>';
+    } finally {
+      btnSearch.disabled = false;
+      btnSearch.textContent = 'Rechercher';
+    }
+  }
+
+  // Fonction pour afficher les résultats
+  function displayResults(data, searchTerm) {
+    if (data.error) {
+      searchInfo.textContent = `Erreur: ${data.error}`;
+      resultsContainer.innerHTML = '<div class="error-message">' + data.error + '</div>';
+      return;
+    }
+
+    if (!data.users || data.users.length === 0) {
+      searchInfo.textContent = `Aucun utilisateur trouvé pour "${searchTerm}"`;
+      resultsContainer.innerHTML = '<div class="no-results">Aucun résultat trouvé</div>';
+      return;
+    }
+
+    searchInfo.textContent = `${data.count} utilisateur(s) trouvé(s) pour "${searchTerm}"`;
+
+    const usersHtml = data.users.map(user => `
+      <div class="user-card">
+        <img src="${user.photoUrl || '/images/default-avatar.png'}"
+             alt="${user.username}"
+             class="user-avatar"
+             onerror="this.src='/images/default-avatar.png'">
+        <div class="user-info">
+          <div class="user-name">${user.username}</div>
+          <div class="user-actions">
+            <a href="/menu/profil_user.html?userId=${user.id}" class="action-btn profile-btn">Profil</a>
+            <a href="/menu/ma_communaute/conversation.html?userId=${user.id}" class="action-btn dm-btn">DM</a>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    resultsContainer.innerHTML = usersHtml;
+  }
+
+  // Événements
+  btnSearch.addEventListener('click', performSearch);
+
+  // Recherche avec la touche Entrée
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      performSearch();
+    }
+  });
+
+  // Bouton Retour au menu
+  document.getElementById("btnBack").addEventListener("click", () => {
+    window.location.href = "/menu/menu.html";
+  });
+
+  // Bouton Déconnexion
+  document.getElementById("btnLogout").addEventListener("click", async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) return;
+
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ refreshToken })
+      });
+
+      if (response.ok) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('currentUserData');
+        alert('Déconnexion réussie');
+        window.location.href = '/connection/connection.html';
+      } else {
+        alert('Erreur lors de la déconnexion');
+      }
+    } catch (err) {
+      alert('Erreur réseau lors de la déconnexion');
+    }
+  });
+
+  // Focus sur le champ de recherche au chargement
+  searchInput.focus();
+</script>
+
+</body>
+</html>

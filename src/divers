@@ -1,0 +1,60 @@
+# Port du serveur
+server.port=8080
+
+# Configuration H2
+spring.datasource.url=jdbc:h2:file:./data/personnedb
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# JPA
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+# Console H2
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+# Dossier où seront stockées les photos
+file.upload-dir=C:/java/Security02/data/photos
+
+
+# Dossier externe pour les playlists
+file.playlist-dir=C:/java/Security02/data/playlist
+
+
+------------------------------------------
+
+# Port du serveur
+server.port=8080
+
+# Configuration PostgreSQL
+spring.datasource.url=jdbc:postgresql://localhost:5432/music_app
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.username=my_user_name
+spring.datasource.password=my_password
+
+# JPA
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# Dossier où seront stockées les photos
+file.upload-dir=C:/java/Security02/data/photos
+
+# Dossier externe pour les playlists
+file.playlist-dir=C:/java/Security02/data/playlist
+
+
+
+
+
+
+
+
+
+
+
+

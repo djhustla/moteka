@@ -1,0 +1,1867 @@
+1.pom.xml
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.0</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.example</groupId>
+    <artifactId>security-learning</artifactId>
+    <version>1.0.0</version>
+    <name>SecurityLearning</name>
+    <description>Projet d'apprentissage Spring Security</description>
+
+    <properties>
+        <java.version>22</java.version>
+    </properties>
+
+    <dependencies>
+        <!-- Web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- JPA -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- H2 Database -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+
+2. application.properties
+
+
+
+# Port du serveur
+server.port=8080
+
+# Configuration H2
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# JPA
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.show-sql=true
+
+# Console H2
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+
+
+Pour conserver les donnée :
+
+# Port du serveur
+server.port=8080
+
+# Configuration H2
+spring.datasource.url=jdbc:h2:file:./data/personnedb
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# JPA
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+# Console H2
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+
+
+
+3.programme de demarrage
+
+
+package com.example.security;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SecurityLearningApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SecurityLearningApplication.class, args);
+    }
+}
+
+
+4. Modeles - Repository - Service - Modele
+
+Modele User
+
+
+package com.example.security.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
+    private String username;
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    // Constructeurs
+    public User() {}
+
+    public User(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+    }
+
+    // Getters et Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+}
+
+
+
+
+
+
+Repository User
+
+
+package com.example.security.repository;
+
+import com.example.security.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByUsername(String username);
+    Optional<User> findByEmail(String email);
+    boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
+}
+
+Service User
+
+
+package com.example.security.service;
+
+import com.example.security.model.User;
+import com.example.security.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public User createUser(String username, String email, String password) {
+        if (userRepository.existsByUsername(username)) {
+            throw new RuntimeException("Username déjà utilisé : " + username);
+        }
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Email déjà utilisé : " + email);
+        }
+
+        User user = new User(username, email, passwordEncoder.encode(password));
+        return userRepository.save(user);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public boolean validatePassword(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+}
+
+
+
+
+
+
+
+Controleur User
+
+
+
+package com.example.security.controller;
+
+import com.example.security.model.User;
+import com.example.security.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(@RequestBody Map<String, String> userData) {
+        try {
+            String username = userData.get("username");
+            String email = userData.get("email");
+            String password = userData.get("password");
+
+            User user = userService.createUser(username, email, password);
+            return ResponseEntity.ok("Utilisateur créé avec succès : " + user.getUsername());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erreur : " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+        users.forEach(user -> user.setPassword("*****")); // Masquer les mots de passe
+        return ResponseEntity.ok(users);
+    }
+}
+
+
+
+security Config
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(); // Pour le hash des mots de passe
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable()) // Désactive CSRF pour les tests
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/api/users/register").permitAll() // Création utilisateur
+                        .requestMatchers("/api/users/all").permitAll()      // Lecture utilisateurs
+                        .anyRequest().authenticated()                        // Tout le reste nécessite auth
+                );
+        return http.build();
+    }
+}
+------------------------------------------------------------------------------
+
+
+
+ligne de commande pour test
+
+curl -X POST http://localhost:8080/api/users/register ^
+-H "Content-Type: application/json" ^
+-d "{\"username\":\"alice\",\"email\":\"alice@example.com\",\"password\":\"Password123\"}"
+
+
+
+curl -X POST http://localhost:8080/api/users/register ^
+-H "Content-Type: application/json" ^
+-d "{\"username\":\"bob\",\"email\":\"bob@example.com\",\"password\":\"Secret456\"}"
+
+
+
+curl -X GET http://localhost:8080/api/users/all
+
+-------------------------------------------------------------------------------------------------
+
+AUTHENTIFICATION
+
+
+Creation de JWTUtil
+
+1. Pom xml
+
+<!-- JWT Dependencies -->
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>0.12.3</version>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>0.12.3</version>
+    <scope>runtime</scope>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.12.3</version>
+    <scope>runtime</scope>
+</dependency>
+
+
+
+package projet.security;
+
+// Imports JWT
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
+// Imports Spring
+import org.springframework.stereotype.Component;
+
+// Imports Java standard
+import javax.crypto.SecretKey;
+import java.util.Date;
+
+@Component
+public class JwtUtil {
+
+    // Secret JWT directement dans la classe (pour la formation progressive)
+    // ⚠️ Bonne pratique : à la fin, on mettra ce secret dans application.properties
+    private final String secret = "monSecretJWTTresLongPourLaSecuriteDuTokenAvecAuMoins256Bits";
+
+    // Durée de vie du token en millisecondes (ici : 1 jour)
+    private final long expiration = 86400000;
+
+    // Génère la clé de signature à partir du secret
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    // Génère un token JWT pour un username donné
+    public String generateToken(String username) {
+        return Jwts.builder()
+                .subject(username)  // Définit le sujet (ici : username)
+                .issuedAt(new Date())  // Date de création
+                .expiration(new Date(System.currentTimeMillis() + expiration)) // Date d'expiration
+                .signWith(getSigningKey())  // Signature avec la clé secrète
+                .compact();  // Génère le token final en String
+    }
+
+    // Récupère le username depuis un token
+    public String extractUsername(String token) {
+        return extractClaims(token).getSubject();
+    }
+
+    // Récupère la date d'expiration du token
+    public Date extractExpiration(String token) {
+        return extractClaims(token).getExpiration();
+    }
+
+    // Extrait les "claims" (informations stockées dans le token)
+    private Claims extractClaims(String token) {
+        return Jwts.parser()                  // Utilisation du parser "nouvelle version"
+                .verifyWith(getSigningKey())  // Vérifie la signature
+                .build()
+                .parseSignedClaims(token)     // Analyse le token signé
+                .getPayload();                // Récupère les claims
+    }
+
+    // Vérifie si le token est expiré
+    public boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    // Valide le token en vérifiant le username et la date d'expiration
+    public boolean validateToken(String token, String username) {
+        return username.equals(extractUsername(token)) && !isTokenExpired(token);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+classe AuthControlleur
+
+
+package com.example.security.controller;
+
+import com.example.security.jwt.JwtUtil;
+import com.example.security.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    @Autowired
+    private UserService userService; // Service des utilisateurs
+
+    @Autowired
+    private JwtUtil jwtUtil; // Utilitaire JWT
+
+    // Endpoint pour login (génère un JWT si login OK)
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+
+        return userService.findByUsername(username)
+                .map(user -> {
+                    if (userService.validatePassword(password, user.getPassword())) {
+                        // Génère le token JWT
+                        String token = jwtUtil.generateToken(username);
+
+                        // Réponse avec username et token
+                        Map<String, String> response = new HashMap<>();
+                        response.put("message", "Connexion réussie");
+                        response.put("username", username);
+                        response.put("token", token);
+
+                        return ResponseEntity.ok(response);
+                    } else {
+                        // Mauvais mot de passe
+                        Map<String, String> error = new HashMap<>();
+                        error.put("error", "Mot de passe incorrect");
+                        return ResponseEntity.badRequest().body(error);
+                    }
+                })
+                // Si utilisateur non trouvé
+                .orElse(ResponseEntity.badRequest().body(Map.of("error", "Utilisateur non trouvé")));
+    }
+
+    // Endpoint pour valider un JWT
+    @PostMapping("/validate")
+    public ResponseEntity<Map<String, String>> validateToken(@RequestBody Map<String, String> tokenData) {
+        String token = tokenData.get("token");
+
+        try {
+            String username = jwtUtil.extractUsername(token);
+
+            if (jwtUtil.validateToken(token, username)) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Token valide");
+                response.put("username", username);
+                return ResponseEntity.ok(response);
+            }
+        } catch (Exception e) {
+            // Si le token est invalide ou expiré
+        }
+
+        return ResponseEntity.badRequest().body(Map.of("error", "Token invalide ou expiré"));
+    }
+}
+
+
+
+
+on modifie le fichier de config
+
+
+package com.example.security.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(); // Pour le hash des mots de passe
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable()) // Désactive CSRF pour les tests
+            .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/api/users/register").permitAll() // Création utilisateur
+                .requestMatchers("/api/users/all").permitAll()      // Lecture utilisateurs
+                .requestMatchers("/api/auth/**").permitAll()        // Auth endpoints
+                .anyRequest().authenticated()                        // Tout le reste nécessite auth
+            );
+
+        return http.build();
+    }
+}
+
+
+
+
+
+curl -X POST http://localhost:8080/api/users/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"alice\",\"password\":\"1234\",\"email\":\"alice@mail.com\"}"
+
+
+
+curl -X POST http://localhost:8080/api/users/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"bob\",\"password\":\"abcd\",\"email\":\"bob@mail.com\"}"
+
+
+
+curl -X POST http://localhost:8080/api/users/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"charlie\",\"password\":\"pass5678\",\"email\":\"charlie@mail.com\"}"
+
+
+
+curl -X GET http://localhost:8080/api/users/all
+
+
+Authentification
+
+
+curl -X POST http://localhost:8080/api/auth/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"alice\",\"password\":\"1234\"}"
+
+Validation du token
+
+curl -X POST http://localhost:8080/api/auth/validate ^
+  -H "Content-Type: application/json" ^
+  -d "{\"token\":\"<TOKEN_Genere>\"}"
+
+  ------------------------------
+
+
+
+
+
+
+  on ne veut permettre uniquement les utilisateur authentifié a se connecter
+
+
+1. On cree  cette classe JwtAuthenticationFilter
+
+package com.example.security.jwt;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+// Filtre exécuté à chaque requête pour vérifier le JWT
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtUtil jwtUtil;
+
+    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+
+        // Récupère le header Authorization
+        String authHeader = request.getHeader("Authorization");
+
+        String username = null;
+        String token = null;
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7); // Retire "Bearer "
+            try {
+                username = jwtUtil.extractUsername(token);
+            } catch (Exception e) {
+                // Token invalide ou mal formé
+                System.out.println("JWT invalide : " + e.getMessage());
+            }
+        }
+
+        // Si on a un username et que personne n'est encore authentifié
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (jwtUtil.validateToken(token, username)) {
+                // Crée une authentification Spring Security simple
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(username, null, null);
+
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                // Remplit le SecurityContext
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        }
+
+        // Continue la chaîne de filtres
+        filterChain.doFilter(request, response);
+    }
+}
+
+
+
+2. on modifie la config en mettant le jwtAuth...
+
+package com.example.security.config;
+
+import com.example.security.jwt.JwtAuthenticationFilter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }
+
+    // Bean pour encoder les mots de passe
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    // Configuration principale de sécurité
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http
+            .csrf(csrf -> csrf.disable()) // Désactive CSRF pour les tests
+            .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/api/users/register").permitAll() // Création utilisateur
+                .requestMatchers("/api/users/all").permitAll()      // Affichage utilisateurs
+                .requestMatchers("/api/auth/**").permitAll()        // Endpoints auth
+                .requestMatchers("/h2-console/**").permitAll()      // Console H2
+                .anyRequest().authenticated()                        // Tout le reste est sécurisé
+            )
+            // Nouvelle syntaxe pour désactiver frame options (H2)
+            .headers(headers -> headers.frameOptions(frame -> frame.disable()));
+
+        // AJOUT : JWT filter avant le filtre standard de Spring Security
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+}
+
+
+
+
+
+
+
+ 3.
+
+  on modifie le userControlleur
+
+
+
+  package com.example.security.controller;
+
+  import com.example.security.model.User;
+  import com.example.security.service.UserService;
+  import com.example.security.jwt.JwtUtil;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.http.ResponseEntity;
+  import org.springframework.web.bind.annotation.*;
+
+  import java.util.List;
+  import java.util.Map;
+
+  @RestController
+  @RequestMapping("/api/users")
+  public class UserController {
+
+      @Autowired
+      private UserService userService;
+
+      @Autowired
+      private JwtUtil jwtUtil;
+
+      // ===========================
+      // Création d'un utilisateur
+      // ===========================
+      @PostMapping("/register")
+      public ResponseEntity<String> registerUser(@RequestBody Map<String, String> userData) {
+          try {
+              String username = userData.get("username");
+              String email = userData.get("email");
+              String password = userData.get("password");
+
+              User user = userService.createUser(username, email, password);
+              return ResponseEntity.ok("Utilisateur créé avec succès : " + user.getUsername());
+          } catch (Exception e) {
+              return ResponseEntity.badRequest().body("Erreur : " + e.getMessage());
+          }
+      }
+
+      // ===========================
+      // Affichage de tous les utilisateurs (mot de passe masqué)
+      // ===========================
+      @GetMapping("/all")
+      public ResponseEntity<List<User>> getAllUsers() {
+          List<User> users = userService.getAllUsers();
+          // Masquer les mots de passe dans la réponse
+          users.forEach(user -> user.setPassword("*****"));
+          return ResponseEntity.ok(users);
+      }
+
+      // ===========================
+      // Endpoint protégé : profile utilisateur
+      // Accessible uniquement avec un JWT valide
+      // ===========================
+      @GetMapping("/profile")
+      public ResponseEntity<Map<String, String>> getProfile(@RequestHeader("Authorization") String authHeader) {
+          try {
+              // Récupération du token en enlevant "Bearer "
+              String token = authHeader.replace("Bearer ", "");
+              String username = jwtUtil.extractUsername(token);
+
+              // Vérification du token
+              if (jwtUtil.validateToken(token, username)) {
+                  return ResponseEntity.ok(Map.of(
+                          "username", username,
+                          "message", "Bienvenue dans ton profil sécurisé !"
+                  ));
+              } else {
+                  return ResponseEntity.status(401).body(Map.of(
+                          "error", "Token invalide ou expiré"
+                  ));
+              }
+          } catch (Exception e) {
+              return ResponseEntity.status(401).body(Map.of(
+                      "error", "Token invalide ou absent"
+              ));
+          }
+      }
+  }
+
+
+
+
+test : creation Zoubida
+
+curl -v -X POST http://localhost:8080/api/users/register -H "Content-Type: application/json" -d "{\"username\":\"zoubida\",\"email\":\"zoubida@mail.com\",\"password\":\"motdepasse1\"}"
+
+
+Creation Zack
+
+
+curl -v -X POST http://localhost:8080/api/users/register -H "Content-Type: application/json" -d "{\"username\":\"zack\",\"email\":\"zack@mail.com\",\"password\":\"motdepasse2\"}"
+
+
+
+Connection Zoubida et generation du token
+
+curl -v -X POST http://localhost:8080/api/auth/login -H "Content-Type: application/json" -d "{\"username\":\"zoubida\",\"password\":\"motdepasse1\"}"
+
+
+idem Zack
+
+curl -v -X POST http://localhost:8080/api/auth/login -H "Content-Type: application/json" -d "{\"username\":\"zack\",\"password\":\"motdepasse2\"}"
+
+
+
+/ on met le token generé
+curl -v -X GET "http://localhost:8080/api/users/profile" -H "Authorization: Bearer <JWT_TOKEN_ZOUBIDA>"
+
+
+Faire un test :
+
+ dans le fichier config ->
+                   //     .requestMatchers("/api/users/all").permitAll()      // Affichage utilisateurs
+Faire ce code la en normal sans token
+curl -X GET http://localhost:8080/api/users/all
+
+Faire ce code la avec token
+curl -v -X GET "http://localhost:8080/api/users/all" -H "Authorization: Bearer <JWT_TOKEN_ZOUBIDA>"
+
+
+
+
+
+
+On va sauvegarde la clé de cryptage du token , et la duré du token dans le application . property
+
+dans le property
+
+# Secret pour JWT
+jwt.secret=monSecretJWTTresLongPourLaSecuriteDuTokenAvecAuMoins256Bits
+
+# Durée de vie du token en millisecondes (1 jour)
+jwt.expiration=86400000
+
+
+
+dans le jwt
+
+
+package projet.security;
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+
+@Component
+public class JwtUtil {
+
+    // Injection depuis application.properties
+    @Value("${jwt.secret}")
+    private String secret;
+
+    @Value("${jwt.expiration}")
+    private long expiration;
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    public String generateToken(String username) {
+        return Jwts.builder()
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public String extractUsername(String token) {
+        return extractClaims(token).getSubject();
+    }
+
+    public Date extractExpiration(String token) {
+        return extractClaims(token).getExpiration();
+    }
+
+    private Claims extractClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    public boolean validateToken(String token, String username) {
+        return username.equals(extractUsername(token)) && !isTokenExpired(token);
+    }
+}
+
+
+
+Je veux faire en sorte que je puisse me voir connecte (/me)
+
+dans le userControlleur
+
+@GetMapping("/me")
+public ResponseEntity<Map<String, String>> getCurrentUser() {
+    // Récupère le nom de l'utilisateur authentifié depuis le SecurityContext
+    String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    if (username == null) {
+        return ResponseEntity.status(401).body(Map.of("error", "Utilisateur non authentifié"));
+    }
+
+    // Retourne les informations basiques de l'utilisateur
+    return ResponseEntity.ok(Map.of(
+        "username", username
+    ));
+}
+
+
+
+
+exercice a faire
+
+curl -X POST http://localhost:8080/api/users/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"lucie\",\"password\":\"pass1234\",\"email\":\"lucie@mail.com\"}"
+
+
+curl -X POST http://localhost:8080/api/auth/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"lucie\",\"password\":\"pass1234\"}"
+
+
+curl -X GET http://localhost:8080/api/users/me ^
+  -H "Authorization: Bearer <TON_TOKEN>"
+
+
+
+avoir + de detail sur /me
+
+
+1. Rajouter ca dans USER
+
+@Column(nullable = false)
+private String role = "USER"; // rôle par défaut
+
+@Column(nullable = false, updatable = false)
+@Temporal(TemporalType.TIMESTAMP)
+private Date createdAt = new Date(); // date de création automatique
+
+// Getters et setters
+public String getRole() { return role; }
+public void setRole(String role) { this.role = role; }
+
+public Date getCreatedAt() { return createdAt; }
+public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+
+
+2. Dans User Service , modifié le constructeur
+
+public User createUser(String username, String email, String password) {
+    // Vérifie si l'utilisateur existe déjà
+    if (userRepository.existsByUsername(username)) {
+        throw new RuntimeException("Username déjà utilisé: " + username);
+    }
+    if (userRepository.existsByEmail(email)) {
+        throw new RuntimeException("Email déjà utilisé: " + email);
+    }
+
+    // Création de l'utilisateur
+    User user = new User();
+    user.setUsername(username);
+    user.setEmail(email);
+    user.setPassword(passwordEncoder.encode(password));
+
+    // Initialisation du rôle par défaut
+    user.setRole("USER");
+
+    // createdAt est déjà initialisé automatiquement dans User.java
+
+    return userRepository.save(user);
+}
+
+
+
+3. Modifié le /me dans le controlleur
+
+@GetMapping("/me")
+public ResponseEntity<Map<String, Object>> getCurrentUser() {
+    // Récupère le username depuis le SecurityContext
+    String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    if (username == null) {
+        return ResponseEntity.status(401).body(Map.of("error", "Utilisateur non authentifié"));
+    }
+
+    // Cherche l'utilisateur en base
+    User user = userService.findByUsername(username).orElse(null);
+
+    if (user == null) {
+        return ResponseEntity.status(404).body(Map.of("error", "Utilisateur non trouvé"));
+    }
+
+    // Retourne les informations enrichies
+    Map<String, Object> response = Map.of(
+        "username", user.getUsername(),
+        "email", user.getEmail(),
+        "role", user.getRole(),
+        "createdAt", user.getCreatedAt().toString()
+    );
+
+    return ResponseEntity.ok(response);
+}
+
+
+
+a Tester
+
+ curl -X POST http://localhost:8080/api/users/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"lucie\",\"password\":\"pass1234\",\"email\":\"lucie@mail.com\"}"
+
+
+
+curl -X POST http://localhost:8080/api/auth/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"lucie\",\"password\":\"pass1234\"}"
+
+curl -v -X GET http://localhost:8080/api/users/me ^
+  -H "Authorization: Bearer <TON_TOKEN>"
+
+
+
+les ROLES
+
+
+Modifications à apporter :
+
+UserService.java : Ajouter une méthode pour créer un utilisateur avec un rôle spécifique
+UserController.java : Ajouter des endpoints protégés par rôle ADMIN
+SecurityConfig.java : Configurer la gestion des rôles dans Spring Security
+JwtAuthenticationFilter.java : Modifier pour inclure les rôles dans l'authentification
+
+
+User Service
+
+package projet.services;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import projet.modeles.User;
+import projet.repository.UserRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // Méthode existante - crée un utilisateur avec rôle USER par défaut
+    public User createUser(String username, String email, String password) {
+        if (userRepository.existsByUsername(username)) {
+            throw new RuntimeException("Username déjà utilisé: " + username);
+        }
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Email déjà utilisé: " + email);
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole("USER"); // Rôle par défaut
+
+        return userRepository.save(user);
+    }
+
+    // NOUVELLE MÉTHODE : Crée un utilisateur avec un rôle spécifique
+    public User createUserWithRole(String username, String email, String password, String role) {
+        if (userRepository.existsByUsername(username)) {
+            throw new RuntimeException("Username déjà utilisé: " + username);
+        }
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Email déjà utilisé: " + email);
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(role.toUpperCase()); // Force en majuscules
+
+        return userRepository.save(user);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public boolean validatePassword(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+}
+
+Security Config
+
+
+package projet.security;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(authz -> authz
+                // Endpoints publics
+                .requestMatchers("/api/users/register").permitAll()
+                .requestMatchers("/api/users/register-admin").permitAll() // NOUVEAU
+                .requestMatchers("/api/users/all").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
+
+                // Endpoints réservés aux ADMIN
+                .requestMatchers("/api/users/admin/**").hasRole("ADMIN") // NOUVEAU
+
+                // Tout le reste nécessite une authentification
+                .anyRequest().authenticated()
+            )
+            .headers(headers -> headers.frameOptions(frame -> frame.disable()));
+
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+}
+
+
+
+
+UserControlleur
+
+package projet.controlleurs;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+import projet.modeles.User;
+import projet.security.JwtUtil;
+import projet.services.UserService;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    // ===========================
+    // ENDPOINTS PUBLICS
+    // ===========================
+
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(@RequestBody Map<String, String> userData) {
+        try {
+            String username = userData.get("username");
+            String email = userData.get("email");
+            String password = userData.get("password");
+
+            User user = userService.createUser(username, email, password);
+            return ResponseEntity.ok("Utilisateur créé avec succès : " + user.getUsername() + " (Rôle: " + user.getRole() + ")");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erreur : " + e.getMessage());
+        }
+    }
+
+    // NOUVEAU : Endpoint pour créer un administrateur
+    @PostMapping("/register-admin")
+    public ResponseEntity<String> registerAdmin(@RequestBody Map<String, String> userData) {
+        try {
+            String username = userData.get("username");
+            String email = userData.get("email");
+            String password = userData.get("password");
+
+            User user = userService.createUserWithRole(username, email, password, "ADMIN");
+            return ResponseEntity.ok("Administrateur créé avec succès : " + user.getUsername() + " (Rôle: " + user.getRole() + ")");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erreur : " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+        users.forEach(user -> user.setPassword("*****"));
+        return ResponseEntity.ok(users);
+    }
+
+    // ===========================
+    // ENDPOINTS AUTHENTIFIÉS
+    // ===========================
+
+    @GetMapping("/profile")
+    public ResponseEntity<Map<String, String>> getProfile(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String username = jwtUtil.extractUsername(token);
+
+        if (jwtUtil.validateToken(token, username)) {
+            return ResponseEntity.ok(Map.of(
+                    "username", username,
+                    "message", "Bienvenue dans ton profil sécurisé !"
+            ));
+        } else {
+            return ResponseEntity.status(401).body(Map.of(
+                    "error", "Token invalide ou expiré"
+            ));
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, Object>> getCurrentUser() {
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (username == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Utilisateur non authentifié"));
+        }
+
+        User user = userService.findByUsername(username).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "Utilisateur non trouvé"));
+        }
+
+        Map<String, Object> response = Map.of(
+                "username", user.getUsername(),
+                "email", user.getEmail(),
+                "role", user.getRole(),
+                "createdAt", user.getCreatedAt().toString()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ===========================
+    // ENDPOINTS RÉSERVÉS AUX ADMIN
+    // ===========================
+
+    @GetMapping("/admin/dashboard")
+    public ResponseEntity<Map<String, Object>> adminDashboard() {
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        long totalUsers = userService.getAllUsers().size();
+        long adminUsers = userService.getAllUsers().stream()
+                .filter(user -> "ADMIN".equals(user.getRole()))
+                .count();
+
+        Map<String, Object> dashboard = Map.of(
+                "message", "Bienvenue dans le tableau de bord administrateur",
+                "connectedAdmin", username,
+                "totalUsers", totalUsers,
+                "adminUsers", adminUsers
+        );
+
+        return ResponseEntity.ok(dashboard);
+    }
+
+    @DeleteMapping("/admin/delete/{userId}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
+        String adminUsername = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // Logique de suppression (à implémenter selon vos besoins)
+        return ResponseEntity.ok("Utilisateur avec ID " + userId + " supprimé par l'admin " + adminUsername);
+    }
+
+    @GetMapping("/admin/users-details")
+    public ResponseEntity<List<User>> getAllUsersWithDetails() {
+        List<User> users = userService.getAllUsers();
+        // Pour les admins, on peut afficher plus de détails (mais pas les mots de passe)
+        users.forEach(user -> user.setPassword("*****"));
+        return ResponseEntity.ok(users);
+    }
+}
+
+
+JWT Auth filtre
+
+
+package projet.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+import projet.repository.UserRepository;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtUtil jwtUtil;
+    private final UserRepository userRepository; // Utilise directement le Repository
+
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserRepository userRepository) {
+        this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+
+        String authHeader = request.getHeader("Authorization");
+        String username = null;
+        String token = null;
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+            try {
+                username = jwtUtil.extractUsername(token);
+            } catch (Exception e) {
+                System.out.println("JWT invalide : " + e.getMessage());
+            }
+        }
+
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (jwtUtil.validateToken(token, username)) {
+
+                // Récupère le rôle directement depuis le repository
+                List<GrantedAuthority> authorities = new ArrayList<>();
+                userRepository.findByUsername(username).ifPresent(user -> {
+                    authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+                });
+
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(username, null, authorities);
+
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        }
+
+        filterChain.doFilter(request, response);
+    }
+}
+
+Exercices
+
+curl -X POST http://localhost:8080/api/users/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"bob\",\"email\":\"bob@mail.com\",\"password\":\"1234\"}"
+
+
+curl -X POST http://localhost:8080/api/users/register-admin ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"admin\",\"email\":\"admin@mail.com\",\"password\":\"admin123\"}"
+
+
+curl -X GET http://localhost:8080/api/users/all
+
+
+curl -X POST http://localhost:8080/api/auth/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"bob\",\"password\":\"1234\"}"
+
+
+curl -X POST http://localhost:8080/api/auth/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"admin\",\"password\":\"admin123\"}"
+
+
+curl -X GET http://localhost:8080/api/users/me ^
+  -H "Authorization: Bearer <TOKEN_USER>"
+
+curl -X GET http://localhost:8080/api/users/admin/dashboard ^
+  -H "Authorization: Bearer <TOKEN_ADMIN>"
+
+Si tu essaies avec le token de Bob (USER) sur /admin/dashboard, tu devrais avoir un 403 Forbidden.
+
+
+
+refresh Token
+
+
+1 refaire jwt Util
+
+
+package projet.security;
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+
+@Component
+public class JwtUtil {
+
+    // Injection depuis application.properties
+
+/*
+    @Value("${jwt.secret}")
+    private String secret;
+    @Value("${jwt.expiration}")
+    private long expiration;
+ */
+    private final String secret = "monSecretJWTTresLongPourLaSecuriteDuTokenAvecAuMoins256Bits";
+    private final long accessTokenExpiration = 15 * 60 * 1000; // 15 min
+    private final long refreshTokenExpiration = 7 * 24 * 60 * 60 * 1000; // 7 jours
+
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    // Génère un access token
+    public String generateAccessToken(String username) {
+        return Jwts.builder()
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public String generateRefreshToken(String username) {
+        return Jwts.builder()
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public String extractUsername(String token) {
+        return extractClaims(token).getSubject();
+    }
+
+    public Date extractExpiration(String token) {
+        return extractClaims(token).getExpiration();
+    }
+
+    private Claims extractClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    public boolean validateToken(String token, String username) {
+        return username.equals(extractUsername(token)) && !isTokenExpired(token);
+    }
+}
+
+
+2. AuthController
+
+
+package projet.controlleurs;
+
+import ch.qos.logback.core.boolex.Matcher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import projet.modeles.User;
+import projet.security.JwtUtil;
+import projet.services.UserService;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    @Autowired
+    private UserService userService; // Service des utilisateurs
+
+    @Autowired
+    private JwtUtil jwtUtil; // Utilitaire JWT
+
+    @Autowired
+    private   PasswordEncoder passwordEncoder;
+
+    // Endpoint pour login (génère un JWT si login OK)
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+
+        User user = userService.findByUsername(username).orElse(null);
+
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+            return ResponseEntity.status(401).body(Map.of("error", "Identifiants invalides"));
+        }
+
+        // Génère access + refresh token
+        String accessToken = jwtUtil.generateAccessToken(username);
+        String refreshToken = jwtUtil.generateRefreshToken(username);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Connexion réussie",
+                "username", username,
+                "accessToken", accessToken,
+                "refreshToken", refreshToken
+        ));
+
+
+         }
+
+    // Endpoint pour valider un JWT
+    @PostMapping("/validate")
+    public ResponseEntity<Map<String, String>> validateToken(@RequestBody Map<String, String> tokenData) {
+        String token = tokenData.get("token");
+
+        try {
+            String username = jwtUtil.extractUsername(token);
+
+            if (jwtUtil.validateToken(token, username)) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Token valide");
+                response.put("username", username);
+                return ResponseEntity.ok(response);
+            }
+        } catch (Exception e) {
+            // Si le token est invalide ou expiré
+        }
+
+        return ResponseEntity.badRequest().body(Map.of("error", "Token invalide ou expiré"));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, Object>> refresh(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+
+        if (refreshToken == null || jwtUtil.isTokenExpired(refreshToken)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Refresh token invalide ou expiré"));
+        }
+
+        String username = jwtUtil.extractUsername(refreshToken);
+
+        // Génère un nouveau access token
+        String newAccessToken = jwtUtil.generateAccessToken(username);
+
+        return ResponseEntity.ok(Map.of(
+                "accessToken", newAccessToken,
+                "refreshToken", refreshToken // on renvoie le même refresh tant qu’il est valide
+        ));
+    }
+
+
+}
+
+TEST
+
+
+dans le jwt , je met l expiration du token apres 1 min
+
+1.Creation
+curl -X POST http://localhost:8080/api/users/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"lucie\",\"password\":\"pass1234\",\"email\":\"lucie@mail.com\"}"
+
+2.Login
+curl -X POST http://localhost:8080/api/auth/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"lucie\",\"password\":\"pass1234\"}"
+
+3. Acces
+  curl -v -X GET http://localhost:8080/api/users/me ^
+    -H "Authorization: Bearer <ACCESS_TOKEN>"
+
+
+    curl -v -X GET http://localhost:8080/api/users/me ^
+        -H "Authorization: Bearer <ACCESS_TOKEN>"
+
+4.acces , apres 1 min = Expiration
+    curl -v -X GET http://localhost:8080/api/users/me ^
+      -H "Authorization: Bearer <ACCESS_TOKEN>"
+
+
+5. generation du token avec le refresh Toke
+      curl -X POST http://localhost:8080/api/auth/refresh ^
+        -H "Content-Type: application/json" ^
+        -d "{\"refreshToken\":\"<REFRESH_TOKEN>\"}"
+
+
+        6. Reconnection
+        curl -v -X GET http://localhost:8080/api/users/me ^
+          -H "Authorization: Bearer <NOUVEAU_ACCESS_TOKEN>"
+
+
+LogOUT
+
+
+Implémentation du Logout avec Refresh Token en BDD (Spring Security + JWT)
+🔹 Étape 1 – Créer une entité InvalidatedToken
+👉 Nouvelle table pour stocker les refresh tokens invalidés.
+
+package projet.security;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+public class InvalidatedToken {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true, length = 512)
+    private String token;
+
+    @Column(nullable = false)
+    private LocalDateTime invalidatedAt; // Date à laquelle on a fait logout
+
+    public InvalidatedToken() {}
+
+    public InvalidatedToken(String token) {
+        this.token = token;
+        this.invalidatedAt = LocalDateTime.now();
+    }
+
+    // getters et setters
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
+    public LocalDateTime getInvalidatedAt() { return invalidatedAt; }
+    public void setInvalidatedAt(LocalDateTime invalidatedAt) { this.invalidatedAt = invalidatedAt; }
+}
+🔹 Étape 2 – Créer un Repository
+package projet.security;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
+
+public interface InvalidatedTokenRepository extends JpaRepository<InvalidatedToken, Long> {
+    Optional<InvalidatedToken> findByToken(String token);
+}
+🔹 Étape 3 – Modifier TokenService
+@Service
+public class TokenService {
+
+    @Autowired
+    private InvalidatedTokenRepository invalidatedTokenRepository;
+
+    // ✅ Enregistrer un token invalidé en BDD
+    public void invalidateRefreshToken(String token) {
+        InvalidatedToken entity = new InvalidatedToken(token);
+        invalidatedTokenRepository.save(entity);
+    }
+
+    // ✅ Vérifier en BDD si token est invalidé
+    public boolean isRefreshTokenInvalidated(String token) {
+        return invalidatedTokenRepository.findByToken(token).isPresent();
+    }
+}
+🔹 Étape 4 – Modifier AuthController
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private TokenService tokenService; // ✅ utilise la BDD
+
+    // ✅ LOGIN
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+
+        return userService.findByUsername(username)
+            .map(user -> {
+                if (userService.validatePassword(password, user.getPassword())) {
+                    String accessToken = jwtUtil.generateToken(username);
+                    String refreshToken = jwtUtil.generateRefreshToken(username);
+
+                    Map<String, String> response = new HashMap<>();
+                    response.put("message", "Connexion réussie");
+                    response.put("username", username);
+                    response.put("accessToken", accessToken);
+                    response.put("refreshToken", refreshToken);
+                    return ResponseEntity.ok(response);
+                } else {
+                    return ResponseEntity.badRequest().body(Map.of("error", "Mot de passe incorrect"));
+                }
+            })
+            .orElse(ResponseEntity.badRequest().body(Map.of("error", "Utilisateur non trouvé")));
+    }
+
+    // ✅ REFRESH
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, String>> refresh(@RequestBody Map<String, String> tokenData) {
+        String refreshToken = tokenData.get("refreshToken");
+
+        try {
+            // Vérifie en BDD
+            if (tokenService.isRefreshTokenInvalidated(refreshToken)) {
+                return ResponseEntity.status(401).body(Map.of("error", "Refresh token invalide (logout effectué)"));
+            }
+
+            String username = jwtUtil.extractUsername(refreshToken);
+            if (jwtUtil.validateToken(refreshToken, username)) {
+                String newAccessToken = jwtUtil.generateToken(username);
+                return ResponseEntity.ok(Map.of(
+                    "accessToken", newAccessToken,
+                    "refreshToken", refreshToken
+                ));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Refresh token invalide ou expiré"));
+        }
+
+        return ResponseEntity.status(401).body(Map.of("error", "Erreur de validation"));
+    }
+
+    // ✅ LOGOUT (invalide en BDD)
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(@RequestBody Map<String, String> tokenData) {
+        String refreshToken = tokenData.get("refreshToken");
+
+        tokenService.invalidateRefreshToken(refreshToken);
+        return ResponseEntity.ok(Map.of("message", "Déconnexion réussie. Refresh token invalidé."));
+    }
+}
+🔹 Étape 5 – Test avec curl
+
+curl -X POST http://localhost:8080/api/users/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"lucie\",\"email\":\"lucie@mail.com\",\"password\":\"pass1234\"}"
+
+
+
+### 1. Login
+curl -X POST http://localhost:8080/api/auth/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"lucie\",\"password\":\"pass1234\"}"
+
+### 2. Déconnexion
+curl -X POST http://localhost:8080/api/auth/logout ^
+  -H "Content-Type: application/json" ^
+  -d "{\"refreshToken\":\"<REFRESH_TOKEN>\"}"
+
+### 3. Refresh (échoue après logout)
+curl -X POST http://localhost:8080/api/auth/refresh ^
+  -H "Content-Type: application/json" ^
+  -d "{\"refreshToken\":\"<REFRESH_TOKEN>\"}"

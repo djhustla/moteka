@@ -1,0 +1,16 @@
+1.Creer la table : Permission : ID - Username - TypePermission
+2.Dans le menu.html , mettre les 3 boutons si le user est dans les permissions
+
+
+------------------------------------
+
+Tester le token + refresh token
+
+- rendre le token + long
+index.html => prevenir si le token est tjs actif et demander :
+    1 garder la connection
+    2 ok . deconnection
+
+--------------------------------------
+
+music favoris :

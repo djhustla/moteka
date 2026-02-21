@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Recherche d'Accès</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .back-button, .delete-all-button {
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .back-button {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+
+        .delete-all-button {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .delete-all-button:hover {
+            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #3498db;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .search-section {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            padding: clamp(16px, 3vw, 25px);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #495057;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+        }
+
+        input, select {
+            width: 100%;
+            padding: clamp(10px, 2vw, 12px) clamp(12px, 2vw, 15px);
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            font-size: clamp(14px, 3vw, 16px);
+            transition: all 0.3s ease;
+            background-color: white;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        select:disabled {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+            border-color: #ced4da;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .search-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+            margin-bottom: 12px;
+        }
+
+        @media (min-width: 640px) {
+            .search-row {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+
+        .search-row select {
+            min-width: 0;
+        }
+
+        .search-row input, .search-row select {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-row button {
+            width: 100%;
+        }
+
+        @media (min-width: 640px) {
+            .search-row button {
+                width: auto;
+                min-width: 120px;
+                flex: 0.5;
+            }
+        }
+
+        .btn-primary, .btn-danger {
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
+            padding: clamp(10px, 2vw, 12px) clamp(16px, 3vw, 20px);
+            font-size: clamp(14px, 3vw, 16px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #1c5a7a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-primary:active, .btn-danger:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled, .btn-danger:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        }
+
+        .result-section {
+            margin-top: 24px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .result-header {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        @media (min-width: 768px) {
+            .result-header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .result-header h2 {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: #2c3e50;
+        }
+
+        .result-count {
+            background: #3498db;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            white-space: nowrap;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+            background: white;
+            margin: 0 -5px;
+            padding: 0 5px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: clamp(10px, 2vw, 15px);
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: clamp(12px, 2.5vw, 14px);
+        }
+
+        th:first-child {
+            border-top-left-radius: 8px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 8px;
+        }
+
+        td {
+            padding: clamp(10px, 2vw, 15px);
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+            font-size: clamp(12px, 2.5vw, 14px);
+            word-break: break-word;
+            hyphens: auto;
+        }
+
+        tr {
+            transition: all 0.2s ease;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        @media (hover: hover) {
+            tr:hover {
+                transform: scale(1.002);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        .gps-link {
+            color: #3498db;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .gps-link:hover {
+            background-color: #e8f4fc;
+            text-decoration: none;
+        }
+
+        @media (hover: hover) {
+            .gps-link:hover {
+                transform: translateY(-1px);
+            }
+        }
+
+        .gps-icon {
+            font-size: 1em;
+            flex-shrink: 0;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: clamp(30px, 5vw, 40px);
+            color: #6c757d;
+            font-style: italic;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 16px;
+        }
+
+        .no-results div:first-child {
+            font-size: clamp(2rem, 8vw, 3rem);
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: clamp(20px, 4vw, 30px);
+            color: #3498db;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .spinner {
+            width: clamp(30px, 6vw, 40px);
+            height: clamp(30px, 6vw, 40px);
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .error, .info-box, .warning-box {
+            padding: clamp(12px, 2vw, 15px);
+            border-radius: 8px;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideDown 0.3s ease-out;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            border: none;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .error::before {
+            content: "⚠️";
+            font-size: 1em;
+        }
+
+        .info-box::before {
+            content: "💡";
+            font-size: 1em;
+        }
+
+        .warning-box::before {
+            content: "⚠️";
+            font-size: 1em;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 360px) {
+            body {
+                padding: 5px;
+            }
+            .container {
+                padding: 12px;
+                border-radius: 12px;
+            }
+            .search-section {
+                padding: 12px;
+            }
+            input, select, button {
+                padding: 8px 10px;
+            }
+            .back-button, .delete-all-button {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+        }
+
+        @media (orientation: portrait) and (max-width: 768px) {
+            .table-container {
+                max-height: 60vh;
+            }
+            table {
+                font-size: 0.9em;
+            }
+            td, th {
+                padding: 8px 6px;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            body {
+                padding: 5px;
+            }
+            .container {
+                padding: 10px;
+            }
+            .search-section {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+            .table-container {
+                max-height: 50vh;
+            }
+        }
+
+        @media (pointer: coarse) {
+            input, select, button, .gps-link {
+                min-height: 44px;
+            }
+            .btn-primary, .btn-danger {
+                padding: 12px 20px;
+            }
+            .gps-link {
+                padding: 10px 12px;
+            }
+            .back-button, .delete-all-button {
+                min-height: 44px;
+            }
+        }
+
+        .search-examples {
+            margin-top: 8px;
+            font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+            color: #6c757d;
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .search-examples strong {
+            color: #3498db;
+            font-weight: 600;
+        }
+
+        .option-disabled {
+            color: #6c757d;
+            font-style: italic;
+            background-color: #e9ecef;
+        }
+
+        @media (max-width: 480px) {
+            td, th {
+                display: block;
+                width: 100%;
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+                min-height: 40px;
+            }
+            td::before, th::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                width: calc(50% - 20px);
+                padding-right: 10px;
+                text-align: left;
+                font-weight: bold;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            thead {
+                display: none;
+            }
+            tr {
+                display: block;
+                margin-bottom: 15px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 10px;
+                background: white;
+            }
+            td {
+                border: none;
+                border-bottom: 1px solid #eee;
+                padding: 8px 15px 8px 50%;
+            }
+            td:last-child {
+                border-bottom: none;
+            }
+            .table-container {
+                overflow-x: visible;
+                background: transparent;
+                box-shadow: none;
+            }
+            table {
+                min-width: 0;
+                background: transparent;
+            }
+        }
+
+        .search-input-container {
+            position: relative;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-input-container input {
+            width: 100%;
+        }
+
+        .coord-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .coord-select {
+            width: 100%;
+        }
+
+        .search-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .search-info h4 {
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .search-info code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .coordinate-value {
+            background: #e8f4fc;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #2980b9;
+        }
+
+        .highlighted-row {
+            background-color: #e8f4fc !important;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+        }
+
+        .closest-match-badge {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .exact-match-badge {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        .distance-display {
+            font-family: monospace;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .distance-value {
+            font-size: 1.2em;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .distance-label {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+
+        .walking-distance-good {
+            color: #27ae60;
+        }
+
+        .walking-distance-medium {
+            color: #f39c12;
+        }
+
+        .walking-distance-poor {
+            color: #e74c3c;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-title {
+            color: #c0392b;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-text {
+            margin-bottom: 20px;
+            line-height: 1.5;
+            color: #555;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-cancel {
+            background: #f8f9fa;
+            color: #495057;
+        }
+
+        .modal-cancel:hover {
+            background: #e9ecef;
+        }
+
+        .modal-confirm {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .modal-confirm:hover {
+            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+            transform: translateY(-2px);
+        }
+
+        .critical-action {
+            background: #fff5f5;
+            border: 2px solid #feb2b2;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .critical-action h4 {
+            color: #c53030;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <a href="/infrabel/index.html" class="back-button">
+            ← Retour au menu
+        </a>
+        <div class="button-group">
+            <button id="deleteAllBtn" class="delete-all-button" title="Supprimer tous les accès (action irréversible)">
+                🗑️ Supprimer tout
+            </button>
+        </div>
+    </div>
+
+    <h1>🔍 Recherche d'Accès</h1>
+
+    <div class="search-section">
+        <div class="form-group">
+            <label for="searchType">📋 Type de recherche</label>
+            <select id="searchType">
+                <option value="nom">Par nom d'accès</option>
+                <option value="ligne">Lister tous les accès d'une ligne</option>
+                <option value="approximative">Recherche approximative</option>
+            </select>
+            <div class="search-examples">
+                <span id="searchHint"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="searchTerm" id="searchLabel">🔎 Terme de recherche</label>
+            <div class="search-row">
+                <div class="search-input-container" id="searchInputContainer">
+                    <input type="text" id="searchTerm" placeholder="Entrez votre recherche..." autocomplete="off" aria-label="Terme de recherche">
+                    <select id="ligneSelect" class="hidden">
+                        <option value="">Chargement des lignes...</option>
+                    </select>
+                    <div id="coordSelects" class="hidden">
+                        <div class="coord-container">
+                            <select id="ligneNum" class="coord-select">
+                                <option value="">Chargement...</option>
+                            </select>
+                            <select id="indiceNum" class="coord-select">
+                                <option value="">Sélectionnez un indice...</option>
+                            </select>
+                            <select id="bkNum" class="coord-select">
+                                <option value="">Sélectionnez un BK...</option>
+                            </select>
+                            <select id="bhNum" class="coord-select">
+                                <option value="">Sélectionnez un BH (0-9)...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button id="searchBtn" class="btn-primary" aria-label="Lancer la recherche">
+                    <span id="btnText">Rechercher</span>
+                    <span id="btnIcon">🔍</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="result-section" id="resultSection">
+        <div class="result-header">
+            <h2>📊 Résultats</h2>
+            <div class="result-count" id="resultCount">0 résultat(s)</div>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <div>Recherche en cours...</div>
+        </div>
+
+        <div id="errorMessage" class="error hidden"></div>
+        <div id="infoMessage" class="info-box hidden"></div>
+        <div id="warningMessage" class="warning-box hidden"></div>
+
+        <div id="searchInfo" class="search-info hidden"></div>
+
+        <div class="table-container" id="tableContainer">
+            <table id="resultTable">
+                <thead>
+                <tr>
+                    <th data-label="ID">ID</th>
+                    <th data-label="Nom d'Accès">Nom d'Accès</th>
+                    <th data-label="Ligne">Ligne</th>
+                    <th data-label="Indice">Indice</th>
+                    <th data-label="BK/BH">BK/BH</th>
+                    <th data-label="Adresse">Adresse</th>
+                    <th data-label="Distance de marche">Distance de marche</th>
+                    <th data-label="Description">Description</th>
+                    <th data-label="Coordonnées GPS">Coordonnées GPS</th>
+                </tr>
+                </thead>
+                <tbody id="resultBody"></tbody>
+            </table>
+        </div>
+
+        <div id="noResults" class="no-results hidden">
+            <div>😕</div>
+            <div>Aucun résultat trouvé pour votre recherche</div>
+            <div style="margin-top: 10px; font-size: 0.9rem;">Essayez avec d'autres termes</div>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <div class="modal-title">
+            <span>⚠️</span>
+            <span>SUPPRESSION DE TOUS LES ACCÈS</span>
+        </div>
+
+        <div class="critical-action">
+            <h4>ATTENTION : ACTION IRRÉVERSIBLE</h4>
+            <p>Tous les accès seront définitivement supprimés de la base de données.</p>
+            <p><strong>Cette action ne peut pas être annulée !</strong></p>
+        </div>
+
+        <div class="modal-text">
+            <p>Nombre d'accès à supprimer : <span id="deleteCount" style="font-weight: bold; color: #c0392b;">0</span></p>
+            <p>Pour confirmer, tapez "<strong>SUPPRIMER</strong>" dans le champ ci-dessous :</p>
+            <input type="text" id="confirmationInput" placeholder="Tapez SUPPRIMER" style="width: 100%; padding: 10px; margin-top: 10px; border: 2px solid #e74c3c; border-radius: 6px; font-size: 16px;">
+            <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                <em>L'API nécessite le paramètre <code>?confirm=true</code></em>
+            </p>
+        </div>
+
+        <div class="modal-buttons">
+            <button id="modalCancelBtn" class="modal-cancel">Annuler</button>
+            <button id="modalConfirmBtn" class="modal-confirm" disabled>Confirmer la suppression</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = '/api/acces';
+
+    function showMessage(type, message, duration = 5000) {
+        const elementId = type + 'Message';
+        const element = document.getElementById(elementId);
+
+        if (element) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    element.classList.add('hidden');
+                }, duration);
+            }
+        }
+    }
+
+    function updateSearchHint() {
+        const searchType = document.getElementById('searchType').value;
+        const hintElement = document.getElementById('searchHint');
+
+        switch(searchType) {
+            case 'nom':
+                hintElement.innerHTML = 'Ex: <strong>entrée</strong> pour "Entrée principale", <strong>port</strong> pour "Porte nord"';
+                break;
+            case 'ligne':
+                hintElement.innerHTML = 'Sélectionnez une ligne pour voir tous ses accès';
+                break;
+            case 'approximative':
+                hintElement.innerHTML = 'Trouve l\'accès sur la même ligne dont la valeur BK*1000+BH est la plus proche';
+                break;
+        }
+    }
+
+    function extractLigneFromString(ligneBkVoie) {
+        if (!ligneBkVoie) return '';
+
+        const match = ligneBkVoie.match(/Ligne\s+(\d+[A-Z]?)\s+BK/i);
+        return match ? match[1].trim() : '';
+    }
+
+    async function loadLignesFromAPI() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/lignes-voies`);
+            if (!response.ok) {
+                throw new Error('Erreur lors du chargement des lignes');
+            }
+
+            const lignes = await response.json();
+
+            const uniqueLignes = [...new Set(lignes.map(ligne => extractLigneFromString(ligne)))]
+                .filter(Boolean)
+                .sort((a, b) => {
+                    const aNum = parseInt(a);
+                    const bNum = parseInt(b);
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        if (aNum !== bNum) return aNum - bNum;
+                        return a.localeCompare(b);
+                    }
+                    return a.localeCompare(b);
+                });
+
+            return uniqueLignes;
+        } catch (error) {
+            console.error('Erreur chargement lignes:', error);
+            showMessage('error', 'Impossible de charger les lignes depuis l\'API');
+            return [];
+        }
+    }
+
+    async function populateLigneSelect() {
+        const ligneSelect = document.getElementById('ligneSelect');
+        ligneSelect.innerHTML = '<option value="">Chargement des lignes...</option>';
+        ligneSelect.disabled = true;
+
+        const lignes = await loadLignesFromAPI();
+
+        ligneSelect.innerHTML = '<option value="">Sélectionnez une ligne...</option>';
+
+        lignes.forEach(ligne => {
+            const option = document.createElement('option');
+            option.value = ligne;
+            option.textContent = `Ligne ${ligne}`;
+            ligneSelect.appendChild(option);
+        });
+
+        ligneSelect.disabled = false;
+    }
+
+    async function populateCoordSelects() {
+        const ligneNumSelect = document.getElementById('ligneNum');
+        const indiceNumSelect = document.getElementById('indiceNum');
+        const bkNumSelect = document.getElementById('bkNum');
+        const bhNumSelect = document.getElementById('bhNum');
+
+        ligneNumSelect.innerHTML = '<option value="">Chargement...</option>';
+        ligneNumSelect.disabled = true;
+
+        const lignes = await loadLignesFromAPI();
+
+        ligneNumSelect.innerHTML = '<option value="">Sélectionnez une ligne...</option>';
+
+        lignes.forEach(ligne => {
+            const option = document.createElement('option');
+            option.value = ligne;
+            option.textContent = `Ligne ${ligne}`;
+            ligneNumSelect.appendChild(option);
+        });
+
+        ligneNumSelect.disabled = false;
+
+        indiceNumSelect.innerHTML = '<option value="">Sélectionnez un indice...</option>';
+        for (let i = 65; i <= 90; i++) {
+            const letter = String.fromCharCode(i);
+            const option = document.createElement('option');
+            option.value = letter;
+            option.textContent = `Indice ${letter}`;
+            indiceNumSelect.appendChild(option);
+        }
+
+        bkNumSelect.innerHTML = '<option value="">Sélectionnez un BK...</option>';
+        for (let i = 0; i <= 100; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `BK ${i}`;
+            bkNumSelect.appendChild(option);
+        }
+
+        bhNumSelect.innerHTML = '<option value="">Sélectionnez un BH (0-9)...</option>';
+        for (let i = 0; i <= 9; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `BH ${i}`;
+            bhNumSelect.appendChild(option);
+        }
+    }
+
+    function toggleSearchInput() {
+        const searchType = document.getElementById('searchType').value;
+        const searchTermInput = document.getElementById('searchTerm');
+        const ligneSelect = document.getElementById('ligneSelect');
+        const coordSelects = document.getElementById('coordSelects');
+        const searchLabel = document.getElementById('searchLabel');
+        const searchBtn = document.getElementById('searchBtn');
+
+        searchTermInput.classList.add('hidden');
+        ligneSelect.classList.add('hidden');
+        coordSelects.classList.add('hidden');
+
+        searchBtn.disabled = false;
+        searchBtn.title = "";
+
+        switch(searchType) {
+            case 'nom':
+                searchTermInput.classList.remove('hidden');
+                searchLabel.innerHTML = '🔎 Nom d\'accès';
+                searchTermInput.placeholder = 'Ex: entrée, porte, escalier...';
+                break;
+            case 'ligne':
+                ligneSelect.classList.remove('hidden');
+                searchLabel.innerHTML = '📋 Sélectionnez une ligne';
+                if (document.querySelectorAll('#ligneSelect option').length <= 1) {
+                    populateLigneSelect();
+                }
+                break;
+            case 'approximative':
+                coordSelects.classList.remove('hidden');
+                searchLabel.innerHTML = '🎯 Sélectionnez ligne, indice, BK et BH';
+                if (document.querySelectorAll('#ligneNum option').length <= 1) {
+                    populateCoordSelects();
+                }
+                break;
+        }
+    }
+
+    function openGoogleMaps(latitude, longitude) {
+        if (!latitude || !longitude) return;
+
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        let mapsUrl;
+
+        if (isAndroid) {
+            mapsUrl = `intent://maps.google.com/maps?q=${latitude},${longitude}&z=15#Intent;scheme=https;package=com.google.android.apps.maps;end`;
+        } else if (isIOS) {
+            mapsUrl = `comgooglemaps://?q=${latitude},${longitude}&center=${latitude},${longitude}&zoom=15`;
+            setTimeout(function() {
+                window.location.href = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15`;
+            }, 250);
+        } else {
+            mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}&z=15`;
+        }
+
+        if (isAndroid || isIOS) {
+            if (isAndroid) {
+                window.location.href = mapsUrl;
+            } else {
+                window.open(mapsUrl, '_blank');
+            }
+        } else {
+            window.open(mapsUrl, '_blank');
+        }
+    }
+
+    function extraireLigneIndiceBK(ligneBkVoie) {
+        if (!ligneBkVoie) return {
+            ligne: 0,
+            indice: '',
+            bk: 0,
+            bh: 0,
+            valeur: 0
+        };
+
+        const regex = /Ligne\s*(\d+)([A-Z]?)\s*BK\s*(\d+)\.(\d+)/;
+        const match = ligneBkVoie.match(regex);
+
+        if (!match) {
+            return {
+                ligne: 0,
+                indice: '',
+                bk: 0,
+                bh: 0,
+                valeur: 0
+            };
+        }
+
+        const ligne = parseInt(match[1]);
+        const indice = match[2] || '';
+        const bk = parseInt(match[3]);
+        const bh = parseInt(match[4]);
+
+        const valeur = bk * 1000 + bh;
+
+        return {
+            ligne,
+            indice,
+            bk,
+            bh,
+            valeur
+        };
+    }
+
+    function calculerDistanceMarche(valeurRecherche, valeurAcces) {
+        if (valeurRecherche === undefined || valeurAcces === undefined) {
+            return null;
+        }
+        return Math.abs(valeurRecherche - valeurAcces);
+    }
+
+    function formaterDistanceMarche(distance) {
+        if (distance === null || distance === undefined) {
+            return '<span style="color: #6c757d; font-style: italic;">N/A</span>';
+        }
+
+        let cssClass = 'walking-distance-poor';
+        let label = 'Distance élevée';
+
+        if (distance === 0) {
+            cssClass = 'walking-distance-good';
+            label = 'Même position';
+        } else if (distance <= 100) {
+            cssClass = 'walking-distance-good';
+            label = 'Très proche';
+        } else if (distance <= 500) {
+            cssClass = 'walking-distance-medium';
+            label = 'Proche';
+        } else if (distance <= 1000) {
+            cssClass = 'walking-distance-medium';
+            label = 'Distance moyenne';
+        }
+
+        return `
+            <div class="distance-display ${cssClass}">
+                <span class="distance-value">${distance}m</span>
+                <span class="distance-label">${label}</span>
+            </div>
+        `;
+    }
+
+    function adaptTableForMobile() {
+        const isMobile = window.innerWidth <= 480;
+        const table = document.getElementById('resultTable');
+        const headers = table.querySelectorAll('th');
+        const rows = table.querySelectorAll('tbody tr');
+
+        if (isMobile) {
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                cells.forEach((cell, index) => {
+                    if (headers[index]) {
+                        cell.setAttribute('data-label', headers[index].textContent);
+                    }
+                });
+            });
+        }
+    }
+
+    function sortByLigneBkVoie(accesList) {
+        return accesList.sort((a, b) => {
+            if (!a.ligneBkVoie || !b.ligneBkVoie) return 0;
+
+            const calculA = extraireLigneIndiceBK(a.ligneBkVoie);
+            const calculB = extraireLigneIndiceBK(b.ligneBkVoie);
+
+            if (calculA.ligne !== calculB.ligne) {
+                return calculA.ligne - calculB.ligne;
+            }
+
+            if (calculA.indice !== calculB.indice) {
+                return calculA.indice.localeCompare(calculB.indice);
+            }
+
+            return calculA.valeur - calculB.valeur;
+        });
+    }
+
+
+
+function displayResults(accesList, searchType = '', searchParams = null) {
+    const tbody = document.getElementById('resultBody');
+    const noResults = document.getElementById('noResults');
+    const tableContainer = document.getElementById('tableContainer');
+    const resultCount = document.getElementById('resultCount');
+    const searchInfo = document.getElementById('searchInfo');
+
+    tbody.innerHTML = '';
+    searchInfo.innerHTML = '';
+    searchInfo.classList.add('hidden');
+
+    if (!Array.isArray(accesList)) {
+        accesList = accesList ? [accesList] : [];
+    }
+
+    if (searchType === 'approximative' && searchParams) {
+        const { ligne, indice, bk, bh } = searchParams;
+        const bhFormatted = (bh * 100).toString().padStart(3, '0');
+        const valeurRecherche = bk * 1000 + (bh * 100);
+
+        searchInfo.innerHTML = `
+            <h4>🔍 Recherche approximative - Ligne ${ligne}${indice || ''}</h4>
+            <p>Vous recherchez : <code>Ligne ${ligne}${indice || ''} BK ${bk}.${bhFormatted}</code></p>
+            <p>Valeur de recherche : <span class="coordinate-value">${valeurRecherche}</span></p>
+            <p><em>Calcul : BK(${bk}) × 1000 + BH(${bh}) × 100 = ${valeurRecherche}</em></p>
+            <p style="margin-top: 8px;"><em>Trouve l'accès sur la ligne ${ligne}${indice || ''} dont BK×1000+BH est le plus proche de ${valeurRecherche}</em></p>
+        `;
+        searchInfo.classList.remove('hidden');
+    }
+
+    if (searchType !== 'approximative') {
+        accesList = sortByLigneBkVoie(accesList);
+    }
+
+    resultCount.textContent = `${accesList.length} résultat(s)`;
+
+    if (accesList.length === 0) {
+        noResults.classList.remove('hidden');
+        tableContainer.classList.add('hidden');
+        return;
+    }
+
+    noResults.classList.add('hidden');
+    tableContainer.classList.remove('hidden');
+
+    let highlightedRowId = null;
+    if (searchType === 'approximative' && accesList.length > 0) {
+        highlightedRowId = accesList[0].id;
+    }
+
+    accesList.forEach((acces, index) => {
+        const row = document.createElement('tr');
+        const valeurs = extraireLigneIndiceBK(acces.ligneBkVoie);
+
+        if (acces.id === highlightedRowId) {
+            row.classList.add('highlighted-row');
+        }
+
+        // Fonction pour ouvrir la page access.html avec l'ID
+        function openAccessPage() {
+            window.location.href = `/infrabel/access.html?id=${acces.id}`;
+        }
+
+        // Coordonnées GPS avec lien Google Maps
+        let gpsContent = '';
+        if (acces.latitude && acces.longitude) {
+            gpsContent = `
+                <a href="javascript:void(0)"
+                   onclick="openGoogleMaps(${acces.latitude}, ${acces.longitude})"
+                   class="gps-link"
+                   title="Ouvrir dans Google Maps"
+                   aria-label="Voir sur Google Maps">
+                    <span class="gps-icon">📍</span>
+                    ${acces.latitude.toFixed(6)}, ${acces.longitude.toFixed(6)}
+                </a>
+            `;
+        } else {
+            gpsContent = '<span style="color: #6c757d; font-style: italic;">Non défini</span>';
+        }
+
+        let distanceMarcheContent = '<span style="color: #6c757d; font-style: italic;">N/A</span>';
+        let badgeHTML = '';
+
+        if (searchType === 'approximative' && searchParams) {
+            const valeurRecherche = searchParams.bk * 1000 + (searchParams.bh * 100);
+            const distance = calculerDistanceMarche(valeurRecherche, valeurs.valeur);
+
+            if (distance !== null) {
+                distanceMarcheContent = formaterDistanceMarche(distance);
+
+                if (index === 0 && accesList.length > 0) {
+                    if (distance === 0) {
+                        badgeHTML = `<span class="exact-match-badge">🎯 EXACT</span>`;
+                    } else {
+                        badgeHTML = `<span class="closest-match-badge">⭐ PLUS PROCHE</span>`;
+                    }
+                }
+            }
+        }
+
+        let adresseContent = acces.adresse || '<span style="color: #6c757d; font-style: italic;">Adresse non encodée</span>';
+
+        // Création des cellules avec événements de clic
+        row.innerHTML = `
+            <td style="cursor: pointer;" onclick="openAccessPage()"><strong>${acces.id}</strong>${badgeHTML}</td>
+            <td style="cursor: pointer;" onclick="openAccessPage()">${acces.nomAcces || ''}</td>
+            <td style="cursor: pointer;" onclick="openAccessPage()">${valeurs.ligne || ''}</td>
+            <td style="cursor: pointer;" onclick="openAccessPage()">${valeurs.indice || ''}</td>
+            <td style="cursor: pointer;" onclick="openAccessPage()">${valeurs.bk && valeurs.bh ? `BK ${valeurs.bk}.${valeurs.bh.toString().padStart(3, '0')}` : ''}</td>
+            <td style="cursor: pointer;" onclick="openAccessPage()">${adresseContent}</td>
+            <td style="cursor: pointer;" onclick="openAccessPage()">${distanceMarcheContent}</td>
+            <td style="cursor: pointer;" onclick="openAccessPage()">${acces.description || ''}</td>
+            <td>${gpsContent}</td>
+        `;
+
+        // Ajouter l'événement de clic sur toute la ligne (sauf la dernière cellule)
+        const cells = row.querySelectorAll('td');
+        for (let i = 0; i < cells.length - 1; i++) {
+            cells[i].style.cursor = 'pointer';
+            cells[i].addEventListener('click', openAccessPage);
+        }
+
+        tbody.appendChild(row);
+    });
+
+    adaptTableForMobile();
+}
+
+
+
+
+    async function performSearch() {
+        const searchType = document.getElementById('searchType').value;
+        const searchTermInput = document.getElementById('searchTerm');
+        const ligneSelect = document.getElementById('ligneSelect');
+        const ligneNum = document.getElementById('ligneNum');
+        const indiceNum = document.getElementById('indiceNum');
+        const bkNum = document.getElementById('bkNum');
+        const bhNum = document.getElementById('bhNum');
+        const searchBtn = document.getElementById('searchBtn');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+
+        let searchTerm;
+
+        btnText.textContent = 'Recherche...';
+        btnIcon.textContent = '⏳';
+        searchBtn.disabled = true;
+
+        showLoading(true);
+        showMessage('error', '', 0);
+        showMessage('info', '', 0);
+        showMessage('warning', '', 0);
+
+        try {
+            let allResults = [];
+            let searchParams = null;
+            let response;
+
+            if (searchType === 'nom') {
+                searchTerm = searchTermInput.value.trim();
+                if (!searchTerm) {
+                    showMessage('error', 'Veuillez entrer un nom d\'accès à rechercher');
+                    return;
+                }
+
+                const endpoint = `${API_BASE_URL}/nom/${encodeURIComponent(searchTerm)}`;
+                response = await fetch(endpoint);
+                if (response.ok) {
+                    allResults = await response.json();
+                } else if (response.status === 404) {
+                    allResults = [];
+                }
+            }
+            else if (searchType === 'ligne') {
+                searchTerm = ligneSelect.value;
+                if (!searchTerm) {
+                    showMessage('error', 'Veuillez sélectionner une ligne');
+                    return;
+                }
+
+                const response = await fetch(API_BASE_URL);
+                if (response.ok) {
+                    const allAccesses = await response.json();
+                    const lignePattern = new RegExp(`^Ligne\\s+${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+BK`, 'i');
+                    allResults = allAccesses.filter(acces =>
+                        acces.ligneBkVoie && acces.ligneBkVoie.match(lignePattern)
+                    );
+                    allResults = sortByLigneBkVoie(allResults);
+                }
+            }
+            else if (searchType === 'approximative') {
+                const ligneValue = ligneNum.value;
+                const indiceValue = indiceNum.value;
+                const bkValue = bkNum.value;
+                const bhValue = bhNum.value;
+
+                if (!ligneValue || bkValue === '' || bhValue === '') {
+                    showMessage('error', 'Veuillez sélectionner une ligne, un BK et un BH');
+                    return;
+                }
+
+                const bhFormatted = (parseInt(bhValue) * 100).toString().padStart(3, '0');
+                let ligneBkVoieParam = `Ligne ${ligneValue}`;
+                if (indiceValue) {
+                    ligneBkVoieParam += indiceValue;
+                }
+                ligneBkVoieParam += ` BK ${bkValue}.${bhFormatted}`;
+
+                searchParams = {
+                    ligne: ligneValue,
+                    indice: indiceValue || '',
+                    bk: parseInt(bkValue),
+                    bh: parseInt(bhValue)
+                };
+
+                const endpoint = `${API_BASE_URL}/recherche-approximative?ligneBkVoie=${encodeURIComponent(ligneBkVoieParam)}`;
+                response = await fetch(endpoint);
+
+                if (response.ok) {
+                    const result = await response.json();
+                    allResults = [result];
+                } else if (response.status === 404) {
+                    allResults = [];
+                } else if (response.status === 400) {
+                    const errorData = await response.json();
+                    showMessage('error', errorData.error || 'Paramètres invalides');
+                    return;
+                }
+            }
+
+            displayResults(allResults, searchType, searchParams);
+
+        } catch (error) {
+            console.error('Erreur de recherche:', error);
+            showMessage('error', `Erreur lors de la recherche: ${error.message}`);
+        } finally {
+            btnText.textContent = 'Rechercher';
+            btnIcon.textContent = '🔍';
+            searchBtn.disabled = false;
+            showLoading(false);
+        }
+    }
+
+    function showLoading(show) {
+        const loadingElement = document.getElementById('loading');
+        const resultSection = document.getElementById('resultSection');
+
+        if (show) {
+            loadingElement.classList.remove('hidden');
+            resultSection.style.opacity = '0.5';
+            resultSection.style.pointerEvents = 'none';
+        } else {
+            loadingElement.classList.add('hidden');
+            resultSection.style.opacity = '1';
+            resultSection.style.pointerEvents = 'auto';
+        }
+    }
+
+    async function deleteAllAccesses() {
+        try {
+            showLoading(true);
+
+            const response = await fetch(`${API_BASE_URL}/all?confirm=true`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                showMessage('info', `✅ ${result.message} (${result.deleted} accès supprimés)`);
+
+                setTimeout(() => {
+                    loadAllAccesses();
+                }, 1000);
+            } else {
+                const errorData = await response.json();
+                if (errorData.warning) {
+                    showMessage('warning', `⚠️ ${errorData.warning}`);
+                } else {
+                    showMessage('error', `❌ ${errorData.error || 'Erreur lors de la suppression'}`);
+                }
+            }
+        } catch (error) {
+            console.error('Erreur de suppression:', error);
+            showMessage('error', `❌ Erreur lors de la suppression: ${error.message}`);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function showDeleteConfirmation() {
+        const modal = document.getElementById('deleteModal');
+        const confirmationInput = document.getElementById('confirmationInput');
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+
+        const resultCount = document.getElementById('resultCount');
+        const countMatch = resultCount.textContent.match(/(\d+)/);
+        const currentCount = countMatch ? parseInt(countMatch[1]) : 0;
+
+        document.getElementById('deleteCount').textContent = currentCount;
+
+        confirmationInput.value = '';
+        confirmBtn.disabled = true;
+
+        modal.classList.remove('hidden');
+        confirmationInput.focus();
+    }
+
+    function hideDeleteConfirmation() {
+        document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSearchHint();
+        toggleSearchInput();
+
+        document.getElementById('searchBtn').addEventListener('click', performSearch);
+
+        document.getElementById('searchTerm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        document.getElementById('ligneSelect').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        document.getElementById('searchType').addEventListener('change', function() {
+            updateSearchHint();
+            toggleSearchInput();
+
+            document.getElementById('searchTerm').value = '';
+            document.getElementById('ligneSelect').value = '';
+            document.getElementById('ligneNum').value = '';
+            document.getElementById('indiceNum').value = '';
+            document.getElementById('bkNum').value = '';
+            document.getElementById('bhNum').value = '';
+
+            const searchType = this.value;
+            if (searchType === 'nom') {
+                document.getElementById('searchTerm').focus();
+            } else if (searchType === 'ligne') {
+                document.getElementById('ligneSelect').focus();
+            } else if (searchType === 'approximative') {
+                document.getElementById('ligneNum').focus();
+            }
+        });
+
+        document.getElementById('deleteAllBtn').addEventListener('click', showDeleteConfirmation);
+
+        document.getElementById('modalCancelBtn').addEventListener('click', hideDeleteConfirmation);
+
+        document.getElementById('confirmationInput').addEventListener('input', function(e) {
+            const confirmBtn = document.getElementById('modalConfirmBtn');
+            confirmBtn.disabled = (e.target.value.toUpperCase() !== 'SUPPRIMER');
+        });
+
+        document.getElementById('modalConfirmBtn').addEventListener('click', function() {
+            if (this.disabled) return;
+
+            hideDeleteConfirmation();
+            deleteAllAccesses();
+        });
+
+        document.getElementById('confirmationInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('modalConfirmBtn').disabled) {
+                hideDeleteConfirmation();
+                deleteAllAccesses();
+            }
+        });
+
+        document.getElementById('searchTerm').focus();
+        window.addEventListener('resize', adaptTableForMobile);
+
+        document.getElementById('ligneSelect').addEventListener('change', function() {
+            if (document.getElementById('searchType').value === 'ligne' && this.value) {
+                performSearch();
+            }
+        });
+
+        setTimeout(() => {
+            loadAllAccesses();
+        }, 500);
+    });
+
+    async function loadAllAccesses() {
+        try {
+            showLoading(true);
+            const response = await fetch(API_BASE_URL);
+            if (response.ok) {
+                const allAccesses = await response.json();
+                const initialResults = allAccesses.slice(0, 10);
+                displayResults(initialResults);
+
+                if (allAccesses.length > 10) {
+                    showMessage('info', `${allAccesses.length} accès chargés. Utilisez la recherche pour filtrer.`);
+                }
+            }
+        } catch (error) {
+            console.error('Erreur chargement initial:', error);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    window.openGoogleMaps = openGoogleMaps;
+    window.performSearch = performSearch;
+</script>
+</body>
+</html>

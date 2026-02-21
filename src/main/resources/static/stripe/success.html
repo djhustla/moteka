@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement Réussi</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f6f9fc;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 7px 14px 0 rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+        }
+        .icon {
+            width: 60px;
+            height: 60px;
+            background-color: #24b47e;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 0 auto 20px;
+        }
+        h1 { color: #32325d; margin-bottom: 10px; }
+        p { color: #6b7c93; line-height: 1.5; }
+        .btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 24px;
+            background-color: #635bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn:hover { background-color: #5851d8; }
+        #payment-id { font-size: 0.8em; color: #aab7c4; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="icon">✓</div>
+    <h1>Merci !</h1>
+    <p>Votre paiement de <strong>0,5 €</strong> a été traité avec succès. Merci pour le test.</p>
+
+    <!-- Modification ici : changement de "/" vers "/index.html" -->
+    <a href="/index.html" class="btn">Retour à l'accueil</a>
+
+    <div id="payment-id"></div>
+</div>
+
+<script>
+    // Optionnel : Récupérer l'ID du paiement dans l'URL pour l'afficher
+    const urlParams = new URLSearchParams(window.location.search);
+    const pi = urlParams.get('payment_intent');
+    if (pi) {
+        document.getElementById('payment-id').textContent = "Référence : " + pi;
+    }
+</script>
+
+</body>
+</html>

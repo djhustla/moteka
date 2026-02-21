@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes Favoris Musicaux</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .content {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    .favoris-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .favoris-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background: #f8f9ff;
+      border-radius: 16px;
+      border: 2px solid #e5e7eb;
+      transition: all 0.3s ease;
+    }
+
+    .favoris-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102,126,234,0.15);
+      border-color: #667eea;
+    }
+
+    .genre-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .cote-preference {
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6b7280;
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+      color: #374151;
+    }
+
+    .empty-state p {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+      transform: translateY(-2px);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #667eea;
+      font-size: 1.1rem;
+    }
+
+    .error {
+      text-align: center;
+      padding: 30px;
+      background: #fef2f2;
+      border-radius: 12px;
+      color: #dc2626;
+      margin-bottom: 20px;
+      border: 1px solid #fecaca;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 20px 15px;
+      }
+
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .content {
+        padding: 20px;
+      }
+
+      .favoris-item {
+        padding: 16px;
+      }
+
+      .genre-name {
+        font-size: 1.1rem;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🎵 Mes Favoris Musicaux</h1>
+    <p>Vos genres musicaux préférés</p>
+  </div>
+
+  <div class="content">
+    <div id="loading" class="loading">
+      Chargement de vos favoris...
+    </div>
+
+    <div id="error" class="error" style="display: none;">
+      Une erreur est survenue lors du chargement
+    </div>
+
+    <div id="favorisList" class="favoris-list" style="display: none;">
+      <!-- Les favoris seront chargés ici -->
+    </div>
+
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <div class="icon">🎵</div>
+      <h3>Aucun favori musical</h3>
+      <p>Vous n'avez pas encore ajouté de genres musicaux à vos favoris.</p>
+    </div>
+
+    <div class="actions">
+      <a href="menu.html" class="btn btn-secondary">
+        Retour
+      </a>
+      <button onclick="refreshFavoris()" class="btn btn-primary">
+        Actualiser
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem('accessToken');
+
+  if (!token) {
+    alert('Vous devez être connecté pour accéder à cette page');
+    window.location.href = '/connection/connection.html';
+  }
+
+  async function loadFavoris() {
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+    const favorisList = document.getElementById('favorisList');
+    const emptyState = document.getElementById('emptyState');
+
+    try {
+      loading.style.display = 'block';
+      error.style.display = 'none';
+      favorisList.style.display = 'none';
+      emptyState.style.display = 'none';
+
+      const response = await fetch('/api/users/me/music-favoris', {
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement');
+      }
+
+      const data = await response.json();
+      const favoris = data.favoris || [];
+
+      loading.style.display = 'none';
+
+      if (favoris.length === 0) {
+        emptyState.style.display = 'block';
+      } else {
+        displayFavoris(favoris);
+        favorisList.style.display = 'flex';
+      }
+
+    } catch (err) {
+      console.error('Erreur:', err);
+      loading.style.display = 'none';
+      error.style.display = 'block';
+      error.innerHTML = `
+        <strong>Erreur de chargement</strong><br>
+        ${err.message}
+      `;
+    }
+  }
+
+  function displayFavoris(favoris) {
+    const favorisList = document.getElementById('favorisList');
+
+    // Trier par préférence (ordre décroissant)
+    const sortedFavoris = [...favoris].sort((a, b) => b.cotePreference - a.cotePreference);
+
+    favorisList.innerHTML = sortedFavoris.map(favori => `
+      <div class="favoris-item">
+        <div class="genre-name">${favori.musicGenreDescription}</div>
+        <div class="cote-preference">
+          ${favori.cotePreference}/10
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function refreshFavoris() {
+    loadFavoris();
+  }
+
+  // Charger au démarrage
+  document.addEventListener('DOMContentLoaded', loadFavoris);
+</script>
+</body>
+</html>

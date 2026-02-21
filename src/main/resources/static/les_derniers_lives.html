@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lecteurs Audio Dropbox - Stream Persistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Lecteur audio fixe en bas (persistant) */
+        .persistent-player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+            color: white;
+            padding: 15px 20px;
+            z-index: 9999;
+            box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.5);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            border-top: 3px solid #ff6b35;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .persistent-player.active {
+            transform: translateY(0);
+        }
+
+        .persistent-thumbnail {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .persistent-info {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .persistent-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 5px;
+        }
+
+        .persistent-progress {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .persistent-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35 0%, #ff8c42 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .persistent-time {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .persistent-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .persistent-play-btn {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(145deg, #3d3d3d, #2a2a2a);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .persistent-next-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .persistent-next-btn:hover {
+            opacity: 1;
+        }
+
+        .persistent-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.6;
+            margin-left: 10px;
+        }
+
+        /* Boutons fixes (améliorés pour mobile) */
+        .back-btn, .reseau-btn {
+            position: fixed;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #374151;
+            border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .back-btn {
+            top: 15px;
+            left: 15px;
+        }
+
+        .reseau-btn {
+            top: 15px;
+            right: 15px;
+        }
+
+        .back-btn:hover, .reseau-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Container principal */
+        .players-container {
+            text-align: center;
+            background: white;
+            padding: 0;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            margin-top: 70px;
+            margin-bottom: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 35px 25px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        /* Zone de contenu */
+        .players-content {
+            padding: 25px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Carte de lecteur audio */
+        .audio-player-card {
+            background: #f8f9ff;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .audio-player-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        /* En-tête du lecteur */
+        .player-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .track-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .track-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+            text-align: left;
+            line-height: 1.4;
+            flex: 1;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* LECTEUR AUDIO MODERNE */
+        .modern-player {
+            background: linear-gradient(145deg, #2d2d2d, #1a1a1a);
+            border-radius: 24px;
+            padding: 30px 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+        }
+
+        .mix-title {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        /* Contrôles du lecteur */
+        .player-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .play-pause-btn {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(145deg, #3d3d3d, #2a2a2a);
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .play-pause-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .play-icon, .pause-icon {
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        .play-icon {
+            border-width: 15px 0 15px 25px;
+            border-color: transparent transparent transparent #f3f4f6;
+            margin-left: 5px;
+        }
+
+        .pause-icon {
+            width: 20px;
+            height: 30px;
+            background: linear-gradient(90deg, #f3f4f6 0%, #f3f4f6 35%, transparent 35%, transparent 65%, #f3f4f6 65%, #f3f4f6 100%);
+            display: none;
+        }
+
+        /* Barre de progression */
+        .progress-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-bar-container {
+            position: relative;
+            height: 8px;
+            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+            border-radius: 10px;
+            overflow: visible;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35 0%, #ff8c42 100%);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+        }
+
+        .progress-handle {
+            position: absolute;
+            top: 50%;
+            left: 0%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: left 0.1s linear;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #9ca3af;
+            font-weight: 600;
+        }
+
+        /* Boutons secondaires */
+        .secondary-controls {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .control-btn-small {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(145deg, #3d3d3d, #2a2a2a);
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            color: #f3f4f6;
+            font-size: 1.4rem;
+        }
+
+        .control-btn-small:active {
+            transform: scale(0.95);
+        }
+
+        /* Section téléchargement */
+        .download-section {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* États */
+        .loading-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #667eea;
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .error-state {
+            background: #fee2e2;
+            border: 3px solid #ef4444;
+            border-radius: 16px;
+            padding: 25px 20px;
+            text-align: center;
+            color: #b91c1c;
+            margin-bottom: 20px;
+        }
+
+        .retry-btn {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .retry-btn:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #6b7280;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* ===== RESPONSIVE MOBILE ===== */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+            }
+
+            /* Lecteur persistant mobile */
+            .persistent-player {
+                padding: 12px 15px;
+                gap: 12px;
+            }
+
+            .persistent-thumbnail {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
+
+            .persistent-title {
+                font-size: 0.85rem;
+            }
+
+            .persistent-play-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1.1rem;
+            }
+
+            /* Boutons fixes */
+            .back-btn, .reseau-btn {
+                padding: 12px 15px;
+                font-size: 0.85rem;
+                top: 10px;
+            }
+
+            .back-btn {
+                left: 10px;
+            }
+
+            .reseau-btn {
+                right: 10px;
+            }
+
+            /* Container principal */
+            .players-container {
+                margin-top: 60px;
+                border-radius: 20px;
+                margin-bottom: 80px; /* Espace pour le lecteur persistant */
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 1.7rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+            }
+
+            .players-content {
+                padding: 20px 15px;
+                max-height: calc(100vh - 150px);
+            }
+
+            /* Carte audio compacte */
+            .audio-player-card {
+                padding: 18px;
+                border-radius: 16px;
+            }
+
+            .player-header {
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+
+            .track-number {
+                width: 32px;
+                height: 32px;
+                font-size: 0.95rem;
+            }
+
+            .track-title {
+                font-size: 1rem;
+            }
+
+            /* Lecteur moderne responsive */
+            .modern-player {
+                padding: 25px 20px;
+            }
+
+            .play-pause-btn {
+                width: 65px;
+                height: 65px;
+            }
+
+            .control-btn-small {
+                width: 50px;
+                height: 50px;
+            }
+
+            /* Contrôles empilés */
+            .player-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .progress-wrapper {
+                order: 3;
+                width: 100%;
+                margin-top: 15px;
+            }
+
+            .play-pause-btn {
+                width: 60px;
+                height: 60px;
+            }
+
+            .control-btn-small {
+                width: 48px;
+                height: 48px;
+                font-size: 1.2rem;
+            }
+
+            .download-btn {
+                padding: 16px;
+                font-size: 1rem;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .back-btn, .reseau-btn {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+
+            .header {
+                padding: 25px 15px;
+            }
+
+            .players-content {
+                padding: 15px 12px;
+            }
+
+            .audio-player-card {
+                padding: 15px;
+            }
+
+            .track-number {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+            }
+
+            .track-title {
+                font-size: 0.95rem;
+            }
+
+            .modern-player {
+                padding: 20px 15px;
+            }
+
+            .play-pause-btn {
+                width: 55px;
+                height: 55px;
+            }
+
+            .control-btn-small {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Lecteur audio persistant (toujours visible) -->
+<div class="persistent-player" id="persistentPlayer">
+    <div class="persistent-thumbnail" id="persistentThumbnail">🎵</div>
+    <div class="persistent-info">
+        <div class="persistent-title" id="persistentTitle">Aucune lecture en cours</div>
+        <div class="persistent-progress">
+            <div class="persistent-progress-fill" id="persistentProgressFill"></div>
+        </div>
+        <div class="persistent-time">
+            <span id="persistentCurrentTime">0:00</span>
+            <span id="persistentDuration">0:00</span>
+        </div>
+    </div>
+    <div class="persistent-controls">
+        <button class="persistent-play-btn" id="persistentPlayBtn">▶️</button>
+        <button class="persistent-next-btn" id="persistentNextBtn" title="Piste suivante">⏭️</button>
+        <button class="persistent-close-btn" id="persistentCloseBtn" title="Fermer">×</button>
+    </div>
+</div>
+
+<a href="javascript:history.back()" class="back-btn">
+    <span>←</span> Retour
+</a>
+
+<a href="https://linktr.ee/djhustla" target="_blank" class="reseau-btn">
+    <span>🌐</span> MES RESEAUX
+</a>
+
+<div class="players-container">
+    <div class="header">
+        <h1>🎵 Lecteurs Audio</h1>
+        <p class="subtitle">Écoutez vos fichiers depuis Dropbox</p>
+    </div>
+
+    <div class="players-content" id="playersContent">
+        <div class="loading-state">Chargement des fichiers audio...</div>
+    </div>
+</div>
+
+<script>
+    // ==================== GESTIONNAIRE AUDIO GLOBAL ====================
+    class PersistentAudioManager {
+        constructor() {
+            this.audio = new Audio();
+            this.currentTrack = null;
+            this.playlist = [];
+            this.currentIndex = -1;
+            this.isPlaying = false;
+            this.persistentData = this.loadPersistentData();
+            this.init();
+        }
+
+        init() {
+            // Configurer l'audio
+            this.audio.crossOrigin = "anonymous";
+            this.audio.preload = "metadata";
+            this.audio.volume = 0.7;
+
+            // Événements audio
+            this.audio.addEventListener('timeupdate', () => this.updateProgress());
+            this.audio.addEventListener('loadedmetadata', () => this.updateDuration());
+            this.audio.addEventListener('ended', () => this.playNext());
+            this.audio.addEventListener('play', () => {
+                this.isPlaying = true;
+                this.updatePersistentPlayer();
+                this.savePersistentData();
+            });
+            this.audio.addEventListener('pause', () => {
+                this.isPlaying = false;
+                this.updatePersistentPlayer();
+                this.savePersistentData();
+            });
+
+            // Restaurer l'état précédent
+            this.restoreState();
+        }
+
+        loadPersistentData() {
+            try {
+                const data = localStorage.getItem('audioPersistentData');
+                return data ? JSON.parse(data) : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        savePersistentData() {
+            const data = {
+                currentTrack: this.currentTrack,
+                currentIndex: this.currentIndex,
+                currentTime: this.audio.currentTime,
+                isPlaying: this.isPlaying,
+                playlist: this.playlist,
+                timestamp: Date.now()
+            };
+
+            try {
+                localStorage.setItem('audioPersistentData', JSON.stringify(data));
+            } catch (e) {
+                console.error('Erreur sauvegarde:', e);
+            }
+        }
+
+        restoreState() {
+            if (!this.persistentData) return;
+
+            const { currentTrack, currentIndex, currentTime, isPlaying, playlist, timestamp } = this.persistentData;
+
+            // Vérifier si les données sont récentes (moins de 24h)
+            if (Date.now() - timestamp > 24 * 60 * 60 * 1000) return;
+
+            if (playlist && playlist.length > 0) {
+                this.playlist = playlist;
+                if (currentIndex >= 0 && currentIndex < playlist.length) {
+                    this.currentTrack = currentTrack;
+                    this.currentIndex = currentIndex;
+
+                    // Charger la piste mais ne pas jouer automatiquement
+                    this.audio.src = currentTrack.streamUrl;
+                    this.audio.load();
+
+                    if (currentTime > 0) {
+                        this.audio.currentTime = currentTime;
+                    }
+
+                    // Mettre à jour l'interface
+                    setTimeout(() => this.updatePersistentPlayer(), 100);
+
+                    // Jouer automatiquement si c'était en cours
+                    if (isPlaying) {
+                        setTimeout(() => {
+                            this.audio.play().catch(e => {
+                                console.log('Auto-play bloqué:', e);
+                            });
+                        }, 500);
+                    }
+                }
+            }
+        }
+
+        setPlaylist(tracks) {
+            this.playlist = tracks;
+            this.savePersistentData();
+        }
+
+        playTrack(track, index) {
+            if (!track || !track.streamUrl) return;
+
+            this.currentTrack = track;
+            this.currentIndex = index;
+
+            // Si c'est la même piste, toggle play/pause
+            if (this.audio.src === track.streamUrl) {
+                if (this.isPlaying) {
+                    this.audio.pause();
+                } else {
+                    this.audio.play().catch(e => {
+                        console.error('Erreur lecture:', e);
+                        showNotification('Erreur de lecture', 'error');
+                    });
+                }
+            } else {
+                // Nouvelle piste
+                this.audio.src = track.streamUrl;
+                this.audio.load();
+                this.audio.play().catch(e => {
+                    console.error('Erreur lecture:', e);
+                    showNotification('Erreur de lecture', 'error');
+                });
+            }
+
+            this.updatePersistentPlayer();
+            this.savePersistentData();
+        }
+
+        playNext() {
+            if (this.playlist.length === 0 || this.currentIndex === -1) return;
+
+            const nextIndex = (this.currentIndex + 1) % this.playlist.length;
+            this.playTrack(this.playlist[nextIndex], nextIndex);
+        }
+
+        togglePlayPause() {
+            if (!this.currentTrack) return;
+
+            if (this.isPlaying) {
+                this.audio.pause();
+            } else {
+                this.audio.play().catch(e => {
+                    console.error('Erreur lecture:', e);
+                    showNotification('Erreur de lecture', 'error');
+                });
+            }
+        }
+
+        updateProgress() {
+            if (!this.audio.duration) return;
+
+            const progress = (this.audio.currentTime / this.audio.duration) * 100;
+            const progressFill = document.getElementById('persistentProgressFill');
+            const currentTimeEl = document.getElementById('persistentCurrentTime');
+
+            if (progressFill) progressFill.style.width = `${progress}%`;
+            if (currentTimeEl) currentTimeEl.textContent = formatTime(this.audio.currentTime);
+
+            // Sauvegarder toutes les 5 secondes
+            if (Math.floor(this.audio.currentTime) % 5 === 0) {
+                this.savePersistentData();
+            }
+        }
+
+        updateDuration() {
+            const durationEl = document.getElementById('persistentDuration');
+            if (durationEl) {
+                durationEl.textContent = formatTime(this.audio.duration);
+            }
+        }
+
+        updatePersistentPlayer() {
+            const player = document.getElementById('persistentPlayer');
+            const titleEl = document.getElementById('persistentTitle');
+            const playBtn = document.getElementById('persistentPlayBtn');
+            const thumbnail = document.getElementById('persistentThumbnail');
+
+            if (!this.currentTrack) {
+                player.classList.remove('active');
+                return;
+            }
+
+            // Afficher le lecteur
+            player.classList.add('active');
+
+            // Mettre à jour les infos
+            if (titleEl) {
+                titleEl.textContent = this.currentTrack.fileName || 'Piste inconnue';
+            }
+
+            if (playBtn) {
+                playBtn.textContent = this.isPlaying ? '⏸️' : '▶️';
+            }
+
+            if (thumbnail) {
+                thumbnail.textContent = '🎵';
+            }
+
+            // Mettre à jour la progression
+            this.updateProgress();
+            this.updateDuration();
+        }
+
+        stop() {
+            this.audio.pause();
+            this.audio.currentTime = 0;
+            this.currentTrack = null;
+            this.currentIndex = -1;
+            this.isPlaying = false;
+
+            const player = document.getElementById('persistentPlayer');
+            player.classList.remove('active');
+
+            localStorage.removeItem('audioPersistentData');
+        }
+    }
+
+    // Instance globale
+    const audioManager = new PersistentAudioManager();
+
+    // ==================== FONCTIONS UTILITAIRES ====================
+    function fixDropboxUrl(url) {
+        let cleanUrl = url.replace(/&e=\d+/g, '').replace(/&st=[^&]+/g, '');
+
+        if (cleanUrl.includes('/scl/fi/')) {
+            const streamUrl = cleanUrl
+                .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                .replace('?dl=0', '')
+                .replace('&dl=0', '');
+
+            const downloadUrl = cleanUrl.replace('?dl=0', '?dl=1').replace('&dl=0', '&dl=1');
+
+            return {
+                streamUrl: streamUrl,
+                downloadUrl: downloadUrl,
+                originalUrl: url
+            };
+        }
+
+        return {
+            streamUrl: cleanUrl.replace('?dl=0', '?raw=1'),
+            downloadUrl: cleanUrl.replace('?dl=0', '?dl=1'),
+            originalUrl: url
+        };
+    }
+
+    function getFileNameFromUrl(url) {
+        try {
+            const urlObj = new URL(url);
+            const pathParts = urlObj.pathname.split('/');
+            let filename = pathParts[pathParts.length - 1];
+            filename = filename.split('?')[0];
+            filename = decodeURIComponent(filename);
+            return filename || 'audio.mp3';
+        } catch (error) {
+            return 'audio.mp3';
+        }
+    }
+
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    // ==================== CRÉATION DE L'INTERFACE ====================
+    function createAudioPlayer(link, index) {
+        const urls = fixDropboxUrl(link);
+        const fileName = getFileNameFromUrl(link);
+        const displayName = fileName.length > 40 ? fileName.substring(0, 37) + '...' : fileName;
+
+        const trackData = {
+            streamUrl: urls.streamUrl,
+            downloadUrl: urls.downloadUrl,
+            fileName: fileName,
+            displayName: displayName
+        };
+
+        return `
+            <div class="audio-player-card" data-track-index="${index}">
+                <div class="player-header">
+                    <div class="track-number">${index + 1}</div>
+                    <div class="track-title" title="${fileName}">
+                        ${displayName}
+                    </div>
+                </div>
+
+                <div class="modern-player">
+                    <div class="mix-title">${displayName}</div>
+
+                    <div class="player-controls">
+                        <button class="play-pause-btn" data-track-index="${index}">
+                            <div class="play-icon" id="playIcon-${index}"></div>
+                            <div class="pause-icon" id="pauseIcon-${index}" style="display: none;"></div>
+                        </button>
+
+                        <div class="progress-wrapper">
+                            <div class="progress-bar-container" id="progressContainer-${index}">
+                                <div class="progress-bar-fill" id="progressFill-${index}"></div>
+                                <div class="progress-handle" id="progressHandle-${index}"></div>
+                            </div>
+                            <div class="time-display">
+                                <span id="currentTime-${index}">0:00</span>
+                                <span id="duration-${index}">0:00</span>
+                            </div>
+                        </div>
+
+                        <div class="secondary-controls">
+                            <button class="control-btn-small" data-track-index="${index}" title="Stop">■</button>
+                            <button class="control-btn-small" data-track-index="${index}" title="Mute">🔊</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="download-section">
+                    <button class="download-btn" onclick="downloadFile('${urls.downloadUrl}', '${fileName}')">
+                        <span>📥</span> Télécharger
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // ==================== GESTION DES ÉVÉNEMENTS ====================
+    function setupPlayerEvents(index, trackData) {
+        const playPauseBtn = document.querySelector(`button[data-track-index="${index}"]`);
+        const stopBtn = document.querySelectorAll(`button[data-track-index="${index}"]`)[1];
+        const muteBtn = document.querySelectorAll(`button[data-track-index="${index}"]`)[2];
+        const progressContainer = document.getElementById(`progressContainer-${index}`);
+
+        if (playPauseBtn) {
+            playPauseBtn.addEventListener('click', () => {
+                audioManager.playTrack(trackData, index);
+            });
+        }
+
+        if (stopBtn) {
+            stopBtn.addEventListener('click', () => {
+                if (audioManager.currentIndex === index) {
+                    audioManager.stop();
+                }
+            });
+        }
+
+        if (muteBtn) {
+            muteBtn.addEventListener('click', () => {
+                audioManager.audio.muted = !audioManager.audio.muted;
+                muteBtn.textContent = audioManager.audio.muted ? '🔇' : '🔊';
+            });
+        }
+
+        if (progressContainer) {
+            progressContainer.addEventListener('click', (e) => {
+                if (!trackData.duration) return;
+
+                const rect = progressContainer.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const percentage = Math.max(0, Math.min(100, (clickX / rect.width) * 100));
+
+                if (audioManager.currentIndex === index) {
+                    audioManager.audio.currentTime = (percentage / 100) * trackData.duration;
+                }
+            });
+        }
+    }
+
+    // ==================== LECTEUR PERSISTANT ====================
+    function setupPersistentPlayer() {
+        const playBtn = document.getElementById('persistentPlayBtn');
+        const nextBtn = document.getElementById('persistentNextBtn');
+        const closeBtn = document.getElementById('persistentCloseBtn');
+
+        if (playBtn) {
+            playBtn.addEventListener('click', () => {
+                audioManager.togglePlayPause();
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                audioManager.playNext();
+            });
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                audioManager.stop();
+            });
+        }
+    }
+
+    // ==================== TÉLÉCHARGEMENT ====================
+    window.downloadFile = function(url, filename) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showNotification(`Téléchargement de ${filename} démarré`, 'success');
+    };
+
+    // ==================== NOTIFICATIONS ====================
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 15px;
+            background: ${type === 'error' ? '#fee2e2' : '#d1fae5'};
+            color: ${type === 'error' ? '#b91c1c' : '#065f46'};
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 1001;
+            font-weight: 600;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+            word-wrap: break-word;
+            font-size: 0.95rem;
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => notification.style.transform = 'translateX(0)', 10);
+        setTimeout(() => {
+            notification.style.transform = 'translateX(120%)';
+            setTimeout(() => document.body.removeChild(notification), 300);
+        }, 3000);
+    }
+
+    // ==================== CHARGEMENT DES FICHIERS ====================
+    async function loadAudioFiles() {
+        try {
+            const response = await fetch('/api/dropbox/liens');
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message || 'Erreur serveur');
+            }
+
+            const links = data.liens || [];
+
+            if (links.length === 0) {
+                playersContent.innerHTML = `
+                    <div class="empty-state">
+                        <p style="font-size: 1.2rem;">🎵</p>
+                        <p>Aucun fichier audio trouvé.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Créer les lecteurs
+            let playersHTML = '';
+            const tracks = [];
+
+            links.forEach((link, index) => {
+                const urls = fixDropboxUrl(link);
+                const fileName = getFileNameFromUrl(link);
+                const displayName = fileName.length > 40 ? fileName.substring(0, 37) + '...' : fileName;
+
+                tracks.push({
+                    streamUrl: urls.streamUrl,
+                    downloadUrl: urls.downloadUrl,
+                    fileName: fileName,
+                    displayName: displayName
+                });
+
+                playersHTML += createAudioPlayer(link, index);
+            });
+
+            playersContent.innerHTML = playersHTML;
+
+            // Configurer les événements et playlist
+            audioManager.setPlaylist(tracks);
+
+            tracks.forEach((track, index) => {
+                setupPlayerEvents(index, track);
+            });
+
+            // Configurer le lecteur persistant
+            setupPersistentPlayer();
+
+            showNotification(`${links.length} fichier(s) chargé(s)`, 'success');
+
+        } catch (error) {
+            console.error('Erreur chargement:', error);
+            playersContent.innerHTML = `
+                <div class="error-state">
+                    <p style="font-size: 1.2rem;">❌</p>
+                    <p><strong>Erreur de chargement</strong></p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
+                    <button class="retry-btn" onclick="retryLoading()">🔄 Réessayer</button>
+                </div>
+            `;
+        }
+    }
+
+    window.retryLoading = function() {
+        playersContent.innerHTML = '<div class="loading-state">Nouvelle tentative...</div>';
+        setTimeout(loadAudioFiles, 1000);
+    };
+
+    // ==================== GESTION DE LA PAGE ====================
+    // Sauvegarder l'état avant de quitter
+    window.addEventListener('beforeunload', () => {
+        audioManager.savePersistentData();
+    });
+
+    // Reprendre la lecture si on revient sur la page
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && audioManager.isPlaying) {
+            // Vérifier si l'audio est toujours en cours
+            if (audioManager.audio.paused) {
+                audioManager.audio.play().catch(e => {
+                    console.log('Replay après retour:', e);
+                });
+            }
+        }
+    });
+
+    // Démarrer
+    document.addEventListener('DOMContentLoaded', loadAudioFiles);
+</script>
+
+</body>
+</html>

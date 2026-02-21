@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Utilisateurs Opposés</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .main-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        min-height: 90vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .header {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        padding: 25px 30px;
+        color: white;
+        text-align: center;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .header .subtitle {
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        padding: 15px 30px;
+        background: #fffbeb;
+        border-bottom: 2px solid #fef3c7;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        border: 2px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex: 1;
+        min-width: 160px;
+    }
+
+    .btn-menu {
+        background: #d97706;
+        color: white;
+    }
+
+    .btn-menu:hover {
+        background: #b45309;
+        transform: translateY(-2px);
+    }
+
+    .btn-prev {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .btn-prev:hover {
+        background: #d97706;
+        transform: translateY(-2px);
+    }
+
+    .btn-logout {
+        background: #374151;
+        color: white;
+        border: none;
+        font-family: inherit;
+    }
+
+    .btn-logout:hover {
+        background: #1f2937;
+        transform: translateY(-2px);
+    }
+
+    .content {
+        padding: 30px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .message {
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border: 2px solid;
+        text-align: center;
+        width: 100%;
+        max-width: 800px;
+    }
+
+    .loading-message {
+        background: #fffbeb;
+        color: #92400e;
+        border-color: #fef3c7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .error-message {
+        background: #fee;
+        color: #dc2626;
+        border-color: #fecaca;
+        display: none;
+    }
+
+    .users-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 25px;
+        width: 100%;
+        max-width: 1200px;
+    }
+
+    .user-card {
+        background: #fffbeb;
+        border-radius: 16px;
+        padding: 20px;
+        border: 2px solid #fef3c7;
+        transition: all 0.3s;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .user-card:hover {
+        border-color: #f59e0b;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.15);
+    }
+
+    .user-photo-container {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        max-width: 180px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        overflow: hidden;
+        background: #eee;
+        border: 3px solid #f59e0b;
+    }
+
+    .user-avatar {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: white;
+        font-weight: bold;
+    }
+
+    .user-name {
+        font-weight: 700;
+        font-size: 1.3rem;
+        color: #374151;
+        margin-bottom: 15px;
+        word-break: break-word;
+    }
+
+    .profile-link {
+        display: inline-block;
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+        color: white;
+        text-align: center;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .profile-link:hover {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        transform: translateY(-2px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6b7280;
+        display: none;
+    }
+
+    .refresh-btn {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .refresh-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(146, 64, 14, 0.3);
+        border-radius: 50%;
+        border-top-color: #92400e;
+        animation: spin 1s linear infinite;
+    }
+
+    .footer {
+        text-align: center;
+        padding: 15px;
+        color: #6b7280;
+        font-size: 0.85rem;
+        border-top: 2px solid #fef3c7;
+        margin-top: auto;
+        background: #fffbeb;
+    }
+
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+
+        .users-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+  </style>
+</head>
+<body>
+<div class="main-container">
+  <div class="header">
+    <h1>⚠️ Goûts Opposés</h1>
+    <p class="subtitle">Les utilisateurs avec des préférences musicales opposées aux vôtres</p>
+  </div>
+
+  <div class="action-buttons">
+    <a href="/menu/menu.html" class="btn btn-menu">🏠 Retour au menu principal</a>
+    <a href="/menu/connection_musical_menu.html" class="btn btn-prev">⬅️ Menu précédent</a>
+    <button id="logoutBtn" class="btn btn-logout">🚪 Déconnexion</button>
+  </div>
+
+  <div class="content">
+    <div class="message loading-message" id="loadingMessage">
+      <div class="loading-spinner"></div>
+      <span>Recherche des utilisateurs aux goûts opposés...</span>
+    </div>
+
+    <div class="message error-message" id="errorMessage">
+      ❌ <span id="errorText"></span>
+      <button onclick="location.reload()"
+              style="margin-left: 15px; padding: 6px 12px; border-radius: 6px; border: none; background: #dc2626; color: white; cursor: pointer;">
+        Réessayer
+      </button>
+    </div>
+
+    <div class="users-grid" id="usersGrid"></div>
+
+    <div class="empty-state" id="emptyState">
+      <p style="margin-bottom: 20px;">Aucun utilisateur avec des goûts opposés trouvé pour le moment.</p>
+      <button class="refresh-btn" id="refreshBtn">🔄 Actualiser</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Goûts opposés • Mis à jour: <span id="lastUpdate">--:--</span></p>
+  </div>
+</div>
+
+<script>
+  const CONFIG = {
+      apiBaseUrl: '/api/music-favoris',
+      token: localStorage.getItem('accessToken')
+  };
+
+  const DOM = {
+      loadingMessage: document.getElementById('loadingMessage'),
+      errorMessage: document.getElementById('errorMessage'),
+      errorText: document.getElementById('errorText'),
+      usersGrid: document.getElementById('usersGrid'),
+      emptyState: document.getElementById('emptyState'),
+      refreshBtn: document.getElementById('refreshBtn'),
+      logoutBtn: document.getElementById('logoutBtn'),
+      lastUpdate: document.getElementById('lastUpdate')
+  };
+
+  class OppositeUsersManager {
+      constructor() {
+          this.oppositeUsers = [];
+      }
+
+      async init() {
+          if (!CONFIG.token) {
+              window.location.href = '/connection/connection.html';
+              return;
+          }
+          this.setupEventListeners();
+          await this.loadOppositeUsers();
+          this.updateLastUpdateTime();
+      }
+
+      async loadOppositeUsers() {
+          try {
+              this.showLoading();
+              const response = await fetch(`${CONFIG.apiBaseUrl}/me/opposite`, {
+                  headers: {'Authorization': 'Bearer ' + CONFIG.token}
+              });
+
+              if (response.status === 401) {
+                  window.location.href = '/connection/connection.html';
+                  return;
+              }
+
+              if (!response.ok) {
+                  throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+              }
+
+              const data = await response.json();
+              this.oppositeUsers = data.oppositeUsers || [];
+              this.renderUsers();
+
+          } catch (error) {
+              this.handleError('Erreur de chargement', error);
+          } finally {
+              DOM.loadingMessage.style.display = 'none';
+          }
+      }
+
+      renderUsers() {
+          DOM.usersGrid.innerHTML = '';
+          if (this.oppositeUsers.length === 0) {
+              DOM.emptyState.style.display = 'block';
+              return;
+          }
+
+          DOM.emptyState.style.display = 'none';
+
+          this.oppositeUsers.forEach(user => {
+              const card = document.createElement('div');
+              card.className = 'user-card';
+
+              // Créer le conteneur de photo
+              const photoContainer = document.createElement('div');
+              photoContainer.className = 'user-photo-container';
+
+              if (user.photoUrl) {
+                  const img = document.createElement('img');
+                  img.className = 'user-avatar';
+                  img.src = user.photoUrl;
+                  img.alt = `Photo de ${this.escapeHtml(user.username || 'Utilisateur')}`;
+
+                  // Gestion d'erreur pour l'image
+                  img.onerror = () => {
+                      photoContainer.innerHTML = `
+                          <div class="avatar-placeholder">
+                              ${user.username ? user.username.charAt(0).toUpperCase() : '?'}
+                          </div>
+                      `;
+                  };
+                  photoContainer.appendChild(img);
+              } else {
+                  photoContainer.innerHTML = `
+                      <div class="avatar-placeholder">
+                          ${user.username ? user.username.charAt(0).toUpperCase() : '?'}
+                      </div>
+                  `;
+              }
+
+              // Créer le nom d'utilisateur
+              const nameDiv = document.createElement('div');
+              nameDiv.className = 'user-name';
+              nameDiv.textContent = this.escapeHtml(user.username || 'Utilisateur');
+
+              // Créer le lien vers le profil
+              const link = document.createElement('a');
+              link.href = `/menu/profil_user.html?userId=${encodeURIComponent(user.id)}`;
+              link.className = 'profile-link';
+              link.textContent = '👤 Voir le profil';
+
+              // Assembler la carte
+              card.appendChild(photoContainer);
+              card.appendChild(nameDiv);
+              card.appendChild(link);
+
+              DOM.usersGrid.appendChild(card);
+          });
+      }
+
+      setupEventListeners() {
+          DOM.logoutBtn.addEventListener('click', () => {
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('userData');
+              window.location.href = '/connection/connection.html';
+          });
+
+          DOM.refreshBtn.addEventListener('click', () => {
+              this.loadOppositeUsers();
+              this.updateLastUpdateTime();
+          });
+      }
+
+      updateLastUpdateTime() {
+          const now = new Date();
+          DOM.lastUpdate.textContent = now.toLocaleTimeString('fr-FR', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+          });
+      }
+
+      showLoading() {
+          DOM.loadingMessage.style.display = 'flex';
+          DOM.errorMessage.style.display = 'none';
+          DOM.emptyState.style.display = 'none';
+      }
+
+      handleError(context, error) {
+          DOM.errorText.textContent = `${context}: ${error.message || 'Erreur inconnue'}`;
+          DOM.errorMessage.style.display = 'block';
+          console.error(context, error);
+      }
+
+      escapeHtml(text) {
+          if (!text) return '';
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+      }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+      new OppositeUsersManager().init();
+  });
+</script>
+</body>
+</html>
