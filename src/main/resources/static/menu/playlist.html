@@ -70,7 +70,6 @@
       margin-top: 20px;
     }
 
-    /* CARD RESPONSIVE */
     .card {
       background:#fff;
       border-radius:16px;
@@ -87,27 +86,16 @@
       box-shadow: 0 12px 30px rgba(0,0,0,0.2);
     }
 
-    /* RESPONSIVE POUR MOBILE */
     @media (max-width: 768px) {
-      body {
-        padding: 15px;
-      }
-
-      .container {
-        grid-template-columns: 1fr;
-        gap: 15px;
-        margin-top: 15px;
-      }
-
+      body { padding: 15px; }
+      .container { grid-template-columns: 1fr; gap: 15px; }
       .card {
         width: 100vw;
         margin-left: -15px;
         margin-right: -15px;
         border-radius: 12px;
         padding: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
       }
-
       .buttons-container {
         top: 15px;
         right: 15px;
@@ -115,7 +103,6 @@
         justify-content: space-between;
         padding: 12px 15px;
       }
-
       .buttons-container button {
         flex: 1;
         margin: 0 5px;
@@ -125,29 +112,20 @@
     }
 
     @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-
-      h1 {
-        margin: 70px 0 15px 0;
-        font-size: 1.6rem;
-      }
-
+      body { padding: 10px; }
+      h1 { margin: 70px 0 15px 0; font-size: 1.6rem; }
       .card {
         margin-left: -10px;
         margin-right: -10px;
         border-radius: 10px;
         padding: 12px;
       }
-
       .buttons-container {
         top: 10px;
         right: 10px;
         left: 10px;
         padding: 10px 12px;
       }
-
       .buttons-container button {
         padding: 10px 8px;
         font-size: 0.8rem;
@@ -250,7 +228,6 @@
       padding: 0 15px;
     }
 
-    /* Animation de chargement */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -258,6 +235,12 @@
 
     .card {
       animation: fadeIn 0.5s ease;
+    }
+
+    .proxy-status {
+      font-size: 0.8rem;
+      margin-top: 5px;
+      color: #ddd;
     }
   </style>
 </head>
@@ -273,6 +256,7 @@
 <div class="loading" id="loading">Chargement de la playlist...</div>
 <div class="container" id="playlist"></div>
 <div class="pagination" id="pagination"></div>
+<div class="proxy-status" id="proxyStatus"></div>
 
 <script>
   document.getElementById("btnRetour").addEventListener("click", () => {
@@ -290,11 +274,53 @@
   let currentPage = 1;
   const itemsPerPage = 20;
 
+  // 🔥 LISTE DES PROXYS CORS FIABLES (avec fallback)
+  const corsProxies = [
+    'https://corsproxy.io/?',
+    'https://api.allorigins.win/raw?url=',
+    'https://cors-anywhere.herokuapp.com/',
+    'https://proxy.cors.sh/',
+    'https://cors.eu.org/'
+  ];
+
+  let currentProxyIndex = 0;
+
+  async function fetchWithProxy(url) {
+    const proxyUrl = corsProxies[currentProxyIndex];
+    const encodedUrl = encodeURIComponent(url);
+    const fullUrl = proxyUrl + encodedUrl;
+    
+    document.getElementById('proxyStatus').textContent = `🌐 Utilisation du proxy ${currentProxyIndex + 1}/${corsProxies.length}...`;
+    
+    try {
+      const response = await fetch(fullUrl, {
+        // 🔥 Ajout d'un timeout pour éviter les blocages
+        signal: AbortSignal.timeout(10000) // 10 secondes timeout
+      });
+      
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      document.getElementById('proxyStatus').textContent = `✅ Proxy ${currentProxyIndex + 1} fonctionnel`;
+      return await response.text();
+      
+    } catch (error) {
+      console.warn(`❌ Proxy ${currentProxyIndex + 1} échoué:`, error.message);
+      
+      // Essayer le prochain proxy
+      if (currentProxyIndex < corsProxies.length - 1) {
+        currentProxyIndex++;
+        return fetchWithProxy(url); // Réessayer avec le prochain proxy
+      } else {
+        document.getElementById('proxyStatus').textContent = '❌ Tous les proxies ont échoué';
+        throw new Error('Aucun proxy CORS fonctionnel trouvé');
+      }
+    }
+  }
+
   async function loadPlaylist() {
     const params = new URLSearchParams(window.location.search);
     let src = params.get("src") || "fr.txt";
 
-    // IMPORTANT: Décoder le nom du fichier pour gérer les espaces
     src = decodeURIComponent(src);
 
     const playlistName = src.replace('.txt', '');
@@ -303,20 +329,18 @@
 
     document.getElementById("loading").style.display = "block";
     document.getElementById("playlist").innerHTML = "";
+    document.getElementById("proxyStatus").textContent = "🔄 Recherche d'un proxy CORS...";
 
     console.log("📁 Chargement du fichier:", src);
 
     try {
-      const proxyUrl = 'https://corsproxy.io/?';
-      // MODIFICATION ICI : Changement de playlist_list vers mes_playlists
-      const targetUrl =    `https://raw.githubusercontent.com/djhustla/music-storage/main/playlist_list/${src}`;
+      // 🔥 URL DIRECTE VERS GITHUB
+      const targetUrl = `https://raw.githubusercontent.com/djhustla/music-storage/main/playlist_list/${src}`;
+      
+      console.log("🎯 URL cible:", targetUrl);
 
-      console.log("🎯 URL complète:", targetUrl);
-
-      const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-      if (!response.ok) throw new Error(`Fichier "${src}" non trouvé sur le serveur`);
-
-      const text = await response.text();
+      // 🔥 UTILISATION DU SYSTÈME DE FALLBACK PROXY
+      const text = await fetchWithProxy(targetUrl);
 
       // Parser le fichier playlist
       allSongs = text.trim().split('\n')
@@ -344,15 +368,16 @@
       renderPagination();
 
     } catch (err) {
-      console.error("❌ Erreur:", err);
+      console.error("❌ Erreur finale:", err);
       document.getElementById("loading").style.display = "none";
       document.getElementById('playlist').innerHTML =
         `<div class="error">
           <h3>Erreur de chargement</h3>
           <p>Impossible de charger la playlist "${src}"</p>
           <p><small>${err.message}</small></p>
-          <button onclick="loadPlaylist()" style="margin-top:10px; padding:12px 20px; background:#8e44ad; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
-            🔄 Réessayer
+          <p><small>🌐 Cause probable: Blocage CORS sur le serveur distant</small></p>
+          <button onclick="window.location.reload()" style="margin-top:10px; padding:12px 20px; background:#8e44ad; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
+            🔄 Réessayer avec un autre proxy
           </button>
         </div>`;
     }
@@ -389,17 +414,14 @@
 
       let htmlContent = '';
 
-      // Ajouter YouTube si disponible
       if (youtubeEmbed) {
         htmlContent += `<iframe class="youtube" src="${youtubeEmbed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
       }
 
-      // Ajouter Spotify si disponible
       if (spotifyEmbed) {
         htmlContent += `<iframe class="spotify" src="${spotifyEmbed}" frameborder="0" allow="encrypted-media"></iframe>`;
       }
 
-      // Informations de la musique
       htmlContent += `
         <div class="info">
           <div class="title">${title}</div>
@@ -433,7 +455,11 @@
     }
   }
 
-  window.addEventListener('DOMContentLoaded', loadPlaylist);
+  // Réinitialiser l'index du proxy à chaque chargement
+  window.addEventListener('DOMContentLoaded', () => {
+    currentProxyIndex = 0;
+    loadPlaylist();
+  });
 </script>
 
 </body>
