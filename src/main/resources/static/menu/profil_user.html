@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Utilisateur</title>
+    <style>
+        /* ==================================== */
+        /* BASE & LAYOUT                        */
+        /* ==================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 80px 20px 40px;
+            position: relative;
+            overflow-x: hidden;
+            background: #0d0018;
+        }
+
+        /* ==================================== */
+        /* FOND GALAXIE ÉTOILÉ                  */
+        /* ==================================== */
+        .galaxy-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .galaxy-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 30%, rgba(120, 40, 200, 0.55) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 70%, rgba(80, 20, 160, 0.45) 0%, transparent 60%),
+                radial-gradient(ellipse 100% 80% at 50% 50%, rgba(30, 0, 80, 0.9) 0%, transparent 80%),
+                linear-gradient(160deg, #1a003a 0%, #0d0018 40%, #1a0035 100%);
+        }
+
+        .galaxy-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(1.5px 1.5px at 10% 15%, rgba(255,255,255,0.9) 0%, transparent 100%),
+                radial-gradient(1px 1px at 25% 8%, rgba(255,255,255,0.7) 0%, transparent 100%),
+                radial-gradient(2px 2px at 40% 22%, rgba(255,255,255,0.8) 0%, transparent 100%),
+                radial-gradient(1px 1px at 55% 5%, rgba(255,255,255,0.6) 0%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 70% 18%, rgba(255,255,255,0.85) 0%, transparent 100%),
+                radial-gradient(1px 1px at 85% 10%, rgba(255,255,255,0.7) 0%, transparent 100%),
+                radial-gradient(2px 2px at 92% 25%, rgba(255,255,255,0.9) 0%, transparent 100%),
+                radial-gradient(1px 1px at 5% 35%, rgba(255,255,255,0.6) 0%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 18% 45%, rgba(255,255,255,0.75) 0%, transparent 100%),
+                radial-gradient(1px 1px at 33% 38%, rgba(255,255,255,0.5) 0%, transparent 100%),
+                radial-gradient(2px 2px at 48% 52%, rgba(255,255,255,0.8) 0%, transparent 100%),
+                radial-gradient(1px 1px at 62% 40%, rgba(255,255,255,0.6) 0%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 75% 55%, rgba(255,255,255,0.7) 0%, transparent 100%),
+                radial-gradient(1px 1px at 88% 42%, rgba(255,255,255,0.55) 0%, transparent 100%),
+                radial-gradient(1px 1px at 3% 62%, rgba(255,255,255,0.65) 0%, transparent 100%),
+                radial-gradient(2px 2px at 15% 70%, rgba(255,255,255,0.85) 0%, transparent 100%),
+                radial-gradient(1px 1px at 28% 65%, rgba(255,255,255,0.5) 0%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 42% 78%, rgba(255,255,255,0.75) 0%, transparent 100%),
+                radial-gradient(1px 1px at 58% 68%, rgba(255,255,255,0.6) 0%, transparent 100%),
+                radial-gradient(2px 2px at 72% 82%, rgba(255,255,255,0.8) 0%, transparent 100%),
+                radial-gradient(1px 1px at 83% 72%, rgba(255,255,255,0.55) 0%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 95% 85%, rgba(255,255,255,0.7) 0%, transparent 100%),
+                radial-gradient(1px 1px at 7% 88%, rgba(255,255,255,0.65) 0%, transparent 100%),
+                radial-gradient(2px 2px at 22% 92%, rgba(255,255,255,0.8) 0%, transparent 100%),
+                radial-gradient(1px 1px at 37% 95%, rgba(255,255,255,0.5) 0%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 52% 88%, rgba(255,255,255,0.7) 0%, transparent 100%),
+                radial-gradient(1px 1px at 67% 92%, rgba(255,255,255,0.6) 0%, transparent 100%),
+                radial-gradient(2px 2px at 78% 96%, rgba(255,255,255,0.85) 0%, transparent 100%),
+                radial-gradient(1px 1px at 90% 90%, rgba(255,255,255,0.55) 0%, transparent 100%),
+                /* étoiles roses/violettes */
+                radial-gradient(1.5px 1.5px at 30% 20%, rgba(220,150,255,0.8) 0%, transparent 100%),
+                radial-gradient(1px 1px at 60% 30%, rgba(180,100,255,0.7) 0%, transparent 100%),
+                radial-gradient(2px 2px at 80% 15%, rgba(255,180,255,0.6) 0%, transparent 100%),
+                radial-gradient(1px 1px at 45% 60%, rgba(200,120,255,0.75) 0%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 12% 50%, rgba(220,150,255,0.6) 0%, transparent 100%),
+                /* étoiles bleues */
+                radial-gradient(1px 1px at 65% 75%, rgba(150,180,255,0.7) 0%, transparent 100%),
+                radial-gradient(2px 2px at 35% 85%, rgba(120,160,255,0.6) 0%, transparent 100%),
+                radial-gradient(1px 1px at 50% 10%, rgba(160,200,255,0.75) 0%, transparent 100%);
+        }
+
+        /* Lueur néon colorée animée en arrière-plan */
+        .nebula {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+            animation: nebulaDrift 8s ease-in-out infinite alternate;
+        }
+        .nebula-1 {
+            width: 500px; height: 400px;
+            background: radial-gradient(ellipse, #9b30ff, transparent 70%);
+            top: -100px; left: -150px;
+            animation-delay: 0s;
+        }
+        .nebula-2 {
+            width: 400px; height: 350px;
+            background: radial-gradient(ellipse, #ff40c8, transparent 70%);
+            top: 30%; right: -100px;
+            animation-delay: -3s;
+        }
+        .nebula-3 {
+            width: 350px; height: 300px;
+            background: radial-gradient(ellipse, #4040ff, transparent 70%);
+            bottom: 0; left: 20%;
+            animation-delay: -5s;
+        }
+        @keyframes nebulaDrift {
+            0%   { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 20px) scale(1.08); }
+        }
+
+        /* Scintillement des étoiles */
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ==================================== */
+        /* BOUTONS SUPÉRIEURS                   */
+        /* ==================================== */
+        .buttons-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .buttons-container button {
+            background: #fff;
+            color: #667eea;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+        }
+
+        .buttons-container button:hover {
+            background: #667eea;
+            color: #fff;
+        }
+
+        /* Bouton Déconnexion en rouge */
+        #btnLogout {
+            background: #dc2626;
+            color: white;
+        }
+
+        #btnLogout:hover {
+            background: #b91c1c;
+            color: white;
+        }
+
+        /* ==================================== */
+        /* INDICATEUR AUDIO                      */
+        /* ==================================== */
+        .audio-player {
+            display: none;
+        }
+
+        .son-playing-indicator {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(16, 185, 129, 0.95);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 700;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        /* ==================================== */
+        /* CONTENEUR PRINCIPAL                  */
+        /* ==================================== */
+        .profile-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        /* ==================================== */
+        /* SECTION PHOTO + USERNAME             */
+        /* ==================================== */
+        .header-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0 30px;
+        }
+
+        .profile-photo-container {
+            position: relative;
+            margin-bottom: 22px;
+            width: 320px;
+            height: 320px;
+        }
+
+        .profile-photo {
+            width: 100%;
+            height: 100%;
+            border-radius: 22px;
+            border: 5px solid rgba(255, 255, 255, 0.85);
+            object-fit: cover;
+            box-shadow:
+                0 0 0 3px rgba(180, 100, 255, 0.5),
+                0 15px 50px rgba(0, 0, 0, 0.7),
+                0 0 80px rgba(150, 80, 255, 0.5),
+                0 0 120px rgba(100, 50, 200, 0.3);
+            transition: all 0.4s ease;
+            position: relative;
+            z-index: 2;
+            display: block;
+        }
+
+        .profile-photo:hover {
+            transform: scale(1.03);
+            box-shadow:
+                0 0 0 5px rgba(220, 150, 255, 0.6),
+                0 20px 60px rgba(0, 0, 0, 0.8),
+                0 0 100px rgba(180, 80, 255, 0.7);
+        }
+
+        /* Halo lumineux derrière la photo */
+        .profile-photo-container::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 370px;
+            height: 370px;
+            border-radius: 30px;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(160, 80, 255, 0.4) 0%,
+                rgba(120, 40, 200, 0.15) 40%,
+                transparent 70%
+            );
+            z-index: 1;
+            pointer-events: none;
+            animation: haloPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes haloPulse {
+            0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .profile-photo-hidden {
+            width: 100%;
+            height: 100%;
+            border-radius: 22px;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            object-fit: cover;
+            filter: grayscale(100%) blur(6px) brightness(0.3);
+            position: relative;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.1), 0 15px 40px rgba(0,0,0,0.5);
+        }
+
+        .photo-hidden-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px 30px;
+            border-radius: 15px;
+            z-index: 3;
+            text-align: center;
+            width: 200px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .default-photo {
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 5rem;
+            letter-spacing: 2px;
+            border-radius: 22px;
+            border: 5px solid rgba(255, 255, 255, 0.85);
+        }
+
+        /* Username */
+        .profile-username {
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow:
+                0 0 20px rgba(200, 130, 255, 0.9),
+                0 0 40px rgba(160, 80, 255, 0.6),
+                0 2px 8px rgba(0, 0, 0, 0.8);
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        /* ==================================== */
+        /* MESSAGES DE CHARGEMENT / ERREUR      */
+        /* ==================================== */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #c084fc;
+            font-size: 1.1rem;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #f87171;
+        }
+
+        /* ==================================== */
+        /* VISIBILITY INFO                      */
+        /* ==================================== */
+        .visibility-info {
+            background: rgba(254, 243, 199, 0.12);
+            border: 2px solid rgba(251, 191, 36, 0.5);
+            border-radius: 15px;
+            padding: 14px 18px;
+            margin: 10px 0 20px;
+            font-size: 0.95rem;
+            color: #fde68a;
+            text-align: center;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        /* ==================================== */
+        /* BOUTON CHAT                          */
+        /* ==================================== */
+        .chat-button {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            text-align: center;
+            border-radius: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1.05rem;
+            margin: 10px 0 20px;
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.45);
+            letter-spacing: 0.3px;
+        }
+
+        .chat-button:hover {
+            filter: brightness(1.12);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.6);
+        }
+
+        /* ==================================== */
+        /* RÉSEAUX SOCIAUX - FOLLOW ME          */
+        /* ==================================== */
+        .reseaux-section {
+            background: rgba(10, 5, 25, 0.65);
+            border-radius: 25px;
+            padding: 28px 20px 32px;
+            margin: 10px 0 20px;
+            border: 1.5px solid rgba(120, 60, 220, 0.35);
+            backdrop-filter: blur(15px);
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255,255,255,0.07);
+            width: 100%;
+        }
+
+        /* Séparateur "FOLLOW ME" avec lignes */
+        .reseaux-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        .reseaux-title-line {
+            flex: 1;
+            height: 1.5px;
+            background: linear-gradient(90deg, transparent, rgba(180, 100, 255, 0.7), transparent);
+        }
+
+        .reseaux-title {
+            color: #FFFFFF;
+            font-size: 1.3rem;
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            text-align: center;
+            font-weight: 400;
+            text-shadow: 0 0 18px rgba(180, 100, 255, 0.8);
+            white-space: nowrap;
+        }
+
+        /* ==================================== */
+        /* GRILLE DES LOGOS - CENTRAGE DYNAMIQUE*/
+        /* ==================================== */
+        .icons-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 28px;
+            width: 100%;
+        }
+
+        /* ==================================== */
+        /* ICÔNES RÉSEAUX                       */
+        /* ==================================== */
+        .reseau-icon-wrapper {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .reseau-icon-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .reseau-icon-custom {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+            position: relative;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .reseau-icon-custom .reseau-name {
+            font-size: 0.55rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 4px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .reseau-icon-custom .reseau-symbol {
+            font-size: 1.9rem;
+            margin-bottom: 2px;
+            filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+            transition: all 0.3s ease;
+        }
+
+        .reseau-icon-custom .youtube-play {
+            font-size: 2.1rem;
+            margin-bottom: 2px;
+            filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+            transition: all 0.3s ease;
+        }
+
+        .reseau-icon-custom .whatsapp-phone {
+            font-size: 1.9rem;
+            margin-bottom: 2px;
+            filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+            transition: all 0.3s ease;
+        }
+
+        /* Effets de survol */
+        .reseau-icon-wrapper:hover,
+        .reseau-icon-custom:hover {
+            transform: scale(1.35);
+            box-shadow: 0 0 80px rgba(255, 255, 255, 0.6), 0 25px 60px rgba(0, 0, 0, 1.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .reseau-icon-wrapper:hover img {
+            filter: brightness(1.3) saturate(1.2);
+        }
+
+        .reseau-icon-wrapper[data-network="twitter"]:hover,
+        .reseau-icon-custom[data-network="twitter"]:hover {
+            border-color: #1DA1F2;
+            box-shadow: 0 0 90px #1DA1F2, 0 0 120px rgba(29, 161, 242, 0.9);
+        }
+
+        .reseau-icon-wrapper[data-network="instagram"]:hover {
+            border-color: #E4405F;
+            box-shadow: 0 0 90px #E4405F, 0 0 120px rgba(228, 64, 95, 0.9);
+        }
+
+        .reseau-icon-wrapper[data-network="facebook"]:hover {
+            border-color: #1877F2;
+            box-shadow: 0 0 90px #1877F2, 0 0 120px rgba(24, 119, 242, 0.9);
+        }
+
+        .reseau-icon-wrapper[data-network="tiktok"]:hover {
+            border-color: #00F2EA;
+            box-shadow: 0 0 90px #00F2EA, 0 0 120px rgba(0, 242, 234, 0.9);
+        }
+
+        .reseau-icon-wrapper[data-network="snapchat"]:hover {
+            border-color: #FFFC00;
+            box-shadow: 0 0 90px #FFFC00, 0 0 120px rgba(255, 252, 0, 0.9);
+        }
+
+        .reseau-icon-wrapper[data-network="spotify"]:hover {
+            border-color: #1DB954;
+            box-shadow: 0 0 90px #1DB954, 0 0 120px rgba(29, 185, 84, 0.9);
+        }
+
+        .reseau-icon-wrapper[data-network="default"]:hover {
+            border-color: #667eea;
+            box-shadow: 0 0 90px #667eea, 0 0 120px rgba(102, 126, 234, 0.9);
+        }
+
+        .reseau-icon-custom[data-network="youtube"]:hover {
+            border-color: #FF0000;
+            box-shadow: 0 0 90px #FF0000, 0 0 120px rgba(255, 0, 0, 0.9);
+        }
+        .reseau-icon-custom[data-network="youtube"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="youtube"]:hover .youtube-play {
+            color: #FF0000;
+            text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="whatsapp"]:hover {
+            border-color: #25D366;
+            box-shadow: 0 0 90px #25D366, 0 0 120px rgba(37, 211, 102, 0.9);
+        }
+        .reseau-icon-custom[data-network="whatsapp"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="whatsapp"]:hover .whatsapp-phone {
+            color: #25D366;
+            text-shadow: 0 0 15px rgba(37, 211, 102, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="linkedin"]:hover {
+            border-color: #0077B5;
+            box-shadow: 0 0 90px #0077B5, 0 0 120px rgba(0, 119, 181, 0.9);
+        }
+        .reseau-icon-custom[data-network="linkedin"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="linkedin"]:hover .reseau-symbol {
+            color: #0077B5;
+            text-shadow: 0 0 15px rgba(0, 119, 181, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="pinterest"]:hover {
+            border-color: #E60023;
+            box-shadow: 0 0 90px #E60023, 0 0 120px rgba(230, 0, 35, 0.9);
+        }
+        .reseau-icon-custom[data-network="pinterest"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="pinterest"]:hover .reseau-symbol {
+            color: #E60023;
+            text-shadow: 0 0 15px rgba(230, 0, 35, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="telegram"]:hover {
+            border-color: #0088CC;
+            box-shadow: 0 0 90px #0088CC, 0 0 120px rgba(0, 136, 204, 0.9);
+        }
+        .reseau-icon-custom[data-network="telegram"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="telegram"]:hover .reseau-symbol {
+            color: #0088CC;
+            text-shadow: 0 0 15px rgba(0, 136, 204, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="mixcloud"]:hover {
+            border-color: #52aad8;
+            box-shadow: 0 0 90px #52aad8, 0 0 120px rgba(82, 170, 216, 0.9);
+        }
+        .reseau-icon-custom[data-network="mixcloud"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="mixcloud"]:hover .reseau-symbol {
+            color: #52aad8;
+            text-shadow: 0 0 15px rgba(82, 170, 216, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="soundcloud"]:hover {
+            border-color: #FF5500;
+            box-shadow: 0 0 90px #FF5500, 0 0 120px rgba(255, 85, 0, 0.9);
+        }
+        .reseau-icon-custom[data-network="soundcloud"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="soundcloud"]:hover .reseau-symbol {
+            color: #FF5500;
+            text-shadow: 0 0 15px rgba(255, 85, 0, 0.8);
+        }
+
+        .reseau-icon-custom[data-network="twitter"]:hover .reseau-name,
+        .reseau-icon-custom[data-network="twitter"]:hover .reseau-symbol {
+            color: #1DA1F2;
+            text-shadow: 0 0 15px rgba(29, 161, 242, 0.8);
+        }
+
+        .no-reseaux {
+            color: rgba(255,255,255,0.35);
+            font-style: italic;
+            text-align: center;
+            padding: 25px;
+            font-size: 1rem;
+        }
+
+        /* ==================================== */
+        /* RESPONSIVE                           */
+        /* ==================================== */
+        @media (max-width: 768px) {
+            .buttons-container {
+                top: 10px;
+                right: 10px;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .buttons-container button {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            body {
+                padding-top: 90px;
+            }
+
+            .profile-photo-container {
+                width: 260px;
+                height: 260px;
+            }
+
+            .profile-photo-container::before {
+                width: 300px;
+                height: 300px;
+            }
+
+            .profile-username {
+                font-size: 2rem;
+            }
+
+            .reseaux-title {
+                font-size: 1.1rem;
+                letter-spacing: 7px;
+            }
+
+            .reseau-icon-wrapper,
+            .reseau-icon-custom {
+                width: 78px;
+                height: 78px;
+            }
+
+            .icons-grid {
+                gap: 22px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-photo-container {
+                width: 220px;
+                height: 220px;
+            }
+
+            .profile-photo-container::before {
+                width: 255px;
+                height: 255px;
+            }
+
+            .profile-username {
+                font-size: 1.7rem;
+            }
+
+            .reseaux-title {
+                font-size: 1rem;
+                letter-spacing: 5px;
+            }
+
+            .reseau-icon-wrapper,
+            .reseau-icon-custom {
+                width: 70px;
+                height: 70px;
+            }
+
+            .reseau-icon-custom .reseau-symbol { font-size: 1.6rem; }
+            .reseau-icon-custom .youtube-play { font-size: 1.8rem; }
+            .reseau-icon-custom .whatsapp-phone { font-size: 1.6rem; }
+            .reseau-icon-custom .reseau-name { font-size: 0.48rem; }
+
+            .icons-grid {
+                gap: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Fond galaxie -->
+<div class="galaxy-bg"></div>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+
+<!-- Indicateur son -->
+<div id="sonPlayingIndicator" class="son-playing-indicator">
+    🔈 Son d'entrée en cours...
+</div>
+
+<!-- Boutons supérieurs -->
+<div class="buttons-container">
+    <button onclick="window.location.href='/menu/menu.html'">⬅ Retour au menu</button>
+    <button id="btnLogout">🚪 Déconnexion</button>
+</div>
+
+<!-- Conteneur principal -->
+<div class="profile-container">
+
+    <!-- Photo + Username -->
+    <div class="header-section">
+        <div class="profile-photo-container" id="profilePhotoContainer"></div>
+        <h1 class="profile-username" id="profileUsername">Chargement...</h1>
+    </div>
+
+    <!-- Contenu dynamique -->
+    <div style="width:100%" id="profileContent">
+        <div class="loading">Chargement des informations...</div>
+    </div>
+
+</div>
+
+<audio id="sonEntreePlayer" class="audio-player"></audio>
+
+<script>
+    const token = localStorage.getItem('accessToken');
+
+    if (!token) {
+        alert('Vous devez être connecté pour voir les profils');
+        window.location.href = '/connection/connection.html';
+    }
+
+    let currentUserId = null;
+    let targetUserId = null;
+    let currentUserUsername = null;
+
+    // ================================================
+    // CONFIGURATION DES RÉSEAUX SOCIAUX
+    // ================================================
+    const socialAppsConfig = {
+        'instagram.com': {
+            webUrl: (url, username) => `https://www.instagram.com/${username}`,
+            appUrl: (url, username) => `instagram://user?username=${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/instagram\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'tiktok.com': {
+            webUrl: (url, username) => `https://www.tiktok.com/@${username}`,
+            appUrl: (url, username) => `tiktok://@${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/tiktok\.com\/@([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'snapchat.com': {
+            webUrl: (url, username) => `https://www.snapchat.com/add/${username}`,
+            appUrl: (url, username) => `snapchat://add/${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/snapchat\.com\/add\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'facebook.com': {
+            webUrl: (url, username) => `https://www.facebook.com/${username}`,
+            appUrl: (url, username) => `fb://profile/${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/facebook\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'youtube.com': {
+            webUrl: (url, username) => url,
+            appUrl: (url, username) => `vnd.youtube://${url.replace('https://', '')}`,
+            extractUsername: (url) => {
+                const match = url.match(/youtube\.com\/(@[^/?#]+)/) ||
+                              url.match(/youtube\.com\/(c\/[^/?#]+)/) ||
+                              url.match(/youtube\.com\/(channel\/[^/?#]+)/) ||
+                              url.match(/youtube\.com\/user\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'whatsapp.com': {
+            webUrl: (url) => url,
+            appUrl: (url) => `whatsapp://send?text=${encodeURIComponent(url)}`,
+            extractUsername: (url) => {
+                const match = url.match(/whatsapp\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'twitter.com': {
+            webUrl: (url, username) => `https://twitter.com/${username}`,
+            appUrl: (url, username) => `twitter://user?screen_name=${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/twitter\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'x.com': {
+            webUrl: (url, username) => `https://x.com/${username}`,
+            appUrl: (url, username) => `twitter://user?screen_name=${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/x\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'linkedin.com': {
+            webUrl: (url) => url,
+            appUrl: (url) => `linkedin://${url.replace('https://', '')}`,
+            extractUsername: (url) => {
+                const match = url.match(/linkedin\.com\/in\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'pinterest.com': {
+            webUrl: (url, username) => `https://pinterest.com/${username}`,
+            appUrl: (url, username) => `pinterest://user/${username}`,
+            extractUsername: (url) => {
+                const match = url.match(/pinterest\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        't.me': {
+            webUrl: (url) => url,
+            appUrl: (url) => `tg://resolve?domain=${url.replace('https://t.me/', '')}`,
+            extractUsername: (url) => {
+                const match = url.match(/t\.me\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'mixcloud.com': {
+            webUrl: (url) => url,
+            appUrl: (url) => `mixcloud://${url.replace('https://', '')}`,
+            extractUsername: (url) => {
+                const match = url.match(/mixcloud\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'soundcloud.com': {
+            webUrl: (url) => url,
+            appUrl: (url) => `soundcloud://${url.replace('https://', '')}`,
+            extractUsername: (url) => {
+                const match = url.match(/soundcloud\.com\/([^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        },
+        'spotify.com': {
+            webUrl: (url) => url,
+            appUrl: (url) => `spotify://${url.replace('https://', '')}`,
+            extractUsername: (url) => {
+                const match = url.match(/spotify\.com\/(user\/[^/?#]+)/) ||
+                              url.match(/spotify\.com\/(artist\/[^/?#]+)/) ||
+                              url.match(/spotify\.com\/(track\/[^/?#]+)/) ||
+                              url.match(/spotify\.com\/(playlist\/[^/?#]+)/) ||
+                              url.match(/spotify\.com\/(album\/[^/?#]+)/);
+                return match ? match[1] : null;
+            }
+        }
+    };
+
+    // ================================================
+    // FONCTIONS UTILITAIRES
+    // ================================================
+    function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    function cleanUrl(url) {
+        if (!url) return '';
+        return url.replace(/\n/g, '').replace(/\r/g, '').trim();
+    }
+
+    function getUserIdFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('userId');
+    }
+
+    function hasSpecialPrivileges(username) {
+        return username === 'doka' || username === 'administrateur';
+    }
+
+    // ================================================
+    // DÉCONNEXION
+    // ================================================
+    function handleLogout() {
+        localStorage.removeItem('accessToken');
+        alert('Vous avez été déconnecté.');
+        window.location.href = '/connection/connection.html';
+    }
+
+    // ================================================
+    // OUVERTURE LIEN SPOTIFY ARTISTE
+    // ================================================
+    function openArtisteSpotify(userId) {
+        // Redirection vers la page profil artiste avec l'userId en paramètre
+        window.location.href = `/menu/profil_artist.html?userId=${userId}`;
+    }
+
+    // ================================================
+    // OUVERTURE LIENS SOCIAUX
+    // ================================================
+    function openSocialLink(url, network = null) {
+        if (!url || url === 'hidden') return;
+
+        const cleanedUrl = cleanUrl(url);
+
+        let platformConfig = null;
+        let username = null;
+
+        for (const domain in socialAppsConfig) {
+            if (cleanedUrl.includes(domain)) {
+                platformConfig = socialAppsConfig[domain];
+                username = platformConfig.extractUsername(cleanedUrl);
+                break;
+            }
+        }
+
+        if (platformConfig && username) {
+            if (isMobileDevice()) {
+                const appUrl = platformConfig.appUrl(cleanedUrl, username);
+                if (appUrl) {
+                    window.location.href = appUrl;
+                    setTimeout(() => {
+                        if (!document.hidden) {
+                            const webUrl = platformConfig.webUrl(cleanedUrl, username);
+                            window.open(webUrl, '_blank');
+                        }
+                    }, 500);
+                    return;
+                }
+            }
+            const webUrl = platformConfig.webUrl(cleanedUrl, username);
+            window.open(webUrl, '_blank');
+            return;
+        }
+
+        window.open(cleanedUrl, '_blank');
+    }
+
+    // ================================================
+    // LOGOS RÉSEAUX
+    // ================================================
+    function getReseauIconInfo(url) {
+        url = url.toLowerCase();
+
+        const platformMap = {
+            'facebook.com':  { network: 'facebook',  logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/facebook.png' },
+            'instagram.com': { network: 'instagram', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/instagram.png' },
+            'tiktok.com':    { network: 'tiktok',    logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/tiktok.png' },
+            'snapchat.com':  { network: 'snapchat',  logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/snap.png' },
+            'twitter.com':   { network: 'twitter',   logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/twitter.png' },
+            'x.com':         { network: 'twitter',   logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/twitter.png' },
+            'spotify.com':   { network: 'spotify',   logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/spotify.png' }
+        };
+
+        for (const [domain, info] of Object.entries(platformMap)) {
+            if (url.includes(domain)) return info;
+        }
+
+        return { network: 'default', logo: 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/default.png' };
+    }
+
+    // ================================================
+    // CRÉATION ICÔNES CUSTOM
+    // ================================================
+    function createCustomReseauIcon(url, network) {
+        const cleanedUrl = cleanUrl(url);
+
+        switch(network) {
+            case 'youtube':
+                return `<a href="javascript:void(0)" class="reseau-icon-custom" data-network="youtube"
+                            onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'youtube')" title="Visiter YouTube">
+                            <div class="youtube-play">▶</div>
+                            <div class="reseau-name">YouTube</div>
+                        </a>`;
+            case 'whatsapp':
+                return `<a href="javascript:void(0)" class="reseau-icon-custom" data-network="whatsapp"
+                            onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'whatsapp')" title="Visiter WhatsApp">
+                            <div class="whatsapp-phone">📱</div>
+                            <div class="reseau-name">WhatsApp</div>
+                        </a>`;
+            case 'linkedin':
+                return `<a href="javascript:void(0)" class="reseau-icon-custom" data-network="linkedin"
+                            onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'linkedin')" title="Visiter LinkedIn">
+                            <div class="reseau-symbol">in</div>
+                            <div class="reseau-name">LinkedIn</div>
+                        </a>`;
+            case 'pinterest':
+                return `<a href="javascript:void(0)" class="reseau-icon-custom" data-network="pinterest"
+                            onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'pinterest')" title="Visiter Pinterest">
+                            <div class="reseau-symbol">P</div>
+                            <div class="reseau-name">Pinterest</div>
+                        </a>`;
+            case 'telegram':
+                return `<a href="javascript:void(0)" class="reseau-icon-custom" data-network="telegram"
+                            onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'telegram')" title="Visiter Telegram">
+                            <div class="reseau-symbol">✈</div>
+                            <div class="reseau-name">Telegram</div>
+                        </a>`;
+            case 'mixcloud':
+                return `<a href="javascript:void(0)" class="reseau-icon-custom" data-network="mixcloud"
+                            onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'mixcloud')" title="Visiter Mixcloud">
+                            <div class="reseau-symbol">☁</div>
+                            <div class="reseau-name">Mixcloud</div>
+                        </a>`;
+            case 'soundcloud':
+                return `<a href="javascript:void(0)" class="reseau-icon-custom" data-network="soundcloud"
+                            onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'soundcloud')" title="Visiter SoundCloud">
+                            <div class="reseau-symbol">♫</div>
+                            <div class="reseau-name">SoundCloud</div>
+                        </a>`;
+            default:
+                return `<a href="javascript:void(0)" class="reseau-icon-custom" data-network="default"
+                            onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', 'default')" title="Visiter le profil">
+                            <div class="reseau-symbol">🌐</div>
+                            <div class="reseau-name">Site Web</div>
+                        </a>`;
+        }
+    }
+
+    // ================================================
+    // RÉCUPÉRER UTILISATEUR CONNECTÉ
+    // ================================================
+    async function getCurrentUserInfo() {
+        try {
+            const response = await fetch('/api/users/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!response.ok) throw new Error('Erreur lors de la récupération du profil');
+            const userData = await response.json();
+            return {
+                id: userData.id,
+                username: userData.username,
+                donneeVisible: userData.donneeVisible || "111",
+                role: userData.role
+            };
+        } catch (error) {
+            console.error('Erreur:', error);
+            return null;
+        }
+    }
+
+    // ================================================
+    // SON D'ENTRÉE
+    // ================================================
+    function playSonEntree(sonUrl, showSon) {
+        if (!sonUrl || !showSon) return;
+
+        const cleanedUrl = cleanUrl(sonUrl);
+        const audioPlayer = document.getElementById('sonEntreePlayer');
+        const indicator = document.getElementById('sonPlayingIndicator');
+
+        audioPlayer.src = cleanedUrl;
+        audioPlayer.volume = 0.7;
+        indicator.style.display = 'flex';
+
+        audioPlayer.onended = function() {
+            indicator.style.display = 'none';
+        };
+
+        audioPlayer.onerror = function() {
+            indicator.style.display = 'none';
+            console.error('❌ Erreur lors de la lecture du son');
+        };
+
+        audioPlayer.play().catch(error => {
+            console.error('Erreur de lecture audio (probablement auto-play bloqué):', error);
+            indicator.style.display = 'none';
+        });
+    }
+
+    // ================================================
+    // AFFICHER PHOTO DE PROFIL
+    // ================================================
+    function displayProfilePhoto(photoUrl, username, showPhoto, isAdmin) {
+        const container = document.getElementById('profilePhotoContainer');
+        const defaultAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&size=320&background=667eea&color=fff`;
+
+        if (isAdmin || showPhoto === '1') {
+            const finalPhotoUrl = photoUrl && photoUrl !== 'hidden' ? photoUrl : defaultAvatarUrl;
+            container.innerHTML = `
+                <img class="profile-photo" src="${finalPhotoUrl}"
+                    alt="Photo de profil"
+                    onerror="this.src='${defaultAvatarUrl}'">
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="profile-photo profile-photo-hidden default-photo">
+                    <div class="photo-hidden-label">Photo cachée</div>
+                </div>
+            `;
+        }
+    }
+
+    // ================================================
+    // RENDU RÉSEAUX SOCIAUX
+    // ================================================
+    function displayReseaux(reseauxList, showNetworks, isAdmin, targetUserRole, targetUserId) {
+        if (!isAdmin && showNetworks !== '1') {
+            return '';
+        }
+
+        const followMeHeader = `
+            <div class="reseaux-title-wrapper">
+                <div class="reseaux-title-line"></div>
+                <div class="reseaux-title">FOLLOW ME</div>
+                <div class="reseaux-title-line"></div>
+            </div>
+        `;
+
+        const reseauxArray = (reseauxList && reseauxList.trim() !== '')
+            ? reseauxList.split(';').filter(url => url.trim() !== '')
+            : [];
+
+        let iconsHtml = '';
+
+        reseauxArray.forEach((url) => {
+            const cleanedUrl = cleanUrl(url);
+            const lowerUrl = cleanedUrl.toLowerCase();
+
+            // Ignorer les liens Spotify dans la liste des réseaux sociaux
+            if (lowerUrl.includes('spotify.com')) {
+                return; // Skip this URL
+            }
+
+            let customHtml = '';
+
+            if (lowerUrl.includes('youtube.com')) {
+                customHtml = createCustomReseauIcon(cleanedUrl, 'youtube');
+            } else if (lowerUrl.includes('whatsapp.com')) {
+                customHtml = createCustomReseauIcon(cleanedUrl, 'whatsapp');
+            } else if (lowerUrl.includes('linkedin.com')) {
+                customHtml = createCustomReseauIcon(cleanedUrl, 'linkedin');
+            } else if (lowerUrl.includes('pinterest.com')) {
+                customHtml = createCustomReseauIcon(cleanedUrl, 'pinterest');
+            } else if (lowerUrl.includes('t.me') || lowerUrl.includes('telegram.me')) {
+                customHtml = createCustomReseauIcon(cleanedUrl, 'telegram');
+            } else if (lowerUrl.includes('mixcloud.com')) {
+                customHtml = createCustomReseauIcon(cleanedUrl, 'mixcloud');
+            } else if (lowerUrl.includes('soundcloud.com')) {
+                customHtml = createCustomReseauIcon(cleanedUrl, 'soundcloud');
+            } else if (lowerUrl.includes('twitter.com') || lowerUrl.includes('x.com')) {
+                customHtml = createCustomReseauIcon(cleanedUrl, 'twitter');
+            } else if (lowerUrl.includes('instagram.com') || lowerUrl.includes('facebook.com') ||
+                       lowerUrl.includes('tiktok.com') || lowerUrl.includes('snapchat.com')) {
+                const reseauInfo = getReseauIconInfo(cleanedUrl);
+                customHtml = `
+                    <a href="javascript:void(0)" class="reseau-icon-wrapper" data-network="${reseauInfo.network}"
+                        onclick="openSocialLink('${cleanedUrl.replace(/'/g, "\\'")}', '${reseauInfo.network}')"
+                        title="Visiter le profil">
+                        <img src="${reseauInfo.logo}" alt="Logo ${reseauInfo.network}"
+                            onerror="this.src='https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/default.png'">
+                    </a>
+                `;
+            } else {
+                customHtml = createCustomReseauIcon(cleanedUrl, 'default');
+            }
+
+            iconsHtml += customHtml;
+        });
+
+        // Ajout du logo Spotify si le rôle est ARTISTE (toujours présent)
+        if (targetUserRole === 'ARTISTE') {
+            const spotifyLogoUrl = 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/spotify.png';
+            iconsHtml += `
+                <a href="javascript:void(0)" class="reseau-icon-wrapper" data-network="spotify"
+                    onclick="openArtisteSpotify('${targetUserId}')"
+                    title="Voir le profil artiste">
+                    <img src="${spotifyLogoUrl}" alt="Logo Spotify"
+                        onerror="this.src='https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/default.png'">
+                </a>
+            `;
+        }
+
+        if (!iconsHtml) {
+            return `<div class="reseaux-section">${followMeHeader}<div class="no-reseaux">Aucun réseau social ajouté</div></div>`;
+        }
+
+        return `
+            <div class="reseaux-section">
+                ${followMeHeader}
+                <div class="icons-grid">
+                    ${iconsHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    // ================================================
+    // CHARGEMENT PRINCIPAL
+    // ================================================
+    async function loadUserProfile() {
+        targetUserId = getUserIdFromURL();
+
+        if (!targetUserId) {
+            document.getElementById('profileContent').innerHTML = `
+                <div class="error">ID utilisateur manquant dans l'URL</div>
+            `;
+            return;
+        }
+
+        try {
+            const currentUserInfo = await getCurrentUserInfo();
+            if (!currentUserInfo) {
+                throw new Error('Impossible de récupérer votre profil');
+            }
+
+            currentUserId = currentUserInfo.id;
+            currentUserUsername = currentUserInfo.username;
+
+            const isAdmin = hasSpecialPrivileges(currentUserUsername);
+
+            const response = await fetch(`/api/users/${targetUserId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) throw new Error('Utilisateur non trouvé');
+                throw new Error('Erreur lors du chargement du profil');
+            }
+
+            const user = await response.json();
+
+            const donneeVisible = user.donneeVisible || "111";
+            const showPhoto    = donneeVisible[0] || '1';
+            const showSound    = donneeVisible[1] || '1';
+            const showNetworks = donneeVisible[2] || '1';
+
+            document.getElementById('profileUsername').textContent = user.username;
+            displayProfilePhoto(user.photoUrl, user.username, showPhoto, isAdmin);
+
+            if (user.sonEntreeURL && (isAdmin || showSound === '1')) {
+                playSonEntree(user.sonEntreeURL, true);
+            }
+
+            const isCurrentUser = (currentUserId.toString() === targetUserId.toString());
+
+            let reseauxSection    = '';
+            let visibilityMessage = '';
+            let chatButton        = '';
+
+            if (!isAdmin) {
+                visibilityMessage = `
+                    <div class="visibility-info">
+                        🔒 Affichage limité selon les paramètres de visibilité de l'utilisateur
+                    </div>
+                `;
+            }
+
+            reseauxSection = displayReseaux(user.listeReseaux, showNetworks, isAdmin, user.role, targetUserId);
+
+            // Bouton Chat
+            if (!isCurrentUser) {
+                chatButton = `
+                    <a href="/menu/ma_communaute/conversation.html?userId=${user.id}" class="chat-button">
+                        💬 Discuter avec ${user.username}
+                    </a>
+                `;
+            }
+
+            document.getElementById('profileContent').innerHTML = `
+                ${visibilityMessage}
+                ${chatButton}
+                ${reseauxSection}
+            `;
+
+        } catch (error) {
+            console.error('Erreur de chargement du profil:', error);
+            document.getElementById('profileUsername').textContent = 'Erreur';
+            document.getElementById('profileContent').innerHTML = `
+                <div class="error">❌ ${error.message}</div>
+            `;
+            displayProfilePhoto(null, 'Erreur', '0', false);
+        }
+    }
+
+    // ================================================
+    // INIT
+    // ================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        loadUserProfile();
+        document.getElementById('btnLogout').addEventListener('click', handleLogout);
+    });
+</script>
+</body>
+</html>

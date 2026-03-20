@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tous les Accès - Infrabel</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Arial', sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+        color: #333;
+        font-size: 16px;
+        min-height: 100vh;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+        color: #2c3e50;
+        font-size: 2rem;
+        margin-bottom: 5px;
+        background: linear-gradient(90deg, #2c3e50, #3498db);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+
+    .menu-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+
+    button {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s;
+        min-height: 44px;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #f39c12, #d68910);
+        color: white;
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(243, 156, 18, 0.3);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-purple {
+        background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        color: white;
+    }
+
+    .btn-purple:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(155, 89, 182, 0.3);
+    }
+
+    .btn-gray {
+        background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        color: white;
+    }
+
+    .btn-gray:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(149, 165, 166, 0.3);
+    }
+
+    .btn-back {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 100;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        padding: 30px;
+        min-height: 500px;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+        color: #2c3e50;
+        text-align: center;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #ecf0f1;
+    }
+
+    .stats-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #e8f4fc;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        border-left: 4px solid #3498db;
+    }
+
+    .stats-item {
+        text-align: center;
+    }
+
+    .stats-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+
+    .stats-label {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+        margin-top: 5px;
+    }
+
+    .filters-bar {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #2c3e50;
+        font-size: 0.9rem;
+    }
+
+    .filter-group input, .filter-group select {
+        width: 100%;
+        padding: 10px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+
+    .filter-group input:focus, .filter-group select:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+
+    .table-section {
+        overflow-x: auto;
+        margin-top: 20px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        background: white;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1000px;
+    }
+
+    th {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        position: sticky;
+        top: 0;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 15px 12px;
+        text-align: left;
+    }
+
+    td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #e9ecef;
+        cursor: pointer;
+    }
+
+    tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-buttons button {
+        padding: 8px 12px;
+        min-width: auto;
+        font-size: 0.9rem;
+    }
+
+    .gps-link {
+        color: #3498db;
+        text-decoration: none;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .gps-link:hover {
+        background-color: #e8f4fc;
+        text-decoration: underline;
+    }
+
+    .adresse-link {
+        color: #3498db;
+        text-decoration: none;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .adresse-link:hover {
+        background-color: #e8f4fc;
+        text-decoration: underline;
+    }
+
+    .loading-container {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #7f8c8d;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #bdc3c7;
+    }
+
+    .ligne-badge {
+        display: inline-block;
+        background: #e8f4fc;
+        color: #3498db;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        border: 1px solid #3498db;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .pagination button {
+        padding: 8px 15px;
+        min-width: auto;
+    }
+
+    .items-per-page {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 10px;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+        }
+
+        .btn-back {
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            width: calc(100% - 20px);
+        }
+
+        .stats-bar {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .filters-bar {
+            flex-direction: column;
+        }
+
+        .filter-group {
+            min-width: 100%;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 15px;
+        }
+
+        table {
+            font-size: 0.85rem;
+        }
+    }
+  </style>
+</head>
+<body>
+<!-- Bouton Retour -->
+<button class="btn-back btn-gray" onclick="window.location.href='/infrabel/index.html'">
+  ◄ Retour au Menu
+</button>
+
+<!-- En-tête -->
+<div class="header">
+  <h1>Tous les Accès - Infrabel</h1>
+  <div class="subtitle">Vue complète de tous les accès disponibles dans la base de données</div>
+
+  <div class="menu-buttons" id="menuButtons">
+    <button class="btn-success" onclick="window.location.href='/infrabel/acces.html'">
+      ➕ Ajouter un Accès
+    </button>
+    <button class="btn-primary" onclick="refreshAccesList()">
+      🔄 Actualiser
+    </button>
+    <button class="btn-purple" onclick="window.location.href='/infrabel/lignes.html'">
+      🛤️ Voir par Lignes
+    </button>
+  </div>
+</div>
+
+<!-- Conteneur Principal -->
+<div class="container">
+  <h2 class="section-title">📋 Liste Complète des Accès</h2>
+
+  <!-- Barre de statistiques -->
+  <div class="stats-bar">
+    <div class="stats-item">
+      <div class="stats-value" id="totalAcces">0</div>
+      <div class="stats-label">Total Accès</div>
+    </div>
+    <div class="stats-item">
+      <div class="stats-value" id="lignesCount">0</div>
+      <div class="stats-label">Lignes Uniques</div>
+    </div>
+    <div class="stats-item">
+      <div class="stats-value" id="withGps">0</div>
+      <div class="stats-label">Avec GPS</div>
+    </div>
+    <div class="stats-item">
+      <div class="stats-value" id="withAddress">0</div>
+      <div class="stats-label">Avec Adresse</div>
+    </div>
+  </div>
+
+  <!-- Barre de filtres -->
+  <div class="filters-bar">
+    <div class="filter-group">
+      <label for="searchInput">Rechercher</label>
+      <input type="text" id="searchInput" placeholder="Rechercher par nom, ligne, adresse, description..."
+             oninput="filterTable()">
+    </div>
+    <div class="filter-group">
+      <label for="ligneFilter">Filtrer par Ligne</label>
+      <select id="ligneFilter" onchange="filterTable()">
+        <option value="">Toutes les lignes</option>
+        <!-- Rempli dynamiquement -->
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="sortSelect">Trier par</label>
+      <select id="sortSelect" onchange="sortTable()">
+        <option value="ligne">Ligne (A-Z)</option>
+        <option value="ligneDesc">Ligne (Z-A)</option>
+        <option value="nom">Nom (A-Z)</option>
+        <option value="nomDesc">Nom (Z-A)</option>
+        <option value="id">ID (Croissant)</option>
+        <option value="idDesc">ID (Décroissant)</option>
+      </select>
+    </div>
+    <div class="items-per-page">
+      <label for="itemsPerPage">Par page:</label>
+      <select id="itemsPerPage" onchange="changeItemsPerPage()">
+        <option value="10">10</option>
+        <option value="25" selected>25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="0">Tous</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Zone de chargement -->
+  <div id="loadingContainer" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Chargement de tous les accès...</p>
+  </div>
+
+  <!-- Tableau des accès -->
+  <div class="table-section" id="tableSection" style="display: none;">
+    <table id="accesTable">
+      <thead>
+      <tr>
+        <th width="5%">ID</th>
+        <th width="20%">Nom d'Accès</th>
+        <th width="15%">Ligne/Indice/BK/BH</th>
+        <th width="20%">Adresse</th>
+        <th width="20%">Description</th>
+        <th width="10%">Coordonnées GPS</th>
+        <th width="10%">Actions</th>
+      </tr>
+      </thead>
+      <tbody id="tableBody">
+      <!-- Les données seront chargées ici -->
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination" style="display: none;">
+      <button class="btn-gray" onclick="previousPage()" id="prevBtn">◄ Précédent</button>
+      <span id="pageInfo">Page 1 sur 1</span>
+      <button class="btn-gray" onclick="nextPage()" id="nextBtn">Suivant ►</button>
+    </div>
+  </div>
+
+  <!-- État vide -->
+  <div id="emptyState" class="empty-state" style="display: none;">
+    <div class="empty-state-icon">📭</div>
+    <h3>Aucun accès trouvé</h3>
+    <p>Aucun accès n'a été trouvé dans la base de données.</p>
+    <button class="btn-success" onclick="window.location.href='/infrabel/acces.html'" style="margin-top: 20px;">
+      ➕ Créer le premier accès
+    </button>
+  </div>
+</div>
+
+<script>
+  // Configuration
+  const API_BASE_URL = '/api/acces';
+
+  // Variables globales
+  let allAcces = [];
+  let filteredAcces = [];
+  let currentPage = 1;
+  let itemsPerPage = 25;
+  let uniqueLignes = new Set();
+
+  // Fonction pour charger TOUS les accès
+  async function loadAllAcces() {
+      try {
+          showLoading(true);
+
+          const response = await fetch(API_BASE_URL);
+
+          if (!response.ok) {
+              throw new Error(`Erreur HTTP: ${response.status}`);
+          }
+
+          allAcces = await response.json();
+
+          // Extraire les lignes uniques pour le filtre
+          extractUniqueLignes();
+
+          // Calculer les statistiques
+          calculateStats();
+
+          // Initialiser le tableau filtré avec tous les accès
+          filteredAcces = [...allAcces];
+
+          // Trier par défaut (par ligne)
+          sortAcces('ligne');
+
+          // Afficher les données
+          displayAccesList();
+
+          // Remplir le filtre de lignes
+          populateLigneFilter();
+
+      } catch (error) {
+          console.error('Erreur:', error);
+          showError('Erreur lors du chargement des accès: ' + error.message);
+      }
+  }
+
+  // Fonction pour extraire les lignes uniques
+  function extractUniqueLignes() {
+      uniqueLignes.clear();
+      allAcces.forEach(acces => {
+          if (acces.ligneBkVoie) {
+              // Extraire la ligne (ex: "Ligne 36" depuis "Ligne 36 BK 125.400")
+              const ligneMatch = acces.ligneBkVoie.match(/Ligne\s+(\d+[A-Z]?)/);
+              if (ligneMatch && ligneMatch[1]) {
+                  uniqueLignes.add(ligneMatch[1]);
+              }
+          }
+      });
+  }
+
+  // Fonction pour calculer les statistiques
+  function calculateStats() {
+      const total = allAcces.length;
+      const withGps = allAcces.filter(a => a.latitude && a.longitude).length;
+      const withAddress = allAcces.filter(a => a.adresse && a.adresse.trim() !== '').length;
+
+      document.getElementById('totalAcces').textContent = total;
+      document.getElementById('lignesCount').textContent = uniqueLignes.size;
+      document.getElementById('withGps').textContent = withGps;
+      document.getElementById('withAddress').textContent = withAddress;
+  }
+
+  // Fonction pour remplir le filtre de lignes
+  function populateLigneFilter() {
+      const ligneFilter = document.getElementById('ligneFilter');
+
+      // Garder l'option "Toutes les lignes"
+      ligneFilter.innerHTML = '<option value="">Toutes les lignes</option>';
+
+      // Trier les lignes
+      const sortedLignes = Array.from(uniqueLignes).sort((a, b) => {
+          const aNum = parseInt(a.match(/\d+/)[0]);
+          const bNum = parseInt(b.match(/\d+/)[0]);
+          return aNum - bNum;
+      });
+
+      // Ajouter les options
+      sortedLignes.forEach(ligne => {
+          const option = document.createElement('option');
+          option.value = ligne;
+          option.textContent = `Ligne ${ligne}`;
+          ligneFilter.appendChild(option);
+      });
+  }
+
+  // Fonction pour trier les accès
+  function sortAcces(sortBy) {
+      filteredAcces.sort((a, b) => {
+          switch(sortBy) {
+              case 'ligne':
+                  return compareLigneBkVoie(a.ligneBkVoie, b.ligneBkVoie);
+              case 'ligneDesc':
+                  return compareLigneBkVoie(b.ligneBkVoie, a.ligneBkVoie);
+              case 'nom':
+                  return (a.nomAcces || '').localeCompare(b.nomAcces || '');
+              case 'nomDesc':
+                  return (b.nomAcces || '').localeCompare(a.nomAcces || '');
+              case 'id':
+                  return (a.id || 0) - (b.id || 0);
+              case 'idDesc':
+                  return (b.id || 0) - (a.id || 0);
+              default:
+                  return 0;
+          }
+      });
+
+      // Réinitialiser à la première page après tri
+      currentPage = 1;
+  }
+
+  // Fonction de comparaison pour Ligne/BK/BH
+  function compareLigneBkVoie(a, b) {
+      if (!a && !b) return 0;
+      if (!a) return 1;
+      if (!b) return -1;
+
+      // Extraire les valeurs
+      const extractValues = (str) => {
+          const match = str.match(/Ligne\s+(\d+)([A-Z]?)(?:\s+BK\s+(\d+)(?:\.(\d+))?)?/);
+          if (match) {
+              const ligneNum = parseInt(match[1]);
+              const ligneIndice = match[2] || '';
+              const bk = match[3] ? parseInt(match[3]) : 0;
+              const bh = match[4] ? parseInt(match[4]) : 0;
+
+              // Valeur numérique pour le tri
+              let ligneValue = ligneNum * 1000;
+              if (ligneIndice) {
+                  if (/[0-9]/.test(ligneIndice)) {
+                      ligneValue += parseInt(ligneIndice);
+                  } else {
+                      ligneValue += (ligneIndice.charCodeAt(0) - 55);
+                  }
+              }
+
+              return { ligneValue, bk, bh };
+          }
+          return { ligneValue: 99999, bk: 0, bh: 0 };
+      };
+
+      const aValues = extractValues(a);
+      const bValues = extractValues(b);
+
+      // Comparer par ligne d'abord
+      if (aValues.ligneValue !== bValues.ligneValue) {
+          return aValues.ligneValue - bValues.ligneValue;
+      }
+
+      // Puis par BK
+      if (aValues.bk !== bValues.bk) {
+          return aValues.bk - bValues.bk;
+      }
+
+      // Puis par BH
+      return aValues.bh - bValues.bh;
+  }
+
+  // Fonction pour filtrer le tableau
+  function filterTable() {
+      const searchText = document.getElementById('searchInput').value.toLowerCase();
+      const selectedLigne = document.getElementById('ligneFilter').value;
+
+      filteredAcces = allAcces.filter(acces => {
+          // Filtre par recherche
+          const matchesSearch = searchText === '' ||
+              (acces.nomAcces && acces.nomAcces.toLowerCase().includes(searchText)) ||
+              (acces.ligneBkVoie && acces.ligneBkVoie.toLowerCase().includes(searchText)) ||
+              (acces.adresse && acces.adresse.toLowerCase().includes(searchText)) ||
+              (acces.description && acces.description.toLowerCase().includes(searchText));
+
+          // Filtre par ligne
+          let matchesLigne = true;
+          if (selectedLigne) {
+              const ligneMatch = acces.ligneBkVoie ? acces.ligneBkVoie.match(/Ligne\s+(\d+[A-Z]?)/) : null;
+              matchesLigne = ligneMatch && ligneMatch[1] === selectedLigne;
+          }
+
+          return matchesSearch && matchesLigne;
+      });
+
+      // Réappliquer le tri actuel
+      const sortSelect = document.getElementById('sortSelect');
+      sortAcces(sortSelect.value);
+
+      // Réinitialiser à la première page
+      currentPage = 1;
+
+      // Afficher les résultats
+      displayAccesList();
+  }
+
+  // Fonction pour afficher la liste des accès
+  function displayAccesList() {
+      const tbody = document.getElementById('tableBody');
+      const tableSection = document.getElementById('tableSection');
+      const pagination = document.getElementById('pagination');
+      const emptyState = document.getElementById('emptyState');
+      const loadingContainer = document.getElementById('loadingContainer');
+
+      // Masquer le chargement
+      loadingContainer.style.display = 'none';
+
+      if (filteredAcces.length === 0) {
+          // Afficher l'état vide
+          tableSection.style.display = 'none';
+          pagination.style.display = 'none';
+          emptyState.style.display = 'block';
+          return;
+      }
+
+      // Calculer la pagination
+      const totalPages = itemsPerPage > 0 ? Math.ceil(filteredAcces.length / itemsPerPage) : 1;
+      const startIndex = itemsPerPage > 0 ? (currentPage - 1) * itemsPerPage : 0;
+      const endIndex = itemsPerPage > 0 ? Math.min(startIndex + itemsPerPage, filteredAcces.length) : filteredAcces.length;
+      const pageAcces = filteredAcces.slice(startIndex, endIndex);
+
+      // Vider le tableau
+      tbody.innerHTML = '';
+
+      // Ajouter les lignes
+      pageAcces.forEach(acces => {
+          const row = document.createElement('tr');
+
+          // Extraire la ligne pour le badge
+          let ligneBadge = '';
+          if (acces.ligneBkVoie) {
+              const ligneMatch = acces.ligneBkVoie.match(/Ligne\s+(\d+[A-Z]?)/);
+              if (ligneMatch && ligneMatch[1]) {
+                  ligneBadge = `<div class="ligne-badge">Ligne ${ligneMatch[1]}</div>`;
+              }
+          }
+
+          // Cellule GPS
+          let gpsCell = '<span style="color: #999; font-style: italic;">Non défini</span>';
+          if (acces.latitude && acces.longitude) {
+              gpsCell = `
+                  <a href="javascript:void(0)"
+                     onclick="openGoogleMaps(${acces.latitude}, ${acces.longitude})"
+                     class="gps-link" title="Ouvrir dans Google Maps">
+                      📍 ${parseFloat(acces.latitude).toFixed(6)}, ${parseFloat(acces.longitude).toFixed(6)}
+                  </a>
+              `;
+          }
+
+          // Cellule Adresse
+          let adresseCell = '<span style="color: #999; font-style: italic;">Non définie</span>';
+          if (acces.adresse && acces.adresse.trim() !== '') {
+              const adresseEncodee = encodeURIComponent(acces.adresse.trim());
+              adresseCell = `
+                  <a href="javascript:void(0)"
+                     onclick="openGoogleMapsForAddress('${adresseEncodee}')"
+                     class="adresse-link" title="Rechercher cette adresse">
+                      📍 ${acces.adresse}
+                  </a>
+              `;
+          }
+
+          row.innerHTML = `
+              <td><strong>#${acces.id}</strong></td>
+              <td>
+                  <div><strong>${acces.nomAcces || ''}</strong></div>
+                  ${ligneBadge}
+              </td>
+              <td>${acces.ligneBkVoie || ''}</td>
+              <td>${adresseCell}</td>
+              <td>${acces.description || ''}</td>
+              <td>${gpsCell}</td>
+              <td>
+                  <div class="action-buttons">
+                      <button class="btn-warning" onclick="editAcces(${acces.id})" title="Modifier">
+                          ✏️
+                      </button>
+                      <button class="btn-danger" onclick="deleteAcces(${acces.id})" title="Supprimer">
+                          🗑️
+                      </button>
+                  </div>
+              </td>
+          `;
+
+          tbody.appendChild(row);
+      });
+
+      // Mettre à jour la pagination
+      if (itemsPerPage > 0 && filteredAcces.length > itemsPerPage) {
+          document.getElementById('pageInfo').textContent = `Page ${currentPage} sur ${totalPages} (${filteredAcces.length} accès)`;
+          document.getElementById('prevBtn').disabled = currentPage === 1;
+          document.getElementById('nextBtn').disabled = currentPage === totalPages;
+          pagination.style.display = 'flex';
+      } else {
+          pagination.style.display = 'none';
+      }
+
+      // Afficher le tableau
+      tableSection.style.display = 'block';
+      emptyState.style.display = 'none';
+  }
+
+  // Fonction pour changer le nombre d'éléments par page
+  function changeItemsPerPage() {
+      itemsPerPage = parseInt(document.getElementById('itemsPerPage').value);
+      currentPage = 1;
+      displayAccesList();
+  }
+
+  // Fonction pour la page précédente
+  function previousPage() {
+      if (currentPage > 1) {
+          currentPage--;
+          displayAccesList();
+      }
+  }
+
+  // Fonction pour la page suivante
+  function nextPage() {
+      const totalPages = Math.ceil(filteredAcces.length / itemsPerPage);
+      if (currentPage < totalPages) {
+          currentPage++;
+          displayAccesList();
+      }
+  }
+
+  // Fonction pour trier le tableau
+  function sortTable() {
+      const sortSelect = document.getElementById('sortSelect');
+      sortAcces(sortSelect.value);
+      displayAccesList();
+  }
+
+  // Fonction pour rafraîchir la liste
+  function refreshAccesList() {
+      loadAllAcces();
+  }
+
+  // Fonction pour ouvrir Google Maps avec coordonnées
+  function openGoogleMaps(lat, lng) {
+      const url = `https://www.google.com/maps?q=${lat},${lng}`;
+      window.open(url, '_blank');
+  }
+
+  // Fonction pour ouvrir Google Maps pour une adresse
+  function openGoogleMapsForAddress(address) {
+      const url = `https://www.google.com/maps/search/?api=1&query=${address}`;
+      window.open(url, '_blank');
+  }
+
+  // Fonction pour modifier un accès
+  function editAcces(id) {
+      window.location.href = `/infrabel/modifierAccess.html?id=${id}`;
+  }
+
+  // Fonction pour supprimer un accès
+  async function deleteAcces(id) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer cet accès ? Cette action est irréversible.')) {
+          return;
+      }
+
+      try {
+          const response = await fetch(`${API_BASE_URL}/${id}`, {
+              method: 'DELETE'
+          });
+
+          if (!response.ok) {
+              throw new Error(`Erreur HTTP: ${response.status}`);
+          }
+
+          showNotification('Accès supprimé avec succès!', 'success');
+
+          // Recharger la liste
+          setTimeout(() => {
+              loadAllAcces();
+          }, 500);
+
+      } catch (error) {
+          console.error('Erreur:', error);
+          showNotification('Erreur lors de la suppression', 'error');
+      }
+  }
+
+  // Fonction pour afficher/masquer le chargement
+  function showLoading(show) {
+      const loadingContainer = document.getElementById('loadingContainer');
+      const tableSection = document.getElementById('tableSection');
+      const emptyState = document.getElementById('emptyState');
+
+      if (show) {
+          loadingContainer.style.display = 'block';
+          tableSection.style.display = 'none';
+          emptyState.style.display = 'none';
+      }
+  }
+
+  // Fonction pour afficher une erreur
+  function showError(message) {
+      const loadingContainer = document.getElementById('loadingContainer');
+      const tableSection = document.getElementById('tableSection');
+      const emptyState = document.getElementById('emptyState');
+
+      loadingContainer.style.display = 'none';
+      tableSection.style.display = 'none';
+      emptyState.style.display = 'block';
+      emptyState.innerHTML = `
+          <div class="empty-state-icon">❌</div>
+          <h3>Erreur</h3>
+          <p>${message}</p>
+          <button class="btn-primary" onclick="refreshAccesList()" style="margin-top: 20px;">
+              🔄 Réessayer
+          </button>
+      `;
+  }
+
+  // Fonction pour les notifications
+  function showNotification(message, type) {
+      // Créer une notification temporaire
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          padding: 15px 20px;
+          border-radius: 6px;
+          color: white;
+          font-weight: bold;
+          z-index: 1000;
+          animation: slideIn 0.3s ease;
+          max-width: 400px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          background: ${type === 'success' ? '#2ecc71' : '#e74c3c'};
+      `;
+
+      notification.textContent = message;
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+          notification.remove();
+      }, 3000);
+  }
+
+  // Initialisation
+  document.addEventListener('DOMContentLoaded', function() {
+      loadAllAcces();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement 0.5 €</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 350px;
+        }
+        h1 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .amount-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #666;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            background-color: #635bff;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none;
+        }
+        #error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Paiement unique</h1>
+
+    <div class="amount-display">
+        0.50 €
+    </div>
+
+    <p>Cliquez pour procéder au paiement</p>
+
+    <button id="pay-button">
+        Payer 0.50 €
+    </button>
+
+    <div id="error-message"></div>
+
+    <div id="payment-form" class="hidden">
+        <div id="payment-element" style="margin: 20px 0;"></div>
+        <button id="submit-payment">
+            Confirmer le paiement
+        </button>
+    </div>
+</div>
+
+<script>
+    const stripe = Stripe('pk_live_51KPbrsJOvQnra8JX4m5PrOEXegEv48xr0uaE5b7tOk3Bx2nb5zjnMScMAQc1ixW8QLynMjD8tiD4INzhkDijtl3b002aiYPNeI');
+    let elements;
+
+    document.getElementById('pay-button').addEventListener('click', async () => {
+        const button = document.getElementById('pay-button');
+        button.disabled = true;
+        button.textContent = 'Chargement...';
+
+        const errorElement = document.getElementById('error-message');
+        errorElement.textContent = '';
+
+        try {
+            // Montant fixe à 0.5 euros (50 centimes)
+            const response = await fetch('/create-payment-intent?montant=0.5', {
+                method: 'POST'
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur serveur');
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            // Afficher le formulaire Stripe
+            document.getElementById('pay-button').classList.add('hidden');
+            document.getElementById('payment-form').classList.remove('hidden');
+
+            // Initialiser Elements
+            elements = stripe.elements({ clientSecret: data.clientSecret });
+            const paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
+
+        } catch (error) {
+            errorElement.textContent = error.message;
+            button.disabled = false;
+            button.textContent = 'Payer 0.50 €';
+        }
+    });
+
+    // Gestion de la soumission du formulaire Stripe
+    document.getElementById('submit-payment').addEventListener('click', async (event) => {
+        event.preventDefault();
+
+        const button = document.getElementById('submit-payment');
+        button.disabled = true;
+        button.textContent = 'Traitement...';
+
+        const errorElement = document.getElementById('error-message');
+        errorElement.textContent = '';
+
+        const { error } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: window.location.origin + '/stripe/success.html',
+            },
+        });
+
+        if (error) {
+            errorElement.textContent = error.message;
+            button.disabled = false;
+            button.textContent = 'Confirmer le paiement';
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes réseaux sociaux</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 0;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .current-value {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid #bae6fd;
+        }
+
+        .current-value h3 {
+            color: #0369a1;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+        }
+
+        .current-value p {
+            color: #0c4a6e;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            background-color: white;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        .reseaux-list {
+            margin-bottom: 30px;
+        }
+
+        .reseaux-list h2 {
+            color: #334155;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+
+        .reseau-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            background-color: #f8fafc;
+            border-radius: 14px;
+            padding: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #e5e7eb;
+            position: relative;
+        }
+
+        .reseau-item:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+            border-color: #c7d2fe;
+        }
+
+        .reseau-item .input-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .icon-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .reseau-item input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .reseau-item input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .reseau-item input::placeholder {
+            color: #94a3b8;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .add-btn-compact {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .add-btn-compact:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .remove-btn-compact {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+        }
+
+        .remove-btn-compact:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .back-btn {
+            background: white;
+            color: #4b5563;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 14px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #f9fafb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .validate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .validate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .validate-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            color: #9ca3af;
+        }
+
+        .validate-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+            background: #f9fafb;
+            border-radius: 16px;
+            border: 2px dashed #d1d5db;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #d1d5db;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+        }
+
+        .url-status {
+            position: absolute;
+            right: 95px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #d1d5db;
+        }
+
+        .url-status.valid {
+            background-color: #10b981;
+        }
+
+        .url-status.invalid {
+            background-color: #ef4444;
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: popupFadeIn 0.3s ease-out;
+        }
+
+        @keyframes popupFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .popup-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .popup-message {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .popup-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .popup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                min-height: 100vh;
+                align-items: flex-start;
+            }
+
+            .container {
+                max-width: 100%;
+                border-radius: 20px;
+                margin: 20px 0;
+            }
+
+            .header {
+                padding: 30px 25px;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .content {
+                padding: 25px;
+            }
+
+            .reseau-item {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 20px;
+            }
+
+            .reseau-item .input-container {
+                margin-bottom: 15px;
+                width: 100%;
+            }
+
+            .action-buttons {
+                width: 100%;
+                margin-left: 0;
+                justify-content: center;
+                gap: 15px;
+            }
+
+            .add-btn-compact,
+            .remove-btn-compact {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .back-btn, .validate-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .url-status {
+                right: 20px;
+                top: 25px;
+                transform: none;
+            }
+
+            .current-value {
+                padding: 15px;
+            }
+
+            .current-value h3 {
+                font-size: 1rem;
+            }
+
+            .current-value p {
+                font-size: 0.85rem;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 25px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header p {
+                font-size: 0.9rem;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .reseau-item {
+                padding: 15px;
+            }
+
+            .icon-container {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+                margin-right: 10px;
+            }
+
+            .reseau-item input {
+                padding: 10px 12px;
+                font-size: 0.95rem;
+            }
+
+            .action-buttons {
+                gap: 10px;
+            }
+
+            .add-btn-compact,
+            .remove-btn-compact {
+                width: 44px;
+                height: 44px;
+                font-size: 1.1rem;
+            }
+
+            .empty-state {
+                padding: 30px 15px;
+            }
+
+            .empty-state i {
+                font-size: 40px;
+            }
+
+            .empty-state p {
+                font-size: 0.9rem;
+            }
+
+            .back-btn, .validate-btn {
+                padding: 12px 20px;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .reseau-item {
+                padding: 12px;
+            }
+
+            .icon-container {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+
+            .reseau-item input {
+                font-size: 0.9rem;
+                padding: 8px 10px;
+            }
+
+            .action-buttons {
+                gap: 8px;
+            }
+
+            .add-btn-compact,
+            .remove-btn-compact {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-height: 600px) and (orientation: landscape) {
+            body {
+                align-items: flex-start;
+                padding: 10px;
+            }
+
+            .container {
+                margin: 10px 0;
+                max-width: 100%;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .reseau-item {
+                margin-bottom: 10px;
+                padding: 12px;
+            }
+
+            .actions {
+                margin-top: 20px;
+                padding-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-share-alt"></i> Mes réseaux sociaux</h1>
+        <p>Ajoutez les liens vers vos profils</p>
+    </div>
+
+    <div class="content">
+        <div class="current-value" id="currentValueContainer" style="display: none;">
+            <h3><i class="fas fa-link"></i> Valeur actuelle</h3>
+            <p id="currentValue"></p>
+        </div>
+
+        <div class="reseaux-list">
+            <h2><i class="fas fa-plus-circle"></i> Ajouter des réseaux</h2>
+            <div id="reseauxContainer"></div>
+
+            <div id="emptyState" class="empty-state">
+                <i class="fas fa-plus-circle"></i>
+                <p>Cliquez sur "+" pour insérer votre premier lien de réseau social</p>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/menu/menu.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Retour au menu
+            </a>
+            <button id="validateBtn" class="validate-btn" disabled>
+                <i class="fas fa-check-circle"></i> Valider
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="popup-overlay" id="errorPopup">
+    <div class="popup-container">
+        <h2 class="popup-title"><i class="fas fa-exclamation-triangle"></i> Erreur</h2>
+        <p class="popup-message" id="errorMessage">Une erreur s'est produite.</p>
+        <button class="popup-btn" id="closePopup">OK</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Éléments DOM
+        const reseauxContainer = document.getElementById('reseauxContainer');
+        const emptyState = document.getElementById('emptyState');
+        const validateBtn = document.getElementById('validateBtn');
+        const errorPopup = document.getElementById('errorPopup');
+        const errorMessage = document.getElementById('errorMessage');
+        const closePopup = document.getElementById('closePopup');
+
+        // Vérification authentification
+        function checkAuthentication() {
+            const accessToken = localStorage.getItem('accessToken');
+            if (!accessToken) {
+                showError('Vous devez être connecté pour accéder à cette page');
+                setTimeout(() => window.location.href = '/index.html', 2000);
+                return false;
+            }
+            return true;
+        }
+
+        // Afficher les erreurs
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorPopup.style.display = 'flex';
+        }
+
+        closePopup.addEventListener('click', () => errorPopup.style.display = 'none');
+
+        // Si pas authentifié, on arrête
+        if (!checkAuthentication()) return;
+
+        const token = localStorage.getItem('accessToken');
+
+        // Charger les réseaux actuels
+        loadCurrentReseaux();
+
+        // Ajouter un premier champ vide
+        addReseauField();
+
+        // ==================== FONCTIONS PRINCIPALES ====================
+
+        // Charger les réseaux sociaux actuels de l'utilisateur
+        function loadCurrentReseaux() {
+            fetch('/api/users/me', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('refreshToken');
+                        showError('Votre session a expiré. Veuillez vous reconnecter.');
+                        setTimeout(() => window.location.href = '/index.html', 2000);
+                        throw new Error('Session expirée');
+                    }
+                    throw new Error('Erreur lors de la récupération des données');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.listeReseaux) {
+                    document.getElementById('currentValueContainer').style.display = 'block';
+                    document.getElementById('currentValue').textContent = data.listeReseaux;
+
+                    if (data.listeReseaux.trim()) {
+                        const reseauxArray = data.listeReseaux.split(';').filter(item => item.trim() !== '');
+                        if (reseauxArray.length > 0) {
+                            reseauxContainer.innerHTML = '';
+                            emptyState.style.display = 'none';
+                            reseauxArray.forEach(reseau => addReseauField(reseau.trim()));
+                            addReseauField();
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                if (error.message !== 'Session expirée') {
+                    showError('Impossible de charger vos réseaux actuels: ' + error.message);
+                }
+            });
+        }
+
+        // Ajouter un champ de saisie pour un réseau social
+        function addReseauField(value = '') {
+            emptyState.style.display = 'none';
+
+            const reseauItem = document.createElement('div');
+            reseauItem.className = 'reseau-item';
+            const itemId = 'reseau_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            reseauItem.id = itemId;
+
+            const icon = getIconForInput(value);
+            const isValid = validateInput(value);
+            const urlStatusClass = value ? (isValid ? 'valid' : 'invalid') : '';
+
+            reseauItem.innerHTML = `
+                <div class="input-container">
+                    <div class="icon-container">
+                        <i class="${icon}"></i>
+                    </div>
+                    <input type="text"
+                           class="reseau-input"
+                           placeholder="https://exemple.com/votrepseudo ou facebook nom_utilisateur"
+                           value="${value}">
+                    ${value ? `<div class="url-status ${urlStatusClass}"></div>` : ''}
+                </div>
+                <div class="action-buttons">
+                    <button class="add-btn-compact" type="button" title="Ajouter un autre réseau">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="remove-btn-compact" type="button" title="Supprimer ce réseau">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+
+            reseauxContainer.appendChild(reseauItem);
+
+            // Gestionnaires d'événements
+            const addBtn = reseauItem.querySelector('.add-btn-compact');
+            const removeBtn = reseauItem.querySelector('.remove-btn-compact');
+            const input = reseauItem.querySelector('.reseau-input');
+
+            // Bouton Ajouter
+            addBtn.addEventListener('click', function() {
+                if (validateInput(input.value.trim())) {
+                    addReseauField();
+                } else if (input.value.trim() === '') {
+                    showError('Veuillez d\'abord saisir un lien valide avant d\'ajouter un nouveau champ.');
+                    input.focus();
+                } else {
+                    showError('Format invalide. Utilisez une URL complète (http://...) ou "nom_du_reseau nom_utilisateur".');
+                    input.focus();
+                }
+            });
+
+            // Bouton Supprimer
+            removeBtn.addEventListener('click', function() {
+                const inputs = document.querySelectorAll('.reseau-input');
+                if (inputs.length > 1) {
+                    reseauItem.remove();
+                    if (document.querySelectorAll('.reseau-item').length === 0) {
+                        emptyState.style.display = 'block';
+                        validateBtn.disabled = true;
+                    }
+                } else {
+                    showError('Vous devez avoir au moins un champ de saisie.');
+                }
+            });
+
+            // Suivi de la saisie
+            input.addEventListener('input', function() {
+                updateIcon(itemId, this.value);
+                updateUrlStatus(itemId, this.value);
+                updateValidateButton();
+            });
+
+            // Mettre à jour le bouton de validation
+            updateValidateButton();
+
+            // Focus si champ vide
+            if (!value) input.focus();
+        }
+
+        // ==================== VALIDATION ET CONVERSION ====================
+
+        // Valider le format d'entrée
+        function validateInput(text) {
+            if (!text.trim()) return false;
+
+            // Si c'est une URL complète
+            if (text.startsWith('http://') || text.startsWith('https://')) {
+                return true;
+            }
+
+            // Si c'est un format raccourci
+            const parts = text.split(/\s+/).filter(part => part.trim() !== '');
+            if (parts.length >= 2) {
+                const reseauName = parts[0].toLowerCase();
+                const reseauxMapping = getReseauxMapping();
+                return reseauxMapping[reseauName] !== undefined;
+            }
+
+            return false;
+        }
+
+        // MAPPING DES RÉSEAUX ACCEPTÉS
+        function getReseauxMapping() {
+            return {
+                // Réseaux sociaux
+                'facebook': 'facebook',
+                'fb': 'facebook',
+                'instagram': 'instagram',
+                'insta': 'instagram',
+                'twitter': 'twitter',
+                'tw': 'twitter',
+                'tiktok': 'tiktok',
+                'tik': 'tiktok',
+                'snapchat': 'snapchat',
+                'snap': 'snapchat',
+                'linkedin': 'linkedin',
+                'ln': 'linkedin',
+                'youtube': 'youtube',
+                'yt': 'youtube',
+                'github': 'github',
+                'git': 'github',
+
+                // Messageries
+                'whatsapp': 'whatsapp',
+                'wa': 'whatsapp',
+                'telegram': 'telegram',
+                'tg': 'telegram',
+                'discord': 'discord',
+                'dc': 'discord',
+
+                // Plateformes streaming/musique
+                'twitch': 'twitch',
+                'reddit': 'reddit',
+                'pinterest': 'pinterest',
+                'spotify': 'spotify',
+
+                // NOUVEAUX : Plateformes audio
+                'soundcloud': 'soundcloud',
+                'sc': 'soundcloud',
+                'mixcloud': 'mixcloud',
+                'mc': 'mixcloud'
+            };
+        }
+
+        // Convertir le texte en URL complète
+        function convertToUrl(text) {
+            // Si déjà une URL
+            if (text.startsWith('http://') || text.startsWith('https://')) {
+                return text;
+            }
+
+            // Si format raccourci
+            const parts = text.split(/\s+/).filter(part => part.trim() !== '');
+            if (parts.length >= 2) {
+                const reseauName = parts[0].toLowerCase();
+                const username = parts.slice(1).join('');
+                const reseauxMapping = getReseauxMapping();
+                const platform = reseauxMapping[reseauName];
+
+                if (!platform) return text;
+
+                // Formats d'URL pour chaque plateforme
+                const urlFormats = {
+                    'facebook': `https://www.facebook.com/${username}`,
+                    'instagram': `https://www.instagram.com/${username}`,
+                    'twitter': `https://www.twitter.com/${username}`,
+                    'tiktok': `https://www.tiktok.com/@${username}`,
+                    'snapchat': `https://www.snapchat.com/add/${username}`,
+                    'linkedin': `https://www.linkedin.com/in/${username}`,
+                    'youtube': `https://www.youtube.com/@${username}`,
+                    'github': `https://github.com/${username}`,
+                    'whatsapp': `https://wa.me/${username.replace(/\D/g, '')}`,
+                    'telegram': `https://t.me/${username}`,
+                    'discord': username,
+                    'twitch': `https://www.twitch.tv/${username}`,
+                    'reddit': `https://www.reddit.com/user/${username}`,
+                    'pinterest': `https://www.pinterest.fr/${username}`,
+                    'spotify': `https://open.spotify.com/user/${username}`,
+
+                    // NOUVEAUX : Plateformes audio
+                    'soundcloud': `https://soundcloud.com/${username}`,
+                    'mixcloud': `https://www.mixcloud.com/${username}`
+                };
+
+                return urlFormats[platform] || text;
+            }
+
+            return text;
+        }
+
+        // ==================== GESTION DES ICÔNES ====================
+
+        // Obtenir l'icône pour un texte donné
+        function getIconForInput(text) {
+            if (!text.trim()) return 'fas fa-globe';
+
+            // Si URL complète
+            if (text.startsWith('http://') || text.startsWith('https://')) {
+                return getIconForUrl(text);
+            }
+
+            // Si format raccourci
+            const parts = text.split(/\s+/).filter(part => part.trim() !== '');
+            if (parts.length >= 2) {
+                const reseauName = parts[0].toLowerCase();
+                const reseauxMapping = getReseauxMapping();
+                const platform = reseauxMapping[reseauName];
+                if (platform) {
+                    return getIconForPlatform(platform);
+                }
+            }
+
+            return 'fas fa-globe';
+        }
+
+        // Obtenir l'icône pour une URL
+        function getIconForUrl(url) {
+            url = url.toLowerCase();
+
+            const iconMap = {
+                'twitter.com': 'fab fa-twitter',
+                'x.com': 'fab fa-twitter',
+                'facebook.com': 'fab fa-facebook-f',
+                'instagram.com': 'fab fa-instagram',
+                'linkedin.com': 'fab fa-linkedin-in',
+                'github.com': 'fab fa-github',
+                'youtube.com': 'fab fa-youtube',
+                'tiktok.com': 'fab fa-tiktok',
+                'discord.com': 'fab fa-discord',
+                'discord.gg': 'fab fa-discord',
+                'twitch.tv': 'fab fa-twitch',
+                'reddit.com': 'fab fa-reddit',
+                'pinterest.com': 'fab fa-pinterest',
+                'snapchat.com': 'fab fa-snapchat',
+                'whatsapp.com': 'fab fa-whatsapp',
+                'telegram.org': 'fab fa-telegram',
+                't.me': 'fab fa-telegram',
+                'spotify.com': 'fab fa-spotify',
+
+                // NOUVEAUX : Plateformes audio
+                'soundcloud.com': 'fab fa-soundcloud',
+                'mixcloud.com': 'fab fa-mixcloud'
+            };
+
+            for (const [domain, icon] of Object.entries(iconMap)) {
+                if (url.includes(domain)) {
+                    return icon;
+                }
+            }
+
+            return url.startsWith('http') ? 'fas fa-link' : 'fas fa-globe';
+        }
+
+        // Obtenir l'icône pour une plateforme
+        function getIconForPlatform(platform) {
+            const platformIcons = {
+                'facebook': 'fab fa-facebook-f',
+                'instagram': 'fab fa-instagram',
+                'twitter': 'fab fa-twitter',
+                'tiktok': 'fab fa-tiktok',
+                'snapchat': 'fab fa-snapchat',
+                'linkedin': 'fab fa-linkedin-in',
+                'youtube': 'fab fa-youtube',
+                'github': 'fab fa-github',
+                'whatsapp': 'fab fa-whatsapp',
+                'telegram': 'fab fa-telegram',
+                'discord': 'fab fa-discord',
+                'twitch': 'fab fa-twitch',
+                'reddit': 'fab fa-reddit',
+                'pinterest': 'fab fa-pinterest',
+                'spotify': 'fab fa-spotify',
+
+                // NOUVEAUX : Plateformes audio
+                'soundcloud': 'fab fa-soundcloud',
+                'mixcloud': 'fab fa-mixcloud'
+            };
+
+            return platformIcons[platform] || 'fas fa-link';
+        }
+
+        // ==================== MISE À JOUR DE L'INTERFACE ====================
+
+        // Mettre à jour l'icône
+        function updateIcon(itemId, text) {
+            const item = document.getElementById(itemId);
+            if (item) {
+                const iconContainer = item.querySelector('.icon-container i');
+                if (iconContainer) {
+                    iconContainer.className = getIconForInput(text);
+                }
+            }
+        }
+
+        // Mettre à jour le statut de l'URL
+        function updateUrlStatus(itemId, text) {
+            const item = document.getElementById(itemId);
+            if (item) {
+                let statusDiv = item.querySelector('.url-status');
+
+                // Créer si nécessaire
+                if (!statusDiv && text.trim()) {
+                    const inputContainer = item.querySelector('.input-container');
+                    statusDiv = document.createElement('div');
+                    statusDiv.className = 'url-status';
+                    inputContainer.appendChild(statusDiv);
+                }
+                // Supprimer si vide
+                else if (statusDiv && !text.trim()) {
+                    statusDiv.remove();
+                    return;
+                }
+
+                // Mettre à jour la classe
+                if (statusDiv) {
+                    statusDiv.className = 'url-status ' + (validateInput(text) ? 'valid' : 'invalid');
+                }
+            }
+        }
+
+        // Mettre à jour le bouton de validation
+        function updateValidateButton() {
+            const inputs = document.querySelectorAll('.reseau-input');
+            let hasValidInput = false;
+            let hasInvalidInput = false;
+
+            inputs.forEach(input => {
+                const value = input.value.trim();
+                if (value) {
+                    if (validateInput(value)) {
+                        hasValidInput = true;
+                    } else {
+                        hasInvalidInput = true;
+                    }
+                }
+            });
+
+            validateBtn.disabled = !hasValidInput || hasInvalidInput;
+        }
+
+        // ==================== ENREGISTREMENT ====================
+
+        // Enregistrer les réseaux sociaux
+        validateBtn.addEventListener('click', function() {
+            const inputs = document.querySelectorAll('.reseau-input');
+            const reseaux = [];
+            let hasInvalidInput = false;
+
+            // Valider tous les champs
+            inputs.forEach(input => {
+                const value = input.value.trim();
+                if (value) {
+                    if (validateInput(value)) {
+                        const url = convertToUrl(value);
+                        reseaux.push(url);
+                    } else {
+                        hasInvalidInput = true;
+                        showError(`Le format "${value}" n'est pas valide. Utilisez une URL complète (http://...) ou "nom_du_reseau nom_utilisateur".`);
+                        input.focus();
+                    }
+                }
+            });
+
+            if (hasInvalidInput) return;
+
+            if (reseaux.length === 0) {
+                showError('Veuillez saisir au moins un lien de réseau social.');
+                return;
+            }
+
+            // Préparer les données
+            const listeReseaux = reseaux.join(';');
+
+            // Afficher le chargement
+            validateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+            validateBtn.disabled = true;
+
+            // Envoyer à l'API
+            fetch('/api/users/me/updateListeReseaux', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'listeReseaux=' + encodeURIComponent(listeReseaux)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('refreshToken');
+                        throw new Error('Votre session a expiré. Veuillez vous reconnecter.');
+                    }
+                    throw new Error('Erreur lors de l\'enregistrement');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showError('Vos réseaux sociaux ont été mis à jour avec succès !');
+                    setTimeout(() => window.location.href = '/menu/menu.html', 1500);
+                } else {
+                    throw new Error(data.error || 'Erreur inconnue');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showError('Erreur lors de l\'enregistrement: ' + error.message);
+                validateBtn.innerHTML = '<i class="fas fa-check-circle"></i> Valider';
+                updateValidateButton();
+
+                if (error.message.includes('session a expiré')) {
+                    setTimeout(() => window.location.href = '/index.html', 2000);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

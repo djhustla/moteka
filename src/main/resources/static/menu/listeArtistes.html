@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artistes — Moteka</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+          --sp:      #1DB954;
+          --sp2:     #1ed760;
+          --bg:      #060606;
+          --s1:      #0e0e0e;
+          --s2:      #151515;
+          --s3:      #1c1c1c;
+          --border:  rgba(255,255,255,.07);
+          --text:    #efefef;
+          --muted:   rgba(239,239,239,.35);
+          --accent:  #b4f261;
+          --nav-h:   80px;
+        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+          font-family: 'Syne', sans-serif;
+          background: var(--bg);
+          color: var(--text);
+          min-height: 100vh;
+          overflow-x: hidden;
+          padding-top: var(--nav-h);
+        }
+
+        body::before {
+          content:''; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.03;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        }
+
+        .glow { position:fixed; pointer-events:none; z-index:0; border-radius:50%; filter:blur(120px); opacity:.12; }
+        .glow-1 { width:600px; height:600px; top:-200px; left:-200px; background:var(--sp); }
+        .glow-2 { width:400px; height:400px; bottom:-100px; right:-100px; background:var(--accent); }
+
+        /* ── NAV ── */
+        .fixed-nav {
+          position: fixed;
+          top: 0; left: 0; right: 0;
+          height: var(--nav-h);
+          z-index: 1000;
+          background: rgba(6,6,6,0.9);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid var(--border);
+          display: flex;
+          align-items: center;
+          padding: 0 clamp(12px, 3vw, 32px);
+          gap: clamp(8px, 2vw, 16px);
+        }
+
+        .search-bar {
+          flex: 1; min-width: 0;
+          display: flex; align-items: center; gap: 10px;
+          background: var(--s2); border: 1px solid var(--border);
+          border-radius: 12px; padding: 0 14px;
+          height: 46px;
+          transition: border-color .2s;
+        }
+        .search-bar:focus-within { border-color: rgba(29,185,84,.4); }
+        .search-bar svg { width:15px; height:15px; fill:var(--muted); flex-shrink:0; }
+        .search-bar input {
+          flex:1; min-width:0; background:none; border:none; outline:none;
+          font-family:'DM Mono',monospace; font-size:clamp(.75rem,2vw,.85rem); color:var(--text);
+        }
+        .search-bar input::placeholder { color:var(--muted); }
+
+        /* Conteneur boutons nav */
+        .nav-btns { display:flex; align-items:center; gap:clamp(6px,1.5vw,12px); flex-shrink:0; }
+
+        .nav-menu-btn {
+          height: 44px;
+          background: var(--sp);
+          color: black;
+          font-family: 'DM Mono', monospace;
+          font-size: clamp(.6rem,1.5vw,.78rem);
+          font-weight: 700;
+          padding: 0 clamp(10px,2.5vw,20px);
+          border-radius: 10px;
+          text-decoration: none;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          display: flex; align-items: center; gap: 7px;
+          transition: background .2s, transform .2s;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .nav-menu-btn:hover { background: var(--sp2); transform: translateY(-1px); }
+        .nav-menu-btn svg { width:15px; height:15px; fill:black; flex-shrink:0; }
+        .nav-menu-btn .btn-label { display:inline; }
+
+        /* ── PAGE ── */
+        .page { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding: clamp(20px,4vw,40px) clamp(16px,4vw,32px) 80px; }
+
+        .site-header {
+          padding-bottom: clamp(24px,4vw,48px);
+          display: flex;
+          flex-wrap: wrap;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 16px;
+          border-bottom: 1px solid var(--border);
+          margin-bottom: clamp(24px,4vw,48px);
+        }
+        .logo-block { display:flex; flex-direction:column; gap:4px; }
+        .logo-eyebrow { font-family:'DM Mono',monospace; font-size:.6rem; letter-spacing:3px; color:var(--sp); text-transform:uppercase; }
+        .logo-title {
+          font-family:'Bebas Neue', sans-serif;
+          font-size: clamp(2.2rem, 6vw, 5rem);
+          line-height: 1; letter-spacing:2px; color:#fff;
+        }
+        .logo-title span { color:var(--sp); }
+
+        .header-right { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+        .count-badge {
+          font-family:'DM Mono',monospace; font-size:.7rem; color:var(--muted);
+          background:var(--s2); border:1px solid var(--border);
+          padding:5px 12px; border-radius:20px;
+          display:flex; align-items:center; gap:6px;
+        }
+        .count-badge .dot { width:6px; height:6px; border-radius:50%; background:var(--sp); animation:blink 2s ease infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+        /* ── GRILLE ── */
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(clamp(150px, 20vw, 220px), 1fr));
+          gap: clamp(12px, 2vw, 20px);
+        }
+
+        /* ── CARD ── */
+        .artist-card {
+          background: var(--s1);
+          border: 1px solid var(--border);
+          border-radius: 18px;
+          overflow: visible;
+          cursor: pointer;
+          transition: transform .25s cubic-bezier(.22,1,.36,1), border-color .2s, box-shadow .25s;
+          animation: cardIn .4s cubic-bezier(.22,1,.36,1) both;
+          position: relative;
+        }
+        .artist-card:hover {
+          transform: translateY(-6px);
+          border-color: rgba(29,185,84,.3);
+          box-shadow: 0 20px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(29,185,84,.1);
+        }
+        .card-inner { border-radius: 18px; overflow: hidden; }
+        @keyframes cardIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+        .card-photo { width:100%; aspect-ratio:1/1; object-fit:cover; background:var(--s3); display:block; }
+        .card-photo-ph {
+          width:100%; aspect-ratio:1/1;
+          background: linear-gradient(135deg, var(--s2) 0%, var(--s3) 100%);
+          display:flex; align-items:center; justify-content:center; font-size:3rem;
+        }
+
+        .card-body { padding: clamp(10px,2vw,16px); }
+        .card-name {
+          font-size: clamp(.82rem,2vw,.95rem); font-weight:800; color:#fff;
+          white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:6px;
+        }
+        .card-meta { display:flex; flex-direction:column; gap:4px; }
+        .card-meta-row {
+          display:flex; align-items:center; gap:6px;
+          font-family:'DM Mono',monospace; font-size:clamp(.55rem,1.2vw,.62rem); color:var(--muted);
+        }
+        .card-meta-row svg { width:11px; height:11px; fill:var(--muted); flex-shrink:0; }
+
+        .card-status {
+          position:absolute; top:10px; right:10px; z-index:2;
+          width:8px; height:8px; border-radius:50%;
+        }
+        .card-status.active   { background:var(--sp); box-shadow:0 0 8px var(--sp); }
+        .card-status.inactive { background:#555; }
+
+        /* ── GENRE TOOLTIP ── */
+        /* Sur desktop : tooltip au survol */
+        .genre-tooltip {
+          position: absolute;
+          bottom: calc(100% + 10px);
+          left: 50%;
+          transform: translateX(-50%) translateY(6px);
+          z-index: 100;
+          background: rgba(10,10,10,.96);
+          border: 1px solid rgba(29,185,84,.25);
+          border-radius: 12px;
+          padding: 12px 14px;
+          min-width: 200px;
+          max-width: 280px;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity .18s ease, transform .18s ease;
+          backdrop-filter: blur(12px);
+          box-shadow: 0 12px 40px rgba(0,0,0,.6), 0 0 0 1px rgba(29,185,84,.08);
+        }
+        .genre-tooltip::after {
+          content:''; position:absolute; top:100%; left:50%;
+          transform:translateX(-50%); border:6px solid transparent;
+          border-top-color:rgba(29,185,84,.25);
+        }
+        .artist-card:hover .genre-tooltip { opacity:1; transform:translateX(-50%) translateY(0); }
+
+        .tooltip-section { margin-bottom:12px; }
+        .tooltip-section:last-child { margin-bottom:0; }
+        .tooltip-label { font-family:'DM Mono',monospace; font-size:.55rem; letter-spacing:2px; text-transform:uppercase; color:var(--sp); margin-bottom:8px; }
+        .tooltip-tags { display:flex; flex-wrap:wrap; gap:5px; }
+        .tooltip-tag {
+          font-family:'DM Mono',monospace; font-size:.6rem; color:var(--text);
+          background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+          border-radius:6px; padding:3px 8px; text-transform:capitalize;
+        }
+        .pref-item { display:flex; flex-direction:column; font-family:'DM Mono',monospace; font-size:.62rem; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+        .pref-item:last-child { border-bottom:none; }
+        .pref-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+        .pref-cote { color:var(--accent); font-weight:700; }
+        .pref-genres { display:flex; flex-wrap:wrap; gap:4px; margin-top:2px; }
+        .pref-genre-tag { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.1); border-radius:4px; padding:2px 6px; font-size:.55rem; color:var(--muted); }
+        .tooltip-empty { font-family:'DM Mono',monospace; font-size:.62rem; color:var(--muted); font-style:italic; }
+
+        /* ── TOOLTIP MOBILE : bottom sheet au tap ── */
+        .genre-tooltip-mobile {
+          display: none; /* caché par défaut */
+          position: fixed;
+          bottom: 0; left: 0; right: 0;
+          z-index: 500;
+          background: #0f0f0f;
+          border-top: 1px solid rgba(29,185,84,.25);
+          border-radius: 20px 20px 0 0;
+          padding: 20px 20px 32px;
+          max-height: 70vh;
+          overflow-y: auto;
+          box-shadow: 0 -20px 60px rgba(0,0,0,.8);
+          animation: slideUp .25s cubic-bezier(.22,1,.36,1);
+        }
+        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        .mobile-sheet-handle {
+          width: 40px; height: 4px; background: var(--border);
+          border-radius: 4px; margin: 0 auto 16px;
+        }
+        .mobile-sheet-title {
+          font-family:'DM Mono',monospace; font-size:.65rem;
+          letter-spacing:3px; text-transform:uppercase; color:var(--sp);
+          margin-bottom:16px;
+        }
+        .mobile-sheet-overlay {
+          display: none;
+          position: fixed; inset:0; z-index:499;
+          background: rgba(0,0,0,.5);
+        }
+
+        /* ── ÉTATS ── */
+        .state-block {
+          grid-column:1/-1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+          padding:80px 20px; gap:16px; text-align:center;
+        }
+        .spinner { width:36px; height:36px; border:3px solid var(--s3); border-top-color:var(--sp); border-radius:50%; animation:spin .7s linear infinite; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+
+        /* ── MEDIA QUERIES ── */
+        @media (max-width: 768px) {
+          :root { --nav-h: 64px; }
+
+          /* Sur tablette : cacher le label long du bouton recherche */
+          .btn-recherche .btn-label { display: none; }
+        }
+
+        @media (max-width: 480px) {
+          :root { --nav-h: 58px; }
+
+          /* Nav : cacher les labels texte, garder icônes */
+          .nav-menu-btn .btn-label { display: none; }
+          .nav-menu-btn { padding: 0 clamp(8px,3vw,14px); height: 38px; }
+
+          /* Header : stack vertical */
+          .site-header { flex-direction: column; align-items: flex-start; }
+          .header-right { align-items: flex-start; }
+
+          /* Tooltip desktop masqué sur mobile — bottom sheet à la place */
+          .genre-tooltip { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+
+<!-- OVERLAY mobile sheet -->
+<div class="mobile-sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+
+<!-- BOTTOM SHEET mobile -->
+<div class="genre-tooltip-mobile" id="mobileSheet">
+    <div class="mobile-sheet-handle"></div>
+    <div class="mobile-sheet-title" id="sheetArtistName">—</div>
+    <div id="sheetContent"></div>
+</div>
+
+<nav class="fixed-nav">
+    <div class="search-bar">
+        <svg viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        <input type="text" id="searchInput" placeholder="Rechercher un artiste…" oninput="filterArtistes()">
+    </div>
+    <div class="nav-btns">
+        <a href="recherche_globale.html" class="nav-menu-btn btn-recherche">
+            <svg viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            <span class="btn-label">NOUVELLE RECHERCHE</span>
+        </a>
+        <a href="menu.html" class="nav-menu-btn">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            <span class="btn-label">MENU</span>
+        </a>
+    </div>
+</nav>
+
+<div class="page">
+    <header class="site-header">
+        <div class="logo-block">
+            <div class="logo-eyebrow">Moteka • Roster</div>
+            <div class="logo-title">NOS <span>ARTISTES</span></div>
+        </div>
+        <div class="header-right">
+            <div class="count-badge">
+                <span class="dot"></span>
+                <span id="countLabel">chargement…</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="grid" id="grid">
+        <div class="state-block">
+            <div class="spinner"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let allArtistes = [];
+    const isMobile = () => window.innerWidth <= 480;
+
+    function openProfil(userId) {
+      window.location.href = '/menu/profil_artist.html?userId=' + userId;
+    }
+
+    async function loadArtistes() {
+      try {
+        const res = await fetch('/api/users/artistes').then(r => r.json());
+        allArtistes = res.artistes || [];
+
+        await Promise.all(allArtistes.map(async (a) => {
+          try {
+            const [gr, pref] = await Promise.all([
+              fetch(`/api/users/${a.id}/genres`).then(r => r.json()),
+              fetch(`/api/users/${a.id}/music-favoris`).then(r => r.json()),
+            ]);
+            a.genres     = (gr.success && Array.isArray(gr.genres)) ? gr.genres : [];
+            a.musicPrefs = Array.isArray(pref) ? pref : [];
+          } catch(e) {
+            a.genres = []; a.musicPrefs = [];
+          }
+        }));
+
+        document.getElementById('countLabel').textContent =
+          allArtistes.length + ' artiste' + (allArtistes.length > 1 ? 's' : '');
+        render(allArtistes);
+      } catch(e) { renderError(e.message); }
+    }
+
+    function filterArtistes() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const filtered = q ? allArtistes.filter(a => a.username.toLowerCase().includes(q)) : allArtistes;
+      render(filtered);
+    }
+
+    function buildTooltipHTML(a) {
+      let html = '';
+
+      html += `<div class="tooltip-section">`;
+      html += `<div class="tooltip-label">Préférences</div>`;
+      if (a.musicPrefs && a.musicPrefs.length > 0) {
+        a.musicPrefs.forEach(p => {
+          html += `<div class="pref-item">`;
+          html += `<div class="pref-header"><span class="pref-cote">${p.cotePreference}/10</span></div>`;
+          if (p.genres && p.genres.length > 0) {
+            html += `<div class="pref-genres">` + p.genres.map(g => `<span class="pref-genre-tag">${g.description}</span>`).join('') + `</div>`;
+          } else {
+            html += `<div class="tooltip-empty">(aucun genre associé)</div>`;
+          }
+          html += `</div>`;
+        });
+      } else {
+        html += `<div class="tooltip-empty">Aucune préférence définie</div>`;
+      }
+      html += `</div>`;
+
+      html += `<div class="tooltip-section">`;
+      html += `<div class="tooltip-label">Genres Spotify</div>`;
+      if (a.genres && a.genres.length > 0) {
+        html += `<div class="tooltip-tags">` + a.genres.map(g => `<span class="tooltip-tag">${g}</span>`).join('') + `</div>`;
+      } else {
+        html += `<div class="tooltip-empty">non renseignés</div>`;
+      }
+      html += `</div>`;
+
+      return html;
+    }
+
+    // ── BOTTOM SHEET MOBILE ──────────────────────────────────────────────────
+    function openSheet(a, event) {
+      event.stopPropagation();
+      document.getElementById('sheetArtistName').textContent = a.username;
+      document.getElementById('sheetContent').innerHTML = buildTooltipHTML(a);
+      document.getElementById('mobileSheet').style.display = 'block';
+      document.getElementById('sheetOverlay').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSheet() {
+      document.getElementById('mobileSheet').style.display = 'none';
+      document.getElementById('sheetOverlay').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function render(list) {
+      const grid = document.getElementById('grid');
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="state-block">
+            <svg viewBox="0 0 24 24" style="width:48px;height:48px;fill:var(--muted);opacity:.4;"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+            <div style="margin-top:16px;color:var(--muted);font-size:.9rem;">Aucun artiste trouvé</div>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = list.map((a, i) => `
+        <div class="artist-card"
+             style="animation-delay:${i*40}ms"
+             onclick="openProfil(${a.id})"
+             data-id="${a.id}">
+
+          <div class="card-status ${a.isActive ? 'active' : 'inactive'}"></div>
+
+          <!-- Tooltip desktop -->
+          <div class="genre-tooltip">${buildTooltipHTML(a)}</div>
+
+          <div class="card-inner">
+            ${a.photoUrl
+              ? `<img class="card-photo" src="${a.photoUrl}" alt="${a.username}" loading="lazy" onerror="this.outerHTML='<div class=\\'card-photo-ph\\'>🎤</div>'">`
+              : `<div class="card-photo-ph">🎤</div>`
+            }
+            <div class="card-body">
+              <div class="card-name">${a.username}</div>
+              <div class="card-meta">
+                <div class="card-meta-row">
+                  <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                  <span>${a.email}</span>
+                </div>
+                <div class="card-meta-row" style="align-items:flex-start;">
+                  <svg style="margin-top:2px;flex-shrink:0;" viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141 4.14-1.26 9.419-.6 13.079 1.56.42.24.539.78.301 1.26zm.119-3.36c-3.84-2.28-10.14-2.52-13.74-1.38-.6.18-1.26-.18-1.44-.78-.18-.6.18-1.26.78-1.44 4.14-1.26 11.099-.96 15.36 1.62.54.3.72 1.02.42 1.56-.3.48-1.02.66-1.56.42z"/></svg>
+                  ${a.lienSpotify
+                    ? `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.lienSpotify}</span>`
+                    : `<span style="color:#ff5555;font-weight:700;">PAS DE LIEN SPOTY</span>`
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Sur mobile : tap long ou tap sur la photo ouvre le bottom sheet
+      if (isMobile()) {
+        document.querySelectorAll('.artist-card').forEach(card => {
+          const id = parseInt(card.dataset.id);
+          const a  = allArtistes.find(x => x.id === id);
+          if (!a) return;
+
+          let pressTimer = null;
+
+          // Tap long → bottom sheet
+          card.addEventListener('touchstart', () => {
+            pressTimer = setTimeout(() => { openSheet(a, { stopPropagation: () => {} }); }, 500);
+          }, { passive: true });
+          card.addEventListener('touchend', () => clearTimeout(pressTimer), { passive: true });
+          card.addEventListener('touchmove', () => clearTimeout(pressTimer), { passive: true });
+        });
+      }
+    }
+
+    function renderError(msg) {
+      document.getElementById('grid').innerHTML = `
+        <div class="state-block">
+          <svg viewBox="0 0 24 24" style="width:48px;height:48px;fill:var(--muted);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+          <div style="margin-top:16px;color:var(--muted);">Erreur : ${msg}</div>
+        </div>`;
+    }
+
+    loadArtistes();
+</script>
+
+</body>
+</html>

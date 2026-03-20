@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Spotify - Artist Discovery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+        --sp: #1DB954;
+        --sp2: #1ed760;
+        --bg: #060606;
+        --s2: #151515;
+        --card-bg: #121212;
+        --text: #ffffff;
+        --muted: #a7a7a7;
+        --border: rgba(255,255,255,0.08);
+        --nav-h: 70px;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+        font-family: 'Syne', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        padding-top: var(--nav-h);
+        min-height: 100vh;
+    }
+
+    .fixed-nav {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: var(--nav-h);
+        z-index: 1000;
+        background: rgba(6,6,6,0.95);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        gap: 12px;
+    }
+
+    .search-box {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--s2);
+        border: 1px solid var(--border);
+        border-radius: 30px;
+        padding: 0 8px 0 16px;
+        height: 44px;
+        min-width: 0;
+    }
+
+    .search-box input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 0.9rem;
+        outline: none;
+        font-family: 'Syne', sans-serif;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .search-box input::placeholder {
+        color: var(--muted);
+        font-size: 0.85rem;
+    }
+
+    .btn-search {
+        background: var(--sp);
+        color: black;
+        border: none;
+        padding: 0 16px;
+        height: 32px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .nav-menu-btn {
+        height: 44px;
+        background: var(--sp);
+        color: black;
+        padding: 0 18px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .nav-menu-btn span {
+        display: inline;
+    }
+
+    h1 {
+        text-align: center;
+        font-weight: 800;
+        font-size: clamp(1.5rem, 6vw, 2.2rem);
+        margin: 20px 16px 30px;
+        padding: 0 10px;
+        word-break: break-word;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px 16px 40px;
+    }
+
+    #resultsList {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .track-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.25s;
+        cursor: pointer;
+        position: relative;
+        width: 100%;
+    }
+
+    .track-card:active {
+        transform: scale(0.98);
+        background: #1a1a1a;
+    }
+
+    .track-img {
+        width: 100%;
+        aspect-ratio: 1/1;
+        object-fit: cover;
+        display: block;
+    }
+
+    .track-info {
+        padding: 16px;
+    }
+
+    .track-title {
+        font-weight: 800;
+        font-size: 1rem;
+        margin-bottom: 6px;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .track-artist {
+        color: var(--sp);
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .track-album {
+        font-family: 'DM Mono', monospace;
+        color: var(--muted);
+        font-size: 0.7rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .player-container {
+        padding: 0 16px 16px;
+        position: relative;
+    }
+
+    .player-container iframe {
+        border-radius: 12px;
+        width: 100%;
+        height: 80px;
+        display: block;
+    }
+
+    /* Bouton Encoder YouTube - caché par défaut */
+    .youtube-encoder-button {
+        display: none;
+        position: absolute;
+        top: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #FF0000;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 10px 24px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        cursor: pointer;
+        z-index: 30;
+        white-space: nowrap;
+        box-shadow: 0 0 20px rgba(255,0,0,0.5);
+        transition: all 0.3s ease;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid white;
+    }
+
+    .youtube-encoder-button:hover {
+        background: #ff3333;
+        transform: translateX(-50%) scale(1.05);
+        box-shadow: 0 0 30px rgba(255,0,0,0.8);
+    }
+
+    /* Affichage uniquement en mode isolé ET au survol */
+    .track-card.isolated .player-container:hover .youtube-encoder-button {
+        display: flex;
+    }
+
+    .btn-artist-discover {
+        display: none;
+        background: var(--sp);
+        color: black;
+        border: none;
+        padding: 16px 20px;
+        border-radius: 30px;
+        font-weight: 800;
+        font-family: 'Syne', sans-serif;
+        font-size: 1rem;
+        cursor: pointer;
+        margin: 0 16px 16px;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+        width: calc(100% - 32px);
+    }
+
+    .btn-artist-discover:active {
+        background: var(--sp2);
+        transform: scale(0.97);
+    }
+
+    .btn-close-isolated {
+        display: none;
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.2);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 10;
+        font-size: 1.2rem;
+        backdrop-filter: blur(5px);
+    }
+
+    .track-card.isolated {
+        position: fixed;
+        top: var(--nav-h);
+        left: 0;
+        width: 100vw;
+        height: calc(100vh - var(--nav-h));
+        z-index: 999;
+        background: var(--bg);
+        border: none;
+        border-radius: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        cursor: default;
+        overflow-y: auto;
+    }
+
+    .track-card.isolated .btn-artist-discover {
+        display: flex;
+    }
+
+    .track-card.isolated .btn-close-isolated {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .track-card.isolated .track-img {
+        width: auto;
+        max-width: 90%;
+        max-height: 30vh;
+        border-radius: 20px;
+        margin-bottom: 20px;
+    }
+
+    .track-card.isolated .track-info {
+        text-align: center;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .track-card.isolated .track-title {
+        font-size: 1.4rem;
+        -webkit-line-clamp: 3;
+        white-space: normal;
+    }
+
+    .track-card.isolated .player-container {
+        width: 100%;
+        max-width: 500px;
+        margin-top: 20px;
+        padding-top: 40px;
+    }
+
+    #artistPopup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.98);
+        backdrop-filter: blur(10px);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    .popup-content {
+        background: #121212;
+        padding: 24px 20px;
+        border-radius: 24px;
+        border: 1px solid #333;
+        max-width: 480px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        text-align: center;
+    }
+
+    .artist-list {
+        margin: 20px 0;
+        max-height: 50vh;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    .artist-btn-link {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: #1a1a1a;
+        border: 1px solid #282828;
+        padding: 12px;
+        border-radius: 16px;
+        width: 100%;
+        margin-bottom: 12px;
+        text-decoration: none;
+        color: white;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .artist-btn-link:active {
+        background: #252525;
+        border-color: var(--sp);
+        transform: translateX(5px);
+    }
+
+    .artist-photo-rect {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        object-fit: cover;
+        background: #222;
+        border: 1px solid rgba(255,255,255,0.1);
+        flex-shrink: 0;
+    }
+
+    .artist-name-popup {
+        font-weight: 800;
+        font-size: 1rem;
+        text-align: left;
+        flex: 1;
+        word-break: break-word;
+    }
+
+    .artist-arrow {
+        color: var(--sp);
+        font-size: 1.1rem;
+        margin-right: 8px;
+        flex-shrink: 0;
+    }
+
+    .btn-close-popup {
+        background: #333;
+        color: white;
+        border: none;
+        padding: 14px 30px;
+        border-radius: 30px;
+        font-weight: 800;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: 0.2s;
+        width: 100%;
+        max-width: 200px;
+    }
+
+    .btn-close-popup:active {
+        background: #444;
+    }
+
+    .loader {
+        text-align: center;
+        display: none;
+        color: var(--sp);
+        padding: 40px;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.9rem;
+    }
+
+    /* Popup Encoder YouTube */
+    #encoderPopup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.98);
+        backdrop-filter: blur(10px);
+        z-index: 2500;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    .encoder-popup-content {
+        background: #121212;
+        padding: 30px 25px;
+        border-radius: 24px;
+        border: 1px solid #333;
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .encoder-popup-content h3 {
+        color: var(--sp);
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+    }
+
+    .encoder-popup-content p {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-bottom: 25px;
+    }
+
+    .encoder-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .encoder-search-btn {
+        flex-shrink: 0;
+        padding: 12px 18px;
+        background: #FF0000;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        transition: 0.2s;
+    }
+
+    .encoder-search-btn:hover {
+        background: #ff3333;
+        transform: scale(1.02);
+    }
+
+    .encoder-paste-btn {
+        flex-shrink: 0;
+        padding: 12px 18px;
+        background: #2a2a2a;
+        color: white;
+        border: 1px solid #444;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        transition: 0.2s;
+    }
+
+    .encoder-paste-btn:hover {
+        background: #3a3a3a;
+        border-color: #666;
+    }
+
+    .encoder-input {
+        flex: 1;
+        padding: 12px 16px;
+        background: #0a0a0a;
+        border: 1px solid #444;
+        border-radius: 30px;
+        color: white;
+        font-size: 0.9rem;
+        outline: none;
+    }
+
+    .encoder-input:focus {
+        border-color: var(--sp);
+    }
+
+    .encoder-validate-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--sp);
+        color: black;
+        border: none;
+        border-radius: 30px;
+        font-weight: 800;
+        font-size: 1rem;
+        cursor: pointer;
+        margin: 10px 0 15px;
+        transition: 0.2s;
+    }
+
+    .encoder-validate-btn:hover {
+        background: var(--sp2);
+        transform: scale(1.02);
+    }
+
+    .encoder-cancel-btn {
+        background: transparent;
+        color: #777;
+        border: 1px solid #444;
+        padding: 12px 25px;
+        border-radius: 30px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .encoder-cancel-btn:hover {
+        background: #222;
+        color: white;
+    }
+
+    .encoder-result {
+        margin-top: 20px;
+        padding: 15px;
+        background: #0a0a0a;
+        border-radius: 12px;
+        font-family: monospace;
+        font-size: 0.8rem;
+        color: #0f0;
+        max-height: 150px;
+        overflow-y: auto;
+        text-align: left;
+        display: none;
+    }
+
+    /* Overlay pour la recherche Google */
+    #searchOverlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.95);
+        backdrop-filter: blur(8px);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    .search-overlay-content {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .search-overlay-content h3 {
+        color: var(--sp);
+        margin-bottom: 15px;
+    }
+
+    .search-overlay-content p {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    .search-url-display {
+        background: #0a0a0a;
+        border: 1px solid #333;
+        border-radius: 10px;
+        padding: 12px;
+        font-family: monospace;
+        font-size: 0.75rem;
+        color: #888;
+        word-break: break-all;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .search-overlay-btns {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+
+    .search-overlay-btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 30px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .search-overlay-btn.copy {
+        background: var(--sp);
+        color: black;
+    }
+
+    .search-overlay-btn.copy:hover {
+        background: var(--sp2);
+    }
+
+    .search-overlay-btn.close {
+        background: #e91429;
+        color: white;
+    }
+
+    .search-overlay-btn.close:hover {
+        background: #ff2d40;
+    }
+
+    .toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--sp);
+        color: black;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+
+    .toast.show {
+        opacity: 1;
+    }
+
+    @media (max-width: 480px) {
+        :root { --nav-h: 60px; }
+        .fixed-nav { padding: 0 12px; gap: 8px; }
+        .search-box { padding: 0 4px 0 12px; height: 40px; }
+        .search-box input { font-size: 0.8rem; }
+        .search-box input::placeholder { font-size: 0.75rem; }
+        .btn-search { padding: 0 12px; height: 28px; font-size: 0.75rem; }
+        .nav-menu-btn { height: 40px; padding: 0 12px; font-size: 0.75rem; }
+        .nav-menu-btn span { display: none; }
+        .nav-menu-btn i { font-size: 1.1rem; }
+        h1 { font-size: 1.5rem; margin: 15px 12px 20px; }
+        .container { padding: 10px 12px 30px; }
+        #resultsList { grid-template-columns: 1fr; gap: 15px; }
+        .track-info { padding: 12px; }
+        .track-title { font-size: 0.95rem; }
+        .track-artist { font-size: 0.85rem; }
+        .track-album { font-size: 0.65rem; }
+        .player-container { padding: 0 12px 12px; }
+        .btn-artist-discover { padding: 14px 16px; font-size: 0.9rem; margin: 0 12px 12px; width: calc(100% - 24px); }
+        .btn-close-isolated { width: 40px; height: 40px; top: 12px; left: 12px; }
+        .track-card.isolated .track-title { font-size: 1.2rem; }
+        .popup-content { padding: 20px 16px; }
+        .artist-photo-rect { width: 50px; height: 50px; }
+        .artist-name-popup { font-size: 0.9rem; }
+        .artist-arrow { font-size: 1rem; }
+        .youtube-encoder-button { padding: 8px 16px; font-size: 0.8rem; top: -30px; }
+        .encoder-row { flex-wrap: wrap; }
+        .encoder-search-btn, .encoder-paste-btn { width: 100%; justify-content: center; }
+    }
+
+    @media (max-width: 360px) {
+        .search-box { padding-left: 8px; }
+        .btn-search { padding: 0 8px; font-size: 0.7rem; }
+        .artist-photo-rect { width: 45px; height: 45px; }
+        .artist-name-popup { font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="fixed-nav">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Titre ou Artiste..." onkeydown="if(event.key==='Enter') searchTracks()">
+    <button class="btn-search" onclick="searchTracks()">OK</button>
+  </div>
+  <a href="menu.html" class="nav-menu-btn">
+    <i class="fa fa-arrow-left"></i> <span>MENU</span>
+  </a>
+</nav>
+
+<div id="artistPopup">
+  <div class="popup-content">
+    <h2 style="margin-bottom:10px; font-size:1.2rem; font-weight:800; color:white;">ARTISTES</h2>
+    <p style="color:var(--muted); font-size:0.8rem; margin-bottom:20px;">Cliquez sur un artiste pour voir les détails</p>
+    <div id="artistListContent" class="artist-list"></div>
+    <button class="btn-close-popup" onclick="closePopup()">ANNULER</button>
+  </div>
+</div>
+
+<!-- Popup Encoder YouTube -->
+<div id="encoderPopup">
+  <div class="encoder-popup-content">
+    <h3>🎬 Encoder le son YouTube</h3>
+    <p>Recherchez le lien YouTube de ce morceau et collez-le ci-dessous</p>
+
+    <div class="encoder-row">
+      <button class="encoder-search-btn" id="encoderSearchBtn" onclick="openGoogleSearch()">
+        <i class="fab fa-google"></i> Rechercher
+      </button>
+      <button class="encoder-paste-btn" id="encoderPasteBtn" onclick="pasteFromClipboard()">
+        <i class="fas fa-clipboard"></i> Coller
+      </button>
+    </div>
+
+    <input type="text" class="encoder-input" id="encoderInput" placeholder="https://www.youtube.com/watch?v=...">
+
+    <button class="encoder-validate-btn" id="encoderValidateBtn" onclick="validateEncoder()">
+      <i class="fas fa-check"></i> Valider
+    </button>
+
+    <button class="encoder-cancel-btn" onclick="closeEncoderPopup()">Annuler</button>
+
+    <div id="encoderResult" class="encoder-result"></div>
+  </div>
+</div>
+
+<!-- Overlay pour la recherche Google -->
+<div id="searchOverlay">
+  <div class="search-overlay-content">
+    <h3>🔍 Recherche Google ouverte</h3>
+    <p>La fenêtre de recherche est ouverte.<br>Copiez le lien YouTube puis revenez ici.</p>
+    <div class="search-url-display" id="searchUrlDisplay"></div>
+    <div class="search-overlay-btns">
+      <button class="search-overlay-btn copy" onclick="copySearchUrl()"><i class="fas fa-copy"></i> Copier</button>
+      <button class="search-overlay-btn close" onclick="closeSearchOverlay()"><i class="fas fa-times"></i> Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Lien copié !</div>
+
+<div class="container">
+  <h1 id="pageTitle">🔍 Search Tracks</h1>
+  <div id="loader" class="loader">SYNCHRONISATION...</div>
+  <div id="resultsList"></div>
+</div>
+
+<script>
+  let allCards = [];
+  let currentTrackUrl = '';
+  let currentSearchUrl = '';
+  let currentUserId = null;
+
+  // Récupérer l'utilisateur connecté au chargement
+  async function getCurrentUser() {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return null;
+      try {
+          const res = await fetch('/api/users/me', {
+              headers: { 'Authorization': 'Bearer ' + token }
+          });
+          const data = await res.json();
+          return data.id;
+      } catch (e) {
+          console.error('Erreur récupération utilisateur:', e);
+          return null;
+      }
+  }
+
+  // Initialisation
+  (async () => {
+      currentUserId = await getCurrentUser();
+  })();
+
+  async function searchTracks() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
+
+      const resultsList = document.getElementById('resultsList');
+      const loader = document.getElementById('loader');
+
+      resultsList.innerHTML = '';
+      loader.style.display = 'block';
+      allCards = [];
+
+      try {
+          const res = await fetch(`/api/spotify/artiste/searchTrack?titre=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          loader.style.display = 'none';
+
+          if (data.success && data.resultats) {
+              data.resultats.forEach(track => {
+                  const card = document.createElement('div');
+                  card.className = 'track-card';
+                  const spotifyUrl = track.spotifyUrl;
+                  const embedUrl = spotifyUrl.replace("track/", "embed/track/");
+
+                  card.innerHTML = `
+                      <button class="btn-close-isolated"><i class="fa fa-arrow-left"></i></button>
+                      <img src="${track.photoUrl || 'https://via.placeholder.com/300'}" class="track-img">
+                      <div class="track-info">
+                          <div class="track-title">${track.titre}</div>
+                          <div class="track-artist">${track.artiste}</div>
+                          <div class="track-album">${track.albumNom}</div>
+                      </div>
+                      <div class="player-container">
+                          <iframe src="${embedUrl}" width="100%" height="80" frameborder="0" allow="encrypted-media" style="border-radius:8px;"></iframe>
+                          <button class="youtube-encoder-button" onclick="openEncoderPopup('${spotifyUrl}', event)">
+                              <i class="fab fa-youtube"></i> ENCODER LE SON YOUTUBE
+                          </button>
+                      </div>
+                      <button class="btn-artist-discover" onclick="fetchArtistsInfo('${spotifyUrl}')">
+                          <i class="fa-solid fa-users"></i> DÉCOUVRIR L'ARTISTE
+                      </button>
+                  `;
+                  card.querySelector('.btn-close-isolated').onclick = (e) => { e.stopPropagation(); exitIsolated(); };
+                  card.onclick = () => selectTrack(card);
+                  resultsList.appendChild(card);
+                  allCards.push(card);
+              });
+          }
+      } catch (e) { loader.style.display = 'none'; }
+  }
+
+  function selectTrack(selectedCard) {
+      document.getElementById('pageTitle').style.display = 'none';
+      allCards.forEach(c => { if(c !== selectedCard) c.style.display = 'none'; });
+      selectedCard.classList.add('isolated');
+      selectedCard.onclick = null;
+      document.body.style.overflow = 'hidden';
+      window.scrollTo(0,0);
+  }
+
+  function exitIsolated() {
+      allCards.forEach(c => { c.style.display = ''; c.classList.remove('isolated'); c.onclick = () => selectTrack(c); });
+      document.getElementById('pageTitle').style.display = 'block';
+      document.body.style.overflow = 'auto';
+  }
+
+  async function fetchArtistsInfo(trackUrl) {
+      const listContainer = document.getElementById('artistListContent');
+      listContainer.innerHTML = '<div style="color:var(--sp); font-family:DM Mono;">Chargement...</div>';
+      document.getElementById('artistPopup').style.display = 'flex';
+
+      try {
+          const res = await fetch(`/api/spotify/track/artists?url=${encodeURIComponent(trackUrl)}`);
+          const data = await res.json();
+
+          if (data.success && data.artists) {
+              listContainer.innerHTML = '';
+              data.artists.forEach(art => {
+                  const artistBtn = document.createElement('a');
+                  artistBtn.className = 'artist-btn-link';
+                  artistBtn.href = `/menu/artiste_spotify_detail.html?lienSpotify=${encodeURIComponent(art.url)}`;
+                  const imgUrl = art.photoUrl || 'https://via.placeholder.com/150';
+
+                  artistBtn.innerHTML = `
+                      <img src="${imgUrl}" class="artist-photo-rect">
+                      <div class="artist-name-popup">${art.nom}</div>
+                      <i class="fa fa-chevron-right artist-arrow"></i>
+                  `;
+                  listContainer.appendChild(artistBtn);
+              });
+          } else {
+              listContainer.innerHTML = '<div style="color:red">Erreur de données.</div>';
+          }
+      } catch (e) {
+          listContainer.innerHTML = '<div style="color:red">Erreur serveur.</div>';
+      }
+  }
+
+  function closePopup() { document.getElementById('artistPopup').style.display = 'none'; }
+
+  // Fonctions pour l'encodeur YouTube
+  function openEncoderPopup(spotifyUrl, event) {
+      event.stopPropagation();
+      currentTrackUrl = spotifyUrl;
+      document.getElementById('encoderInput').value = '';
+      document.getElementById('encoderResult').style.display = 'none';
+      document.getElementById('encoderResult').innerHTML = '';
+      document.getElementById('encoderPopup').style.display = 'flex';
+  }
+
+  function closeEncoderPopup() {
+      document.getElementById('encoderPopup').style.display = 'none';
+  }
+
+  async function openGoogleSearch() {
+      try {
+          const res = await fetch(`/api/spotify/track/summary?url=${encodeURIComponent(currentTrackUrl)}`);
+          const data = await res.json();
+
+          if (data.success) {
+              const artiste = data.artistes.replace(/[-\s]+/g, ' ').trim();
+              const titre = data.titre.replace(/[-\s]+/g, ' ').trim();
+              const query = `youtube ${artiste} ${titre}`.replace(/\s+/g, ' ').trim();
+              const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+
+              currentSearchUrl = searchUrl;
+              document.getElementById('searchUrlDisplay').textContent = searchUrl;
+              document.getElementById('searchOverlay').style.display = 'flex';
+
+              const popup = window.open(searchUrl, 'googleSearch', 'width=1100,height=700');
+              const timer = setInterval(() => {
+                  if (popup && popup.closed) {
+                      clearInterval(timer);
+                      closeSearchOverlay();
+                  }
+              }, 500);
+          } else {
+              showToast('Impossible de récupérer les informations du morceau');
+          }
+      } catch (e) {
+          console.error('Erreur:', e);
+          showToast('Erreur lors de la recherche');
+      }
+  }
+
+  function closeSearchOverlay() {
+      document.getElementById('searchOverlay').style.display = 'none';
+  }
+
+  function copySearchUrl() {
+      navigator.clipboard.writeText(currentSearchUrl).then(() => {
+          showToast('Lien copié !');
+      }).catch(() => {
+          const ta = document.createElement('textarea');
+          ta.value = currentSearchUrl;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showToast('Lien copié !');
+      });
+  }
+
+  async function pasteFromClipboard() {
+      try {
+          const text = await navigator.clipboard.readText();
+          document.getElementById('encoderInput').value = text;
+          showToast('Collé !');
+      } catch (e) {
+          showToast('Autorisez le presse-papier dans le navigateur');
+      }
+  }
+
+  async function validateEncoder() {
+      const youtubeUrl = document.getElementById('encoderInput').value.trim();
+      if (!youtubeUrl) {
+          showToast('Veuillez entrer un lien YouTube');
+          return;
+      }
+
+      if (!currentUserId) {
+          showToast('Utilisateur non connecté');
+          return;
+      }
+
+      const resultDiv = document.getElementById('encoderResult');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = 'Encodage en cours...';
+
+      try {
+          const response = await fetch('/api/music', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                  lienSpotify: currentTrackUrl,
+                  lienYoutube: youtubeUrl,
+                  userId: currentUserId
+              })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+              resultDiv.innerHTML = `
+                  <span style="color: #1DB954;">✅ Encodage réussi !</span><br>
+                  ID: ${data.id}<br>
+                  Titre: ${data.titre}<br>
+                  <a href="${youtubeUrl}" target="_blank" style="color: #1DB954;">Voir sur YouTube</a>
+              `;
+              setTimeout(() => closeEncoderPopup(), 3000);
+          } else {
+              resultDiv.innerHTML = `<span style="color: #ff5555;">❌ Erreur: ${data.error || 'Inconnue'}</span>`;
+          }
+      } catch (e) {
+          resultDiv.innerHTML = `<span style="color: #ff5555;">❌ Erreur: ${e.message}</span>`;
+      }
+  }
+
+  function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closePopup(); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeEncoderPopup(); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSearchOverlay(); });
+</script>
+</body>
+</html>

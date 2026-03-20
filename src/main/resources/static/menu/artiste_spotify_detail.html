@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artiste — Moteka</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --sp:#1DB954; --sp2:#1ed760; --bg:#060606; --s1:#0d0d0d;
+      --s2:#141414; --s3:#1a1a1a; --border:rgba(255,255,255,.07);
+      --text:#f0f0f0; --muted:rgba(240,240,240,.38);
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+    body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+    .hero-bg{position:fixed;inset:0;z-index:0;background-size:cover;background-position:center top;filter:blur(90px) saturate(1.6) brightness(.2);transform:scale(1.15);transition:background-image 1.2s ease;}
+    .page{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 clamp(14px,4vw,20px) 80px;}
+
+    /* ── SIDEBAR ── */
+    .sidebar-reseaux{position:fixed;top:50%;right:18px;transform:translateY(-50%);z-index:100;display:none;flex-direction:column;align-items:center;gap:14px;}
+    .sidebar-reseaux.visible{display:flex;}
+    .sb-icon-img{width:68px;height:68px;border-radius:50%;overflow:hidden;cursor:pointer;flex-shrink:0;background:rgba(255,255,255,.08);border:2.5px solid rgba(255,255,255,.18);box-shadow:0 6px 20px rgba(0,0,0,.7);transition:all .35s cubic-bezier(.175,.885,.32,1.275);}
+    .sb-icon-img img{width:100%;height:100%;object-fit:cover;display:block;transition:all .3s;}
+    .sb-icon-img:hover{transform:scale(1.28);border-color:rgba(255,255,255,.5);}
+    .sb-icon-img:hover img{filter:brightness(1.3) saturate(1.2);}
+    .sb-icon-img[data-n="instagram"]:hover{border-color:#E4405F;box-shadow:0 0 60px #E4405F,0 0 90px rgba(228,64,95,.7);}
+    .sb-icon-img[data-n="facebook"]:hover{border-color:#1877F2;box-shadow:0 0 60px #1877F2,0 0 90px rgba(24,119,242,.7);}
+    .sb-icon-img[data-n="tiktok"]:hover{border-color:#00F2EA;box-shadow:0 0 60px #00F2EA,0 0 90px rgba(0,242,234,.7);}
+    .sb-icon-img[data-n="snapchat"]:hover{border-color:#FFFC00;box-shadow:0 0 60px #FFFC00,0 0 90px rgba(255,252,0,.7);}
+    .sb-icon-img[data-n="twitter"]:hover{border-color:#1DA1F2;box-shadow:0 0 60px #1DA1F2,0 0 90px rgba(29,161,242,.7);}
+    .sb-icon-img[data-n="default"]:hover{border-color:#667eea;box-shadow:0 0 60px #667eea,0 0 90px rgba(102,126,234,.7);}
+    .sb-icon-custom{width:68px;height:68px;border-radius:50%;cursor:pointer;flex-shrink:0;background:rgba(255,255,255,.08);border:2.5px solid rgba(255,255,255,.18);box-shadow:0 6px 20px rgba(0,0,0,.7);transition:all .35s cubic-bezier(.175,.885,.32,1.275);display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:white;backdrop-filter:blur(10px);}
+    .sb-icon-custom .r-symbol{font-size:1.6rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));transition:all .3s;}
+    .sb-icon-custom .r-name{font-family:'DM Mono',monospace;font-size:.42rem;font-weight:900;letter-spacing:.8px;text-transform:uppercase;margin-top:3px;}
+    .sb-icon-custom:hover{transform:scale(1.28);border-color:rgba(255,255,255,.5);}
+    @media(max-width:600px){
+      .sidebar-reseaux{right:6px;gap:8px;}
+      .sb-icon-img,.sb-icon-custom{width:46px;height:46px;}
+      .sb-icon-custom .r-symbol{font-size:1.1rem;}
+      .sb-icon-custom .r-name{font-size:.32rem;}
+    }
+
+    /* ── BOUTONS FIXES ── */
+    .fixed-btn{
+      position:fixed; top:clamp(12px,2vw,20px); z-index:200;
+      background:var(--sp); border:none; border-radius:clamp(8px,2vw,12px);
+      padding:clamp(10px,2.5vw,16px) clamp(14px,3vw,28px);
+      font-family:'Syne',sans-serif; font-size:clamp(.72rem,1.8vw,1.1rem);
+      font-weight:800; color:#000; cursor:pointer;
+      transition:all .3s ease; display:flex; align-items:center; gap:8px;
+      box-shadow:0 8px 25px rgba(29,185,84,.4);
+      text-transform:uppercase; letter-spacing:1px; text-decoration:none;
+      white-space:nowrap;
+    }
+    .fixed-btn:hover{background:var(--sp2);transform:translateY(-3px);box-shadow:0 15px 35px rgba(29,185,84,.6);}
+    .btn-retour{left:clamp(8px,2vw,20px);}
+    .btn-recherche{right:clamp(8px,2vw,20px);}
+    /* Cacher label sur très petit écran */
+    @media(max-width:400px){
+      .fixed-btn .btn-label{display:none;}
+      .fixed-btn{padding:10px 12px; border-radius:50%;}
+    }
+
+    /* ── INPUT ── */
+    #screenInput{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;text-align:center;padding:clamp(20px,5vw,40px) 0;}
+    .input-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,12vw,7rem);letter-spacing:4px;line-height:1;color:#fff;}
+    .input-logo span{color:var(--sp);}
+    .input-sub{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:4px;text-transform:uppercase;margin-top:-20px;}
+    .input-box{width:100%;max-width:500px;display:flex;flex-direction:column;gap:10px;}
+    .input-wrap{display:flex;align-items:center;gap:12px;background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:15px 20px;transition:border-color .2s,box-shadow .2s;}
+    .input-wrap:focus-within{border-color:rgba(29,185,84,.5);box-shadow:0 0 0 3px rgba(29,185,84,.08);}
+    .input-wrap svg{width:18px;height:18px;fill:var(--sp);flex-shrink:0;}
+    .input-wrap input{flex:1;min-width:0;background:none;border:none;outline:none;font-family:'DM Mono',monospace;font-size:clamp(.75rem,2vw,.85rem);color:var(--text);}
+    .input-wrap input::placeholder{color:var(--muted);}
+    .go-btn{padding:16px;border:none;border-radius:13px;background:var(--sp);color:#000;font-family:'Syne',sans-serif;font-size:.85rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .2s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .go-btn:hover{background:var(--sp2);transform:translateY(-2px);box-shadow:0 10px 30px rgba(29,185,84,.3);}
+    .go-btn .ring{width:16px;height:16px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+    .go-btn.loading span{display:none;}.go-btn.loading .ring{display:block;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .input-err{font-family:'DM Mono',monospace;font-size:.7rem;color:#ff5555;display:none;padding:8px 12px;background:rgba(255,85,85,.07);border:1px solid rgba(255,85,85,.2);border-radius:8px;}
+    .input-err.show{display:block;}
+
+    /* ── LOADING ── */
+    #screenLoad{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+    .load-spinner{width:40px;height:40px;border:3px solid var(--s3);border-top-color:var(--sp);border-radius:50%;animation:spin .7s linear infinite;}
+    .load-text{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+
+    /* ── DASHBOARD ── */
+    #screenDash{display:none;}
+    .hero{position:relative;width:calc(100% + clamp(28px,8vw,40px));margin-left:calc(-1 * clamp(14px,4vw,20px));height:clamp(260px,45vw,400px);overflow:hidden;margin-bottom:28px;}
+    .hero-img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;}
+    .hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(6,6,6,0) 20%,rgba(6,6,6,1) 100%);}
+    .hero-content{position:absolute;bottom:0;left:0;right:0;padding:clamp(16px,4vw,28px);}
+    .hero-tag{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:3px;color:var(--sp);text-transform:uppercase;margin-bottom:6px;}
+    .hero-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,9vw,5rem);line-height:1;color:#fff;letter-spacing:2px;}
+
+    .section{margin-bottom:20px;animation:fadeUp .45s cubic-bezier(.22,1,.36,1) both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    .section-label{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:3px;text-transform:uppercase;color:var(--sp);margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+    .section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+    .card{background:var(--s1);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+
+    .top5-item{display:flex;flex-direction:column;border-bottom:1px solid var(--border);}
+    .top5-item:last-child{border-bottom:none;}
+    .top5-row{display:flex;align-items:center;gap:14px;padding:14px 18px 10px;cursor:pointer;transition:background .15s;}
+    .top5-row:hover{background:rgba(255,255,255,.02);}
+    .top5-rank{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:rgba(29,185,84,.35);width:22px;text-align:center;flex-shrink:0;}
+    .top5-cover{width:50px;height:50px;border-radius:8px;object-fit:cover;flex-shrink:0;}
+    .top5-info{flex:1;min-width:0;}
+    .top5-name{font-size:.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
+    .top5-album{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .top5-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+    .top5-pop-num{font-family:'DM Mono',monospace;font-size:.68rem;font-weight:700;color:var(--sp);}
+    .pop-bar{width:44px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;}
+    .pop-fill{height:100%;background:linear-gradient(90deg,var(--sp),var(--sp2));border-radius:2px;transition:width .6s ease;}
+
+    /* ── PLAYER + HINT YOUTUBE ── */
+    .top5-player{padding:0 14px 12px;display:none;}
+    .top5-item.open .top5-player{display:block;}
+    .top5-item.open .top5-name{color:var(--sp);}
+
+    .player-wrap{position:relative;}
+    .player-hint{
+      font-family:'DM Mono',monospace;
+      font-size:.58rem;
+      color:var(--muted);
+      text-align:center;
+      padding:6px 0 2px;
+      letter-spacing:.5px;
+      opacity:.7;
+    }
+    .player-hint i{color:#FF0000;margin-right:4px;}
+    .player-yt-btn{
+      display:none;
+      position:absolute;
+      top:50%;left:50%;
+      transform:translate(-50%,-50%);
+      background:rgba(255,0,0,.92);
+      color:white;border:none;
+      border-radius:30px;
+      padding:10px 20px;
+      font-family:'Syne',sans-serif;
+      font-size:.8rem;font-weight:800;
+      cursor:pointer;white-space:nowrap;
+      gap:8px;align-items:center;
+      box-shadow:0 4px 20px rgba(255,0,0,.5);
+      transition:all .2s;
+      z-index:10;
+    }
+    .player-yt-btn:hover{background:#ff3333;transform:translate(-50%,-50%) scale(1.05);}
+    /* Desktop : bouton au survol */
+    @media(hover:hover){
+      .player-wrap:hover .player-yt-btn{display:flex;}
+      .player-wrap:hover iframe{opacity:.35;filter:blur(1px);}
+    }
+    /* Mobile : bouton toujours visible */
+    @media(hover:none){
+      .player-yt-btn{display:flex !important;position:static;transform:none;margin:6px auto 0;width:calc(100% - 0px);}
+      .player-yt-btn:hover{transform:none;}
+    }
+
+    .album-head{display:flex;align-items:center;gap:16px;padding:18px;}
+    .album-cover{width:70px;height:70px;border-radius:10px;object-fit:cover;flex-shrink:0;}
+    .album-name{font-size:1rem;font-weight:800;color:#fff;margin-bottom:3px;}
+    .album-meta{font-family:'DM Mono',monospace;font-size:.63rem;color:var(--muted);}
+    .tracklist{border-top:1px solid var(--border);}
+    .track-item{border-bottom:1px solid var(--border);padding:12px 18px;cursor:pointer;transition:background .15s;}
+    .track-item:last-child{border-bottom:none;}
+    .track-item:hover{background:rgba(255,255,255,.025);}
+    .track-name-row{font-size:.83rem;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
+    .track-name-row::before{content:'▶';font-size:.55rem;color:var(--muted);transition:color .2s;}
+    .track-item.open .track-name-row{color:var(--sp);margin-bottom:8px;}
+    .track-item.open .track-name-row::before{color:var(--sp);}
+    .track-player-wrap{display:none;}
+    .track-item.open .track-player-wrap{display:block;}
+
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-thumb{background:rgba(29,185,84,.4);border-radius:4px;}
+
+    /* ── POPUP CONTRIBUTION ── */
+    #popupContrib{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.88);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:clamp(12px,4vw,20px);}
+    .contrib-box{background:var(--s2);border:1px solid rgba(29,185,84,.2);border-radius:22px;padding:clamp(22px,5vw,38px) clamp(18px,5vw,32px);width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 40px 100px rgba(0,0,0,.9);animation:slideUp .4s cubic-bezier(.22,1,.36,1);}
+    @keyframes slideUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+    .p1{text-align:center;}
+    .p1-emoji{font-size:3rem;margin-bottom:14px;display:block;}
+    .p1-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.5rem,5vw,2rem);letter-spacing:2px;line-height:1.05;color:#fff;margin-bottom:10px;}
+    .p1-title em{color:var(--sp);font-style:normal;}
+    .p1-sub{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);line-height:1.65;margin-bottom:22px;}
+    .p1-artist{display:inline-block;background:rgba(29,185,84,.1);border:1px solid rgba(29,185,84,.28);color:var(--sp);font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:2px;padding:6px 18px;border-radius:50px;margin-bottom:28px;text-transform:uppercase;}
+    .p1-btns{display:flex;gap:12px;flex-wrap:wrap;}
+    .btn-oui{flex:1;min-width:120px;padding:15px;border:none;border-radius:12px;background:var(--sp);color:#000;font-family:'Syne',sans-serif;font-size:.82rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .15s;}
+    .btn-oui:hover{background:var(--sp2);transform:translateY(-2px);}
+    .btn-non{flex:1;min-width:120px;padding:15px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:border-color .2s,color .2s;}
+    .btn-non:hover{border-color:rgba(255,255,255,.2);color:var(--text);}
+    .p2{display:none;}
+    .p2-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:#fff;margin-bottom:5px;}
+    .p2-sub{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);margin-bottom:22px;line-height:1.55;}
+    .srow{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+    .srow-btn{flex-shrink:0;min-width:100px;display:flex;align-items:center;gap:8px;padding:11px 13px;background:#0a0a0a;border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:border-color .2s,background .2s;}
+    .srow-btn:hover{background:#111;border-color:rgba(255,255,255,.15);}
+    .srow-btn i{font-size:.95rem;}
+    .ig{color:#E1306C;}.fb{color:#1877F2;}.tk{color:#69C9D0;}.sn{color:#FFFC00;}
+    .srow-input{flex:1;min-width:0;padding:11px 13px;background:#0a0a0a;border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:.7rem;outline:none;transition:border-color .2s;}
+    .srow-input:focus{border-color:rgba(29,185,84,.4);}
+    .srow-input::placeholder{color:rgba(240,240,240,.16);}
+    .btn-paste{flex-shrink:0;padding:10px 11px;background:#111;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:.75rem;cursor:pointer;transition:background .2s,color .2s,border-color .2s;}
+    .btn-paste:hover{background:var(--sp);color:#000;border-color:var(--sp);}
+    .btn-encoder{width:100%;margin-top:20px;padding:16px;background:var(--sp);color:#000;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:.85rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .15s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-encoder:hover{background:var(--sp2);transform:translateY(-2px);box-shadow:0 10px 30px rgba(29,185,84,.3);}
+    .btn-encoder .ring{width:14px;height:14px;border:2px solid rgba(0,0,0,.25);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+    .btn-encoder.loading span{display:none;}.btn-encoder.loading .ring{display:block;}
+    .p3{display:none;text-align:center;}
+    .p3-emoji{font-size:3.2rem;margin-bottom:14px;display:block;}
+    .p3-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:2px;color:var(--sp);margin-bottom:10px;}
+    .p3-sub{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);line-height:1.65;margin-bottom:26px;}
+    .btn-fermer{padding:13px 32px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--text);font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s;}
+    .btn-fermer:hover{background:var(--s3);border-color:rgba(255,255,255,.15);}
+
+    /* ── POPUP ENCODER YOUTUBE ── */
+    #popupYT{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.92);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:clamp(12px,4vw,20px);}
+    .yt-box{background:var(--s2);border:1px solid rgba(255,0,0,.3);border-radius:22px;padding:clamp(22px,5vw,36px) clamp(18px,5vw,30px);width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 40px 100px rgba(0,0,0,.9);animation:slideUp .4s cubic-bezier(.22,1,.36,1);}
+    .yt-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,4vw,1.9rem);letter-spacing:2px;color:#FF0000;margin-bottom:6px;}
+    .yt-sub{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-bottom:20px;line-height:1.55;}
+    .yt-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+    .yt-search-btn{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:11px 16px;background:#FF0000;color:white;border:none;border-radius:10px;font-family:'DM Mono',monospace;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .2s;}
+    .yt-search-btn:hover{background:#ff3333;}
+    .yt-paste-btn{flex-shrink:0;padding:11px 11px;background:#111;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:.75rem;cursor:pointer;transition:background .2s,color .2s,border-color .2s;}
+    .yt-paste-btn:hover{background:var(--sp);color:#000;border-color:var(--sp);}
+    .yt-input{flex:1;min-width:0;padding:11px 13px;background:#0a0a0a;border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:.7rem;outline:none;transition:border-color .2s;}
+    .yt-input:focus{border-color:rgba(255,0,0,.5);}
+    .yt-input::placeholder{color:rgba(240,240,240,.16);}
+    .yt-validate{width:100%;margin-top:6px;padding:15px;background:#FF0000;color:white;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:.85rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .yt-validate:hover{background:#ff3333;transform:translateY(-2px);}
+    .yt-validate .ring{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+    .yt-validate.loading span{display:none;}.yt-validate.loading .ring{display:block;}
+    .yt-cancel{width:100%;margin-top:10px;padding:12px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:12px;font-family:'Syne',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:background .2s,border-color .2s;}
+    .yt-cancel:hover{background:var(--s3);border-color:rgba(255,255,255,.15);}
+    .yt-result{margin-top:16px;padding:12px 14px;background:#0a0a0a;border-radius:10px;font-family:'DM Mono',monospace;font-size:.7rem;color:#0f0;display:none;line-height:1.6;}
+
+    /* ── OVERLAY NAVIGATEUR ── */
+    #searchOverlay{display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.92);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:16px;}
+    .search-box-overlay{background:var(--s2);border:1px solid var(--border);border-radius:16px;padding:clamp(20px,4vw,28px) clamp(16px,4vw,30px);text-align:center;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.9);}
+    .search-box-overlay h3{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;margin-bottom:8px;}
+    .search-box-overlay p{font-family:'DM Mono',monospace;font-size:.64rem;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+    .search-url-display{background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-family:'DM Mono',monospace;font-size:.62rem;color:#555;word-break:break-all;text-align:left;margin-bottom:16px;}
+    .overlay-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+    .overlay-btn-copy{padding:10px 18px;background:var(--sp);color:#000;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-size:.75rem;font-weight:800;cursor:pointer;transition:background .2s;}
+    .overlay-btn-copy:hover{background:var(--sp2);}
+    .overlay-btn-close{padding:10px 18px;background:#e91429;color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-size:.75rem;font-weight:800;cursor:pointer;transition:background .2s;}
+    .overlay-btn-close:hover{background:#ff2d40;}
+
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--sp);color:#000;padding:10px 22px;border-radius:50px;font-family:'Syne',sans-serif;font-size:.78rem;font-weight:800;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap;}
+    .toast.show{opacity:1;}
+  </style>
+</head>
+<body>
+
+<div class="hero-bg" id="heroBg"></div>
+<div class="sidebar-reseaux" id="sidebarReseaux"></div>
+
+<!-- BOUTONS FIXES -->
+<a href="javascript:void(0)" onclick="goBack()" class="fixed-btn btn-retour">
+  <i class="fas fa-arrow-left"></i><span class="btn-label"> RETOUR</span>
+</a>
+<a href="/menu/recherche_globale.html" class="fixed-btn btn-recherche">
+  <i class="fas fa-search"></i><span class="btn-label"> RECHERCHE</span>
+</a>
+
+<!-- POPUP CONTRIBUTION -->
+<div id="popupContrib">
+  <div class="contrib-box">
+    <div class="p1" id="p1">
+      <span class="p1-emoji">🎵</span>
+      <div class="p1-title">Contribue au<br><em>succès de la page</em></div>
+      <div class="p1-sub">Ça ne te prendra qu'une minute.<br>Aide-nous à compléter le profil de cet artiste.</div>
+      <div class="p1-artist" id="p1ArtistTag">Chargement…</div>
+      <div class="p1-btns">
+        <button class="btn-oui" onclick="showForm()">OUI, je contribue 🙌</button>
+        <button class="btn-non" onclick="closePopup()">Non merci</button>
+      </div>
+    </div>
+    <div class="p2" id="p2">
+      <div class="p2-title">Réseaux sociaux</div>
+      <div class="p2-sub" id="p2Sub">Recherche et colle les liens de l'artiste</div>
+      <div class="srow">
+        <button class="srow-btn" onclick="googleSearch('instagram')"><i class="fab fa-instagram ig"></i> Instagram</button>
+        <button class="btn-paste" onclick="pasteField('fInsta')"><i class="fas fa-clipboard"></i></button>
+        <input type="text" class="srow-input" id="fInsta" placeholder="https://instagram.com/...">
+      </div>
+      <div class="srow">
+        <button class="srow-btn" onclick="googleSearch('facebook')"><i class="fab fa-facebook fb"></i> Facebook</button>
+        <button class="btn-paste" onclick="pasteField('fFb')"><i class="fas fa-clipboard"></i></button>
+        <input type="text" class="srow-input" id="fFb" placeholder="https://facebook.com/...">
+      </div>
+      <div class="srow">
+        <button class="srow-btn" onclick="googleSearch('tiktok')"><i class="fab fa-tiktok tk"></i> TikTok</button>
+        <button class="btn-paste" onclick="pasteField('fTk')"><i class="fas fa-clipboard"></i></button>
+        <input type="text" class="srow-input" id="fTk" placeholder="https://tiktok.com/@...">
+      </div>
+      <div class="srow">
+        <button class="srow-btn" onclick="googleSearch('snapchat')"><i class="fab fa-snapchat sn"></i> Snapchat</button>
+        <button class="btn-paste" onclick="pasteField('fSnap')"><i class="fas fa-clipboard"></i></button>
+        <input type="text" class="srow-input" id="fSnap" placeholder="https://snapchat.com/add/...">
+      </div>
+      <button class="btn-encoder" id="btnEncoder" onclick="encodeArtist()">
+        <div class="ring"></div>
+        <span>Encoder l'artiste</span>
+      </button>
+    </div>
+    <div class="p3" id="p3">
+      <span class="p3-emoji">✅</span>
+      <div class="p3-title">Merci !</div>
+      <div class="p3-sub">L'artiste a été enregistré avec succès.<br>Tu as contribué au succès de la plateforme 🙏</div>
+      <button class="btn-fermer" onclick="redirigerProfil()">Voir la page →</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP ENCODER YOUTUBE -->
+<div id="popupYT">
+  <div class="yt-box">
+    <div class="yt-title">🎬 Encoder le son YouTube</div>
+    <div class="yt-sub">Recherche le lien YouTube de ce morceau et colle-le ci-dessous.</div>
+    <div class="yt-row">
+      <button class="yt-search-btn" onclick="ytOpenGoogle()"><i class="fab fa-youtube"></i> Rechercher</button>
+      <button class="yt-paste-btn" onclick="ytPaste()"><i class="fas fa-clipboard"></i></button>
+      <input type="text" class="yt-input" id="ytInput" placeholder="https://www.youtube.com/watch?v=...">
+    </div>
+    <button class="yt-validate" id="ytValidate" onclick="ytValidate()">
+      <div class="ring"></div>
+      <span><i class="fas fa-check"></i> Valider</span>
+    </button>
+    <button class="yt-cancel" onclick="closeYTPopup()">Annuler</button>
+    <div class="yt-result" id="ytResult"></div>
+  </div>
+</div>
+
+<!-- OVERLAY NAVIGATEUR -->
+<div id="searchOverlay">
+  <div class="search-box-overlay">
+    <h3>🔍 Recherche ouverte</h3>
+    <p>La fenêtre est ouverte.<br>Copie le lien puis reviens ici.</p>
+    <div class="search-url-display" id="searchUrlDisplay"></div>
+    <div class="overlay-btns">
+      <button class="overlay-btn-copy" onclick="copySearchUrl()"><i class="fas fa-copy"></i> Copier</button>
+      <button class="overlay-btn-close" onclick="closeSearchOverlay()"><i class="fas fa-times"></i> Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="page">
+  <div id="screenInput">
+    <div>
+      <div class="input-logo">MOTE<span>KA</span></div>
+      <div class="input-sub">Spotify Artist Dashboard</div>
+    </div>
+    <div class="input-box">
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141 4.14-1.26 9.419-.6 13.079 1.56.42.24.539.78.301 1.26zm.119-3.36c-3.84-2.28-10.14-2.52-13.74-1.38-.6.18-1.26-.18-1.44-.78-.18-.6.18-1.26.78-1.44 4.14-1.26 11.099-.96 15.36 1.62.54.3.72 1.02.42 1.56-.3.48-1.02.66-1.56.42z"/></svg>
+        <input type="text" id="linkInput" placeholder="https://open.spotify.com/artist/..." autocomplete="off">
+      </div>
+      <div class="input-err" id="inputErr">Lien Spotify invalide.</div>
+      <button class="go-btn" onclick="launch()">
+        <div class="ring"></div>
+        <span>Charger l'artiste</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="screenLoad">
+    <div class="load-spinner"></div>
+    <div class="load-text">Récupération Spotify…</div>
+  </div>
+
+  <div id="screenDash">
+    <div class="hero">
+      <img class="hero-img" id="heroImg" src="" alt="">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-tag">Artiste Spotify</div>
+        <div class="hero-name" id="heroName">—</div>
+      </div>
+    </div>
+    <div class="section" style="animation-delay:.05s">
+      <div class="section-label">3 Derniers Singles</div>
+      <div class="card"><div id="singlesList"></div></div>
+    </div>
+    <div class="section" style="animation-delay:.1s">
+      <div class="section-label">🔥 Top 5</div>
+      <div class="card"><div id="top5List"></div></div>
+    </div>
+    <div class="section" style="animation-delay:.15s">
+      <div class="section-label" id="projetLabel">Dernier Projet</div>
+      <div class="card">
+        <div class="album-head">
+          <img class="album-cover" id="projetCover" src="" alt="">
+          <div>
+            <div class="album-name" id="projetNom">—</div>
+            <div class="album-meta" id="projetMeta">—</div>
+          </div>
+        </div>
+        <div class="tracklist" id="projetTracklist"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const LOGOS = 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/';
+  let artistName = '', artistPhoto = '', lienSpotify = '';
+  let currentSearchUrl = '', lastCreatedUserId = null;
+  let currentYTSpotifyUrl = '';  // URL spotify du morceau en cours d'encodage
+  let currentUserId = null;
+
+  // Récupérer l'utilisateur connecté
+  (async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+      const d = await fetch('/api/users/me', { headers:{'Authorization':'Bearer '+token} }).then(r=>r.json());
+      currentUserId = d.id || null;
+    } catch(e) {}
+  })();
+
+  const initUrl = new URLSearchParams(window.location.search).get('lienSpotify');
+  if (initUrl) { document.getElementById('linkInput').value = initUrl; launch(); }
+  document.getElementById('linkInput').addEventListener('keydown', e => { if (e.key === 'Enter') launch(); });
+
+  // ── LAUNCH ────────────────────────────────────────────────────────────────
+  async function launch() {
+    const link = document.getElementById('linkInput').value.trim();
+    document.getElementById('inputErr').classList.remove('show');
+    if (!link || !link.includes('spotify.com/artist/')) {
+      document.getElementById('inputErr').classList.add('show'); return;
+    }
+    lienSpotify = link;
+    const enc = encodeURIComponent(link);
+    document.getElementById('screenInput').style.display = 'none';
+    document.getElementById('screenLoad').style.display  = 'flex';
+
+    try {
+      const [rA, rS, rP, rT, existingId] = await Promise.all([
+        fetch(`/api/spotify/artiste/photo?url=${enc}`).then(r=>r.json()),
+        fetch(`/api/spotify/artiste/les-3-derniers-singles?url=${enc}`).then(r=>r.json()),
+        fetch(`/api/spotify/artiste/dernier-projet?url=${enc}`).then(r=>r.json()),
+        fetch(`/api/spotify/artiste/top5?url=${enc}`).then(r=>r.json()),
+        checkIfArtistExists(link),
+      ]);
+
+      if (rA.success) {
+        artistName  = rA.artistName || '';
+        artistPhoto = rA.photoUrl   || '';
+        document.getElementById('heroImg').src                  = artistPhoto;
+        document.getElementById('heroName').textContent         = artistName;
+        document.getElementById('heroBg').style.backgroundImage = `url('${artistPhoto}')`;
+        document.getElementById('p1ArtistTag').textContent      = artistName;
+        document.getElementById('p2Sub').textContent            = `Réseaux sociaux de "${artistName}"`;
+      }
+
+      if (rS.success && rS.singles) {
+        const list = document.getElementById('singlesList');
+        rS.singles.forEach((t, i) => list.appendChild(buildItem(i+1, t.titre, t.dateSortie||'', t.photoUrl, t.popularite, t.urlSpotify)));
+      }
+
+      if (rT.success && rT.tracks) {
+        const list = document.getElementById('top5List');
+        rT.tracks.forEach((t, i) => list.appendChild(buildItem(i+1, t.nom, t.albumNom||'', t.photoUrl, t.popularite, t.urlSpotify)));
+      }
+
+      if (rP.success) {
+        const lbl = rP.type === 'album' ? 'Album' : 'EP';
+        document.getElementById('projetLabel').textContent = 'Dernier ' + lbl;
+        document.getElementById('projetCover').src         = rP.photoUrl || '';
+        document.getElementById('projetNom').textContent   = rP.titre;
+        document.getElementById('projetMeta').textContent  = `${rP.dateSortie} · ${rP.nbTitres} titre${rP.nbTitres>1?'s':''} · ${lbl}`;
+        rP.tracks.forEach(t => {
+          const el = document.createElement('div');
+          el.className = 'track-item';
+          el.innerHTML = `<div class="track-name-row">${t.nom}</div><div class="track-player-wrap">${buildPlayerWrap(t.urlSpotify)}</div>`;
+          el.addEventListener('click', () => el.classList.toggle('open'));
+          document.getElementById('projetTracklist').appendChild(el);
+        });
+      }
+
+      document.getElementById('screenLoad').style.display = 'none';
+      document.getElementById('screenDash').style.display = 'block';
+
+      if (existingId) {
+        try {
+          const rUser = await fetch(`/api/users/${existingId}`).then(r=>r.json());
+          buildSidebar(rUser.listeReseaux || rUser.liste_reseaux || '');
+        } catch(e) {}
+      } else {
+        document.getElementById('popupContrib').style.display = 'flex';
+      }
+
+    } catch(e) {
+      document.getElementById('screenLoad').innerHTML = `
+        <div class="load-text" style="color:#ff5555">Erreur : ${e.message}</div>
+        <button onclick="goBack()" style="margin-top:16px;background:none;border:1px solid var(--border);color:var(--muted);padding:10px 20px;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;">← Retour</button>`;
+    }
+  }
+
+  // ── HELPERS ───────────────────────────────────────────────────────────────
+  function buildPlayerWrap(url, h=80) {
+    if (!url) return '';
+    const embed = url.replace('open.spotify.com/','open.spotify.com/embed/');
+    return `
+      <div class="player-wrap">
+        <div class="player-hint"><i class="fab fa-youtube"></i> Survole ou appuie sur le lecteur pour enregistrer le son</div>
+        <iframe src="${embed}" width="100%" height="${h}" frameborder="0" allow="encrypted-media" style="border-radius:10px;display:block;transition:opacity .2s,filter .2s;"></iframe>
+        <button class="player-yt-btn" onclick="openYTPopup('${url}',event)">
+          <i class="fab fa-youtube"></i> ENCODER LE SON YOUTUBE
+        </button>
+      </div>`;
+  }
+
+  function buildItem(rank, nom, sub, photo, popularite, url) {
+    const el = document.createElement('div');
+    el.className = 'top5-item';
+    el.innerHTML = `
+      <div class="top5-row">
+        <span class="top5-rank">${rank}</span>
+        <img class="top5-cover" src="${photo}" alt="">
+        <div class="top5-info">
+          <div class="top5-name">${nom}</div>
+          <div class="top5-album">${sub}</div>
+        </div>
+        <div class="top5-right">
+          <span class="top5-pop-num">${popularite}</span>
+          <div class="pop-bar"><div class="pop-fill" style="width:${popularite}%"></div></div>
+        </div>
+      </div>
+      <div class="top5-player">${buildPlayerWrap(url)}</div>`;
+    el.querySelector('.top5-row').addEventListener('click', () => el.classList.toggle('open'));
+    return el;
+  }
+
+  function clean(url) { return url ? url.replace(/\n|\r/g,'').trim() : ''; }
+
+  function netInfo(url) {
+    const u = url.toLowerCase();
+    if(u.includes('instagram.com')) return {n:'instagram', logo:LOGOS+'instagram.png'};
+    if(u.includes('facebook.com'))  return {n:'facebook',  logo:LOGOS+'facebook.png'};
+    if(u.includes('tiktok.com'))    return {n:'tiktok',    logo:LOGOS+'tiktok.png'};
+    if(u.includes('snapchat.com'))  return {n:'snapchat',  logo:LOGOS+'snap.png'};
+    if(u.includes('twitter.com')||u.includes('x.com')) return {n:'twitter', logo:LOGOS+'twitter.png'};
+    if(u.includes('youtube.com'))   return {n:'youtube',   custom:'▶', label:'YouTube'};
+    if(u.includes('whatsapp.com'))  return {n:'whatsapp',  custom:'📱', label:'WhatsApp'};
+    return {n:'default', logo:LOGOS+'default.png'};
+  }
+
+  function buildSidebar(listeReseaux) {
+    const sidebar = document.getElementById('sidebarReseaux');
+    sidebar.innerHTML = '';
+    if (!listeReseaux || !listeReseaux.trim()) return;
+    const urls = listeReseaux.split(';').map(u=>clean(u)).filter(u=>u&&!u.includes('spotify.com'));
+    if (!urls.length) return;
+    urls.forEach(url => {
+      const i  = netInfo(url);
+      const el = document.createElement('a');
+      el.href = 'javascript:void(0)';
+      el.onclick = () => window.open(clean(url), '_blank');
+      if (i.logo) {
+        el.className = 'sb-icon-img'; el.setAttribute('data-n', i.n); el.title = i.n;
+        el.innerHTML = `<img src="${i.logo}" alt="${i.n}" onerror="this.src='${LOGOS}default.png'">`;
+      } else {
+        el.className = 'sb-icon-custom'; el.setAttribute('data-n', i.n); el.title = i.label;
+        el.innerHTML = `<div class="r-symbol">${i.custom}</div><div class="r-name">${i.label}</div>`;
+      }
+      sidebar.appendChild(el);
+    });
+    if (sidebar.children.length > 0) sidebar.classList.add('visible');
+  }
+
+  async function checkIfArtistExists(spotifyUrl) {
+    try {
+      const data = await fetch(`/api/users/by-spotify?url=${encodeURIComponent(spotifyUrl)}`).then(r=>r.json());
+      return data.success ? data.id : null;
+    } catch(e) { return null; }
+  }
+
+  function goBack() {
+    ['singlesList','top5List','projetTracklist'].forEach(id => document.getElementById(id).innerHTML = '');
+    document.getElementById('sidebarReseaux').innerHTML = '';
+    document.getElementById('sidebarReseaux').classList.remove('visible');
+    document.getElementById('heroBg').style.backgroundImage = 'none';
+    document.getElementById('screenDash').style.display  = 'none';
+    document.getElementById('screenLoad').style.display  = 'none';
+    document.getElementById('screenInput').style.display = 'flex';
+  }
+
+  // ── POPUP YOUTUBE ─────────────────────────────────────────────────────────
+  function openYTPopup(spotifyUrl, event) {
+    if (event) event.stopPropagation();
+    currentYTSpotifyUrl = spotifyUrl;
+    document.getElementById('ytInput').value = '';
+    document.getElementById('ytResult').style.display = 'none';
+    document.getElementById('ytResult').innerHTML = '';
+    document.getElementById('popupYT').style.display = 'flex';
+  }
+
+  function closeYTPopup() {
+    document.getElementById('popupYT').style.display = 'none';
+  }
+
+  async function ytOpenGoogle() {
+    try {
+      const res  = await fetch(`/api/spotify/track/summary?url=${encodeURIComponent(currentYTSpotifyUrl)}`).then(r=>r.json());
+      if (res.success) {
+        const q   = `youtube ${res.artistes} ${res.titre}`;
+        const url = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+        currentSearchUrl = url;
+        document.getElementById('searchUrlDisplay').textContent = url;
+        document.getElementById('searchOverlay').style.display  = 'flex';
+        const popup = window.open(url, 'ytSearch', 'width=1100,height=700,toolbar=1,location=1,scrollbars=1,resizable=1');
+        const timer = setInterval(() => { if (popup && popup.closed) { clearInterval(timer); closeSearchOverlay(); } }, 500);
+      } else {
+        showToast('Impossible de récupérer les infos du morceau');
+      }
+    } catch(e) { showToast('Erreur lors de la recherche'); }
+  }
+
+  async function ytPaste() {
+    try { document.getElementById('ytInput').value = await navigator.clipboard.readText(); showToast('Collé !'); }
+    catch(e) { showToast('Autorise le presse-papier dans le navigateur'); }
+  }
+
+  async function ytValidate() {
+    const youtubeUrl = document.getElementById('ytInput').value.trim();
+    if (!youtubeUrl) { showToast('Veuillez entrer un lien YouTube'); return; }
+
+    const btn = document.getElementById('ytValidate');
+    btn.classList.add('loading');
+    const resultDiv = document.getElementById('ytResult');
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = 'Encodage en cours…';
+
+    try {
+      const uid = currentUserId;
+      if (!uid) throw new Error('Utilisateur non connecté');
+
+      const res  = await fetch('/api/music', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lienSpotify: currentYTSpotifyUrl, lienYoutube: youtubeUrl, userId: uid })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        resultDiv.innerHTML = `<span style="color:var(--sp)">✅ Encodage réussi ! ID: ${data.id}</span>`;
+        setTimeout(() => closeYTPopup(), 2500);
+      } else {
+        resultDiv.innerHTML = `<span style="color:#ff5555">❌ ${data.error || 'Erreur inconnue'}</span>`;
+      }
+    } catch(e) {
+      resultDiv.innerHTML = `<span style="color:#ff5555">❌ ${e.message}</span>`;
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  // ── POPUP CONTRIBUTION ────────────────────────────────────────────────────
+  function showForm() {
+    document.getElementById('p1').style.display = 'none';
+    document.getElementById('p2').style.display = 'block';
+  }
+
+  function closePopup() {
+    const el = document.getElementById('popupContrib');
+    el.style.opacity = '0'; el.style.transition = 'opacity .3s';
+    setTimeout(() => el.style.display = 'none', 300);
+  }
+
+  function redirigerProfil() {
+    if (lastCreatedUserId) window.location.href = `/menu/profil_artist.html?userId=${lastCreatedUserId}`;
+    else closePopup();
+  }
+
+  async function encodeArtist() {
+    const btn = document.getElementById('btnEncoder');
+    btn.classList.add('loading');
+    const socials = ['fInsta','fFb','fTk','fSnap'].map(id=>document.getElementById(id).value.trim()).filter(v=>v).join(';');
+    const slug  = artistName.trim().replace(/\s+/g,'_').toLowerCase();
+    const email = slug + '@moteka.com';
+    const pass  = slug + '_pass';
+    const phone = '06' + Math.floor(10000000 + Math.random() * 90000000);
+    try {
+      const fd = new FormData();
+      fd.append('username',artistName); fd.append('email',email);
+      fd.append('password',pass); fd.append('phoneNumber',phone);
+      const regD = await fetch('/api/users/register',{method:'POST',body:fd}).then(r=>r.json());
+      if (!regD.id) throw new Error('Échec inscription');
+      const uid = regD.id; lastCreatedUserId = uid;
+      await fetch(`/api/users/${uid}/activate`,{method:'PUT'});
+      await fetch(`/api/users/${uid}/photo-url?photoUrl=${encodeURIComponent(artistPhoto)}`,{method:'PUT'});
+      await fetch(`/api/users/spotify/${uid}?spotifyLink=${encodeURIComponent(lienSpotify)}`,{method:'PUT'});
+      await fetch(`/api/users/${uid}/role?role=ARTISTE`,{method:'PUT'});
+      if (socials) await fetch(`/api/users/${uid}/listeReseaux?listeReseaux=${encodeURIComponent(socials)}`,{method:'PUT'});
+      try { await fetch(`/api/users/${uid}/sync-genres-spotify`,{method:'POST'}); } catch(e) {}
+      btn.classList.remove('loading');
+      document.getElementById('p2').style.display = 'none';
+      document.getElementById('p3').style.display = 'block';
+    } catch(e) { btn.classList.remove('loading'); showToast('Erreur : ' + e.message); }
+  }
+
+  // ── RÉSEAUX ───────────────────────────────────────────────────────────────
+  function googleSearch(platform) {
+    const url = `https://www.google.com/search?q=${encodeURIComponent(artistName+' '+platform)}`;
+    currentSearchUrl = url;
+    document.getElementById('searchUrlDisplay').textContent = url;
+    document.getElementById('searchOverlay').style.display  = 'flex';
+    const popup = window.open(url,'socialSearch','width=1100,height=700,toolbar=1,location=1,scrollbars=1,resizable=1');
+    const timer = setInterval(()=>{if(popup&&popup.closed){clearInterval(timer);closeSearchOverlay();}},500);
+  }
+
+  function closeSearchOverlay() { document.getElementById('searchOverlay').style.display = 'none'; }
+
+  function copySearchUrl() {
+    navigator.clipboard.writeText(currentSearchUrl).then(()=>showToast('Lien copié !')).catch(()=>{
+      const ta=document.createElement('textarea'); ta.value=currentSearchUrl;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      showToast('Lien copié !');
+    });
+  }
+
+  async function pasteField(id) {
+    try { document.getElementById(id).value = await navigator.clipboard.readText(); showToast('Collé !'); }
+    catch(e) { showToast('Autorise le presse-papier dans le navigateur'); }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2200);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Spotify Search & Discovery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sp: #1DB954; --sp2: #1ed760;
+            --bg: #0b0b0b; --card: #181818;
+            --border: rgba(255,255,255,0.1);
+            --nav-h: 70px;
+        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background: var(--bg);
+            color: white;
+            padding-top: var(--nav-h);
+            min-height: 100vh;
+        }
+
+        /* ── NAV ── */
+        .header-fixed {
+            position: fixed; top: 0; left: 0; width: 100%;
+            height: var(--nav-h);
+            background: rgba(11,11,11,0.92);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            display: flex; align-items: center;
+            gap: clamp(8px, 2vw, 15px);
+            padding: 0 clamp(12px, 3vw, 20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .fixed-menu-btn {
+            background: var(--sp); color: black;
+            font-weight: 800;
+            padding: 0 clamp(12px, 3vw, 20px);
+            height: 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            display: flex; align-items: center; gap: 6px;
+            font-size: clamp(.72rem, 1.8vw, .9rem);
+            white-space: nowrap; flex-shrink: 0;
+            transition: background .2s;
+        }
+        .fixed-menu-btn:hover { background: var(--sp2); }
+        /* Cacher le texte MENU sur très petit écran */
+        .fixed-menu-btn .menu-label { display: inline; }
+
+        .search-bar {
+            display: flex; gap: clamp(6px, 1.5vw, 10px);
+            flex: 1; min-width: 0;
+        }
+
+        #typeSelect {
+            background: #282828; color: white;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 0 clamp(8px, 2vw, 15px);
+            font-family: 'Syne'; font-weight: 700;
+            outline: none; cursor: pointer;
+            font-size: clamp(.72rem, 1.8vw, .9rem);
+            flex-shrink: 0;
+            height: 40px;
+        }
+
+        input {
+            flex: 1; min-width: 0;
+            padding: 0 clamp(12px, 3vw, 20px);
+            height: 40px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            outline: none;
+            background: #282828; color: white;
+            font-family: 'Syne';
+            font-size: clamp(.78rem, 1.8vw, .9rem);
+        }
+
+        button.btn-ok {
+            background: var(--sp); color: black;
+            border: none;
+            padding: 0 clamp(14px, 3vw, 25px);
+            height: 40px;
+            border-radius: 30px;
+            cursor: pointer; font-weight: 800;
+            font-size: clamp(.72rem, 1.8vw, .9rem);
+            flex-shrink: 0;
+            transition: background .2s;
+        }
+        button.btn-ok:hover { background: var(--sp2); }
+
+        /* ── GRILLE ── */
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(clamp(200px, 30vw, 250px), 1fr));
+            gap: clamp(12px, 2vw, 20px);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: clamp(16px, 3vw, 30px) clamp(12px, 3vw, 20px) 60px;
+        }
+
+        .card {
+            background: var(--card); border-radius: 12px;
+            padding: clamp(10px, 2.5vw, 15px);
+            cursor: pointer; transition: 0.3s; text-align: center;
+            border: 1px solid transparent;
+        }
+        .card:hover { background: #232323; transform: translateY(-5px); border-color: var(--sp); }
+        .card.isolated {
+            grid-column: 1 / -1;
+            max-width: 500px; width: 100%;
+            margin: 0 auto; cursor: default; transform: none !important;
+        }
+        .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; }
+        .card h3 { font-size: clamp(.9rem, 2.5vw, 1.1rem); margin: 12px 0 5px; font-weight: 800; }
+        .badge { font-size: .7rem; font-weight: 800; color: var(--sp); text-transform: uppercase; margin-bottom: 8px; }
+
+        /* Boutons d'action */
+        .action-area { display: none; flex-direction: column; gap: 10px; margin-top: 16px; }
+        .card.isolated .action-area { display: flex; }
+        .btn-action {
+            width: 100%; padding: clamp(10px, 2.5vw, 12px);
+            border-radius: 30px; border: none;
+            font-family: 'Syne'; font-weight: 800;
+            cursor: pointer; display: flex;
+            align-items: center; justify-content: center; gap: 10px;
+            font-size: clamp(.78rem, 2vw, .9rem);
+        }
+        .btn-artists { background: white; color: black; }
+        .btn-back    { background: #333; color: white; }
+
+        /* ── POPUP ── */
+        #artistPopup {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(10px);
+            z-index: 2000; align-items: center; justify-content: center;
+            padding: 16px;
+        }
+        .popup-content {
+            background: #121212;
+            padding: clamp(18px, 4vw, 30px);
+            border-radius: 24px;
+            border: 1px solid #333;
+            width: 100%; max-width: 450px;
+            max-height: 85vh; overflow-y: auto;
+        }
+        .popup-content h2 { font-weight: 800; font-size: clamp(1rem, 3vw, 1.2rem); margin-bottom: 4px; }
+        .artist-list { margin: 16px 0; max-height: 50vh; overflow-y: auto; }
+        .artist-btn-link {
+            display: flex; align-items: center; gap: clamp(10px, 2.5vw, 15px);
+            background: #1a1a1a; padding: clamp(8px, 2vw, 10px);
+            border-radius: 12px; margin-bottom: 10px;
+            text-decoration: none; color: white;
+            border: 1px solid #282828; transition: 0.2s;
+        }
+        .artist-btn-link:hover { border-color: var(--sp); transform: translateX(5px); }
+        .artist-photo-rect {
+            width: clamp(48px, 12vw, 65px);
+            height: clamp(48px, 12vw, 65px);
+            border-radius: 6px; object-fit: cover; flex-shrink: 0;
+        }
+        .artist-name-popup { font-weight: 800; flex: 1; text-align: left; font-size: clamp(.82rem, 2vw, 1rem); }
+        .btn-close-popup {
+            background: transparent; color: #777;
+            border: none; cursor: pointer; font-weight: 700;
+            margin-top: 10px; font-size: clamp(.8rem, 2vw, .9rem);
+            width: 100%; text-align: center; padding: 8px;
+        }
+
+        .card-spinner {
+            display: none; width: 20px; height: 20px;
+            border: 2px solid rgba(29,185,84,.3); border-top-color: var(--sp);
+            border-radius: 50%; animation: spin .6s linear infinite; margin: 10px auto;
+        }
+        .card-loading .card-spinner { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── MEDIA QUERIES ── */
+        @media (max-width: 480px) {
+            :root { --nav-h: 60px; }
+            /* Cacher texte MENU, garder icône */
+            .fixed-menu-btn .menu-label { display: none; }
+            .fixed-menu-btn { padding: 0 12px; }
+            /* Une colonne sur mobile */
+            #results { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-fixed">
+    <a href="/menu/menu.html" class="fixed-menu-btn">
+        <i class="fa fa-home"></i>
+        <span class="menu-label">MENU</span>
+    </a>
+    <div class="search-bar">
+        <select id="typeSelect">
+            <option value="tout">Tout</option>
+            <option value="track">Titres</option>
+            <option value="artist">Artistes</option>
+            <option value="album">Albums & EP</option>
+            <option value="playlist">Playlists</option>
+        </select>
+        <input type="text" id="queryInput" placeholder="Rechercher...">
+        <button class="btn-ok" onclick="performSearch()">OK</button>
+    </div>
+</div>
+
+<div id="results"></div>
+
+<div id="artistPopup">
+    <div class="popup-content">
+        <h2>ARTISTES</h2>
+        <div id="artistListContent" class="artist-list"></div>
+        <button class="btn-close-popup" onclick="closePopup()">FERMER</button>
+    </div>
+</div>
+
+<script>
+    let currentSearchData = [];
+
+    document.getElementById('queryInput').addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
+
+    async function performSearch() {
+        const query = document.getElementById('queryInput').value.trim();
+        const type  = document.getElementById('typeSelect').value;
+        if (!query) return;
+        const resDiv = document.getElementById('results');
+        resDiv.innerHTML = "<div style='grid-column:1/-1;text-align:center;color:var(--sp);font-family:monospace;'>CHARGEMENT...</div>";
+
+        try {
+            const response = await fetch(`/api/spotify/recherche-par-type?query=${encodeURIComponent(query)}&type=${type}`);
+            const result   = await response.json();
+            resDiv.innerHTML   = "";
+            currentSearchData  = result.data || [];
+
+            if (currentSearchData.length === 0) {
+                resDiv.innerHTML = "<div style='grid-column:1/-1;text-align:center;'>Aucun résultat trouvé.</div>";
+                return;
+            }
+            renderCards(currentSearchData);
+        } catch(e) { resDiv.innerHTML = "Erreur de connexion."; }
+    }
+
+    function renderCards(data) {
+        const resDiv = document.getElementById('results');
+        resDiv.innerHTML = "";
+        data.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="badge">${item.type}</div>
+                <img src="${item.image || 'https://via.placeholder.com/300'}" alt="img">
+                <h3>${item.title}</h3>
+                <div class="card-spinner"></div>
+                <div class="player-overlay"></div>
+                <div class="action-area">
+                    ${item.type === 'track' ? `<button class="btn-action btn-artists" onclick="fetchArtists('${item.url}')"><i class="fa-solid fa-users"></i> VOIR LES ARTISTES</button>` : ''}
+                    <button class="btn-action btn-back" onclick="resetSearch()"><i class="fa fa-rotate-left"></i> RETOUR</button>
+                </div>
+            `;
+            card.onclick = () => handleAction(item, card);
+            resDiv.appendChild(card);
+        });
+    }
+
+    async function handleAction(item, cardElement) {
+        if (item.type === 'artist') {
+            cardElement.classList.add('card-loading');
+            try {
+                const res  = await fetch(`/api/users/by-spotify?url=${encodeURIComponent(item.url)}`);
+                const data = await res.json();
+                window.location.href = (data.success && data.id)
+                    ? `/menu/profil_artist.html?userId=${data.id}`
+                    : `/menu/artiste_spotify_detail.html?lienSpotify=${encodeURIComponent(item.url)}`;
+            } catch(e) {
+                window.location.href = `/menu/artiste_spotify_detail.html?lienSpotify=${encodeURIComponent(item.url)}`;
+            }
+            return;
+        }
+
+        document.querySelectorAll('.card').forEach(c => { if (c !== cardElement) c.remove(); });
+        cardElement.classList.add('isolated');
+        cardElement.onclick = null;
+
+        const embedUrl = item.url
+            .replace("track/", "embed/track/")
+            .replace("album/", "embed/album/")
+            .replace("playlist/", "embed/playlist/");
+
+        const h = item.type === 'track' ? 80 : 380;
+        cardElement.querySelector('.player-overlay').innerHTML = `<iframe src="${embedUrl}" width="100%" height="${h}" frameborder="0" allow="encrypted-media" style="margin-top:15px;border-radius:12px;background:transparent;"></iframe>`;
+    }
+
+    async function fetchArtists(trackUrl) {
+        const listContainer = document.getElementById('artistListContent');
+        listContainer.innerHTML = '<div style="color:var(--sp)">Recherche...</div>';
+        document.getElementById('artistPopup').style.display = 'flex';
+        try {
+            const res  = await fetch(`/api/spotify/track/artists?url=${encodeURIComponent(trackUrl)}`);
+            const data = await res.json();
+            if (data.success && data.artists) {
+                listContainer.innerHTML = '';
+                data.artists.forEach(art => {
+                    const btn = document.createElement('a');
+                    btn.className = 'artist-btn-link';
+                    btn.href      = `/menu/artiste_spotify_detail.html?lienSpotify=${encodeURIComponent(art.url)}`;
+                    btn.innerHTML = `
+                        <img src="${art.photoUrl || 'https://via.placeholder.com/150'}" class="artist-photo-rect">
+                        <div class="artist-name-popup">${art.nom}</div>
+                        <i class="fa fa-chevron-right" style="color:var(--sp)"></i>
+                    `;
+                    listContainer.appendChild(btn);
+                });
+            } else { listContainer.innerHTML = "Erreur."; }
+        } catch(e) { listContainer.innerHTML = "Erreur serveur."; }
+    }
+
+    function resetSearch() { renderCards(currentSearchData); }
+    function closePopup()  { document.getElementById('artistPopup').style.display = 'none'; }
+</script>
+</body>
+</html>

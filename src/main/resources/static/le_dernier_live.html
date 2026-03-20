@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Hustla - Lecteur Audio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===========================
+           VARIABLES & RESET
+        =========================== */
+        :root {
+            --c-bg:       #080810;
+            --c-surface:  rgba(14, 14, 28, 0.82);
+            --c-border:   rgba(120, 80, 255, 0.25);
+            --c-purple:   #7c4dff;
+            --c-violet:   #b44dff;
+            --c-cyan:     #00e5ff;
+            --c-gold:     #ffd740;
+            --c-text:     #e8e0ff;
+            --c-muted:    rgba(200, 180, 255, 0.45);
+            --radius:     18px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            background: var(--c-bg);
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--c-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 40px 18px 60px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ===========================
+           FOND GALAXIE
+        =========================== */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bg-layer::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 70% 55% at 15% 20%, rgba(100, 40, 220, 0.5) 0%, transparent 65%),
+                radial-gradient(ellipse 55% 50% at 85% 75%, rgba(60, 10, 180, 0.45) 0%, transparent 65%),
+                radial-gradient(ellipse 90% 70% at 50% 50%, rgba(10, 0, 40, 0.85) 0%, transparent 80%);
+        }
+
+        /* Étoiles */
+        .bg-layer::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(1.5px 1.5px at  8% 12%, rgba(255,255,255,.9) 0%,transparent 100%),
+                radial-gradient(1px   1px   at 22%  5%, rgba(255,255,255,.7) 0%,transparent 100%),
+                radial-gradient(2px   2px   at 38% 20%, rgba(255,255,255,.8) 0%,transparent 100%),
+                radial-gradient(1px   1px   at 53%  4%, rgba(255,255,255,.6) 0%,transparent 100%),
+                radial-gradient(1.5px 1.5px at 68% 16%, rgba(255,255,255,.85)0%,transparent 100%),
+                radial-gradient(1px   1px   at 83%  9%, rgba(255,255,255,.7) 0%,transparent 100%),
+                radial-gradient(2px   2px   at 91% 23%, rgba(255,255,255,.9) 0%,transparent 100%),
+                radial-gradient(1px   1px   at  4% 33%, rgba(255,255,255,.6) 0%,transparent 100%),
+                radial-gradient(1.5px 1.5px at 17% 44%, rgba(255,255,255,.75)0%,transparent 100%),
+                radial-gradient(1px   1px   at 31% 37%, rgba(255,255,255,.5) 0%,transparent 100%),
+                radial-gradient(2px   2px   at 46% 50%, rgba(255,255,255,.8) 0%,transparent 100%),
+                radial-gradient(1px   1px   at 61% 39%, rgba(255,255,255,.6) 0%,transparent 100%),
+                radial-gradient(1.5px 1.5px at 74% 53%, rgba(255,255,255,.7) 0%,transparent 100%),
+                radial-gradient(1px   1px   at 87% 41%, rgba(255,255,255,.55)0%,transparent 100%),
+                radial-gradient(2px   2px   at 13% 68%, rgba(255,255,255,.85)0%,transparent 100%),
+                radial-gradient(1px   1px   at 27% 63%, rgba(255,255,255,.5) 0%,transparent 100%),
+                radial-gradient(1.5px 1.5px at 41% 77%, rgba(255,255,255,.75)0%,transparent 100%),
+                radial-gradient(1px   1px   at 57% 67%, rgba(255,255,255,.6) 0%,transparent 100%),
+                radial-gradient(2px   2px   at 71% 81%, rgba(255,255,255,.8) 0%,transparent 100%),
+                radial-gradient(1px   1px   at 82% 71%, rgba(255,255,255,.55)0%,transparent 100%),
+                radial-gradient(1.5px 1.5px at 94% 84%, rgba(255,255,255,.7) 0%,transparent 100%),
+                radial-gradient(1px   1px   at  6% 87%, rgba(255,255,255,.65)0%,transparent 100%),
+                radial-gradient(2px   2px   at 20% 91%, rgba(255,255,255,.8) 0%,transparent 100%),
+                radial-gradient(1px   1px   at 35% 94%, rgba(255,255,255,.5) 0%,transparent 100%),
+                radial-gradient(1.5px 1.5px at 50% 87%, rgba(255,255,255,.7) 0%,transparent 100%),
+                radial-gradient(1px   1px   at 65% 91%, rgba(255,255,255,.6) 0%,transparent 100%),
+                radial-gradient(2px   2px   at 77% 95%, rgba(255,255,255,.85)0%,transparent 100%),
+                radial-gradient(1px   1px   at 89% 89%, rgba(255,255,255,.55)0%,transparent 100%),
+                /* étoiles colorées */
+                radial-gradient(1.5px 1.5px at 29% 19%, rgba(200,140,255,.8) 0%,transparent 100%),
+                radial-gradient(1px   1px   at 59% 28%, rgba(160, 90,255,.7) 0%,transparent 100%),
+                radial-gradient(2px   2px   at 79% 14%, rgba(255,170,255,.6) 0%,transparent 100%),
+                radial-gradient(1px   1px   at 44% 59%, rgba(190,110,255,.75)0%,transparent 100%),
+                radial-gradient(1.5px 1.5px at 11% 49%, rgba(210,140,255,.6) 0%,transparent 100%),
+                radial-gradient(1px   1px   at 64% 74%, rgba(140,170,255,.7) 0%,transparent 100%),
+                radial-gradient(2px   2px   at 34% 84%, rgba(110,150,255,.6) 0%,transparent 100%),
+                radial-gradient(1px   1px   at 49%  9%, rgba(150,190,255,.75)0%,transparent 100%);
+        }
+
+        /* Nébuleuses flottantes */
+        .nebula {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 0;
+            animation: nebulaDrift 9s ease-in-out infinite alternate;
+        }
+        .n1 { width:520px;height:380px;background:radial-gradient(ellipse,#8b30ff,transparent 70%);top:-80px;left:-160px;animation-delay:0s; }
+        .n2 { width:420px;height:340px;background:radial-gradient(ellipse,#c040d0,transparent 70%);top:35%;right:-110px;animation-delay:-4s; }
+        .n3 { width:360px;height:300px;background:radial-gradient(ellipse,#3050ee,transparent 70%);bottom:0;left:25%;animation-delay:-7s; }
+
+        @keyframes nebulaDrift {
+            from { transform: translate(0,0) scale(1); }
+            to   { transform: translate(25px,18px) scale(1.07); }
+        }
+
+        /* ===========================
+           LIEN ACCUEIL — AMÉLIORÉ : PLUS CLAIR, PLUS VISIBLE
+        =========================== */
+        .home-link {
+            position: fixed;
+            top: 18px;
+            left: 20px;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            padding: 10px 22px 10px 16px;
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 25px rgba(124, 77, 255, 0.5);
+            color: #0a0a20;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: all 0.25s ease;
+        }
+        .home-link svg {
+            width: 18px; height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+            transition: transform 0.25s;
+        }
+        .home-link:hover {
+            background: #ffffff;
+            color: #3a1b8c;
+            border-color: var(--c-purple);
+            box-shadow: 0 8px 25px rgba(124, 77, 255, 0.7), 0 0 35px rgba(124, 77, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        .home-link:hover svg {
+            transform: translateX(-3px);
+            stroke: #3a1b8c;
+        }
+
+        /* ===========================
+           WRAPPER PRINCIPAL
+        =========================== */
+        .wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 36px;
+            margin-top: 20px;
+        }
+
+        /* ===========================
+           EN-TÊTE ARTISTE
+        =========================== */
+        .artist-header {
+            text-align: center;
+            animation: fadeDown .7s ease both;
+        }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .artist-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(3rem, 12vw, 5.5rem);
+            letter-spacing: 8px;
+            line-height: 1;
+            background: linear-gradient(135deg, #fff 30%, var(--c-violet) 70%, var(--c-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            filter: drop-shadow(0 0 30px rgba(180,77,255,.5));
+        }
+
+        .artist-tagline {
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--c-muted);
+            margin-top: 4px;
+        }
+
+        /* ===========================
+           LECTEUR AUDIO
+        =========================== */
+        .player-card {
+            width: 100%;
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius);
+            padding: 28px 24px 24px;
+            backdrop-filter: blur(16px);
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,.04) inset,
+                0 20px 50px rgba(0,0,0,.6),
+                0 0 60px rgba(100,50,220,.12);
+            animation: fadeUp .7s .1s ease both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Infos piste */
+        .track-info {
+            text-align: center;
+            margin-bottom: 22px;
+        }
+
+        .track-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #fff;
+            line-height: 1.3;
+            min-height: 1.5em;
+            transition: opacity .3s;
+        }
+
+        .track-sub {
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 3px;
+            color: var(--c-purple);
+            margin-top: 4px;
+            text-transform: uppercase;
+            opacity: .8;
+        }
+
+        /* Barre de chargement */
+        .load-bar-wrap {
+            display: none;
+            margin-top: 12px;
+        }
+        .load-bar-track {
+            height: 4px;
+            background: rgba(255,255,255,.08);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .load-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--c-purple), var(--c-cyan));
+            border-radius: 2px;
+            transition: width .3s ease;
+            box-shadow: 0 0 8px rgba(0,229,255,.5);
+        }
+        .load-bar-pct {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--c-cyan);
+            text-align: center;
+            margin-top: 5px;
+            opacity: .8;
+        }
+
+        /* ===========================
+           WAVEFORM
+        =========================== */
+        .waveform-wrap {
+            position: relative;
+            width: 100%;
+            height: 90px;
+            background: rgba(6,4,20,.6);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+
+        .waveform {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 8px 6px;
+            gap: 2px;
+        }
+
+        .w-bar {
+            flex: 1;
+            max-width: 4px;
+            border-radius: 2px;
+            background: linear-gradient(to top, var(--c-purple), var(--c-violet));
+            opacity: .6;
+            min-height: 8%;
+            transition: height .08s ease-out, opacity .08s;
+        }
+
+        .progress-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 0%;
+            height: 100%;
+            background: rgba(124,77,255,.12);
+            border-right: 2px solid var(--c-purple);
+            pointer-events: none;
+            transition: width .1s linear;
+        }
+
+        /* Temps */
+        .time-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--c-muted);
+            margin-bottom: 20px;
+        }
+
+        /* ===========================
+           CONTRÔLES
+        =========================== */
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .ctrl-btn {
+            border: none;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform .2s, box-shadow .2s, opacity .2s;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        /* Boutons secondaires (prev, next, stop) */
+        .ctrl-btn.secondary {
+            width: 48px; height: 48px;
+            background: rgba(124,77,255,.15);
+            border: 1px solid rgba(124,77,255,.35);
+        }
+        .ctrl-btn.secondary svg { width:18px;height:18px;fill:#c084fc; }
+        .ctrl-btn.secondary:hover:not(:disabled) {
+            transform: scale(1.12);
+            box-shadow: 0 0 20px rgba(124,77,255,.45);
+        }
+
+        /* Bouton principal play/pause */
+        .ctrl-btn.primary {
+            width: 66px; height: 66px;
+            background: linear-gradient(135deg, var(--c-purple), var(--c-violet));
+            box-shadow: 0 0 30px rgba(180,77,255,.4), 0 6px 20px rgba(0,0,0,.5);
+        }
+        .ctrl-btn.primary svg { width:26px;height:26px;fill:#fff; }
+        .ctrl-btn.primary:hover:not(:disabled) {
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 0 50px rgba(180,77,255,.7), 0 10px 30px rgba(0,0,0,.6);
+        }
+
+        .ctrl-btn:disabled { opacity: .35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+        /* Ripple au clic */
+        .ctrl-btn::after {
+            content:'';
+            position:absolute;
+            inset:0;
+            border-radius:50%;
+            background:rgba(255,255,255,.15);
+            opacity:0;
+            transform:scale(.6);
+            transition: opacity .3s, transform .3s;
+        }
+        .ctrl-btn:active:not(:disabled)::after { opacity:1; transform:scale(1); }
+
+        /* Numéro de piste */
+        .track-counter {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--c-muted);
+            text-transform: uppercase;
+        }
+
+        /* ===========================
+           SECTION FOLLOW ME
+        =========================== */
+        .follow-section {
+            width: 100%;
+            animation: fadeUp .7s .25s ease both;
+        }
+
+        .follow-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .follow-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(180,77,255,.6), transparent);
+        }
+        .follow-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.6rem;
+            letter-spacing: 8px;
+            color: rgba(255,255,255,.75);
+            text-shadow: 0 0 15px rgba(180,77,255,.5);
+        }
+
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            justify-items: center;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        .icon-bubble {
+            width: 100%;
+            max-width: 130px;
+            aspect-ratio: 1/1;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            border: 2px solid rgba(255,255,255,.1);
+            box-shadow: 0 6px 25px rgba(0,0,0,.65);
+            background: rgba(255,255,255,.04);
+            transition: transform .4s cubic-bezier(.175,.885,.32,1.275), box-shadow .4s, border-color .4s;
+            position: relative;
+        }
+
+        .icon-bubble img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: brightness(.88) saturate(.9);
+            transition: filter .3s, transform .3s;
+        }
+
+        .icon-bubble:hover {
+            transform: scale(1.22);
+        }
+        .icon-bubble:hover img {
+            filter: brightness(1.2) saturate(1.15);
+            transform: scale(1.05);
+        }
+
+        .icon-bubble[data-network="instagram"]:hover {
+            border-color: #E4405F;
+            box-shadow: 0 0 45px #E4405F, 0 0 70px rgba(228,64,95,.5);
+        }
+        .icon-bubble[data-network="tiktok"]:hover {
+            border-color: #00F2EA;
+            box-shadow: 0 0 45px #00F2EA, 0 0 70px rgba(0,242,234,.5);
+        }
+        .icon-bubble[data-network="snapchat"]:hover {
+            border-color: #FFFC00;
+            box-shadow: 0 0 45px #FFFC00, 0 0 70px rgba(255,252,0,.5);
+        }
+        .icon-bubble[data-network="facebook"]:hover {
+            border-color: #1877F2;
+            box-shadow: 0 0 45px #1877F2, 0 0 70px rgba(24,119,242,.5);
+        }
+
+        /* ===========================
+           ÉTATS LOADING / ERREUR
+        =========================== */
+        .error-box {
+            background: rgba(220,30,60,.1);
+            border: 1px solid rgba(220,30,60,.3);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-top: 16px;
+            text-align: center;
+            color: #ff6b8a;
+            font-size: .9rem;
+            font-weight: 600;
+        }
+        .error-box button {
+            margin-top: 10px;
+            padding: 7px 18px;
+            background: rgba(220,30,60,.25);
+            border: 1px solid rgba(220,30,60,.4);
+            color: #ff6b8a;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Rajdhani',sans-serif;
+            font-weight: 700;
+            font-size: .9rem;
+            letter-spacing: 1px;
+            transition: background .2s;
+        }
+        .error-box button:hover { background: rgba(220,30,60,.4); }
+
+        /* ===========================
+           RESPONSIVE
+        =========================== */
+        @media (max-width: 480px) {
+            body { padding: 30px 14px 50px; }
+            .artist-name { font-size: clamp(2.5rem, 15vw, 4rem); }
+            .player-card { padding: 22px 16px 20px; }
+            .waveform-wrap { height: 72px; }
+            .ctrl-btn.primary { width: 58px; height: 58px; }
+            .ctrl-btn.secondary { width: 42px; height: 42px; }
+            .ctrl-btn.primary svg { width: 22px; height: 22px; }
+            .ctrl-btn.secondary svg { width: 16px; height: 16px; }
+            .controls { gap: 10px; }
+            .icons-grid { gap: 28px; }
+            .icon-bubble { max-width: 110px; }
+        }
+
+        @media (max-width: 360px) {
+            .icons-grid { gap: 22px; }
+            .icon-bubble { max-width: 90px; }
+            .ctrl-btn.primary { width: 52px; height: 52px; }
+            .ctrl-btn.secondary { width: 38px; height: 38px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Fond galaxie -->
+<div class="bg-layer"></div>
+<div class="nebula n1"></div>
+<div class="nebula n2"></div>
+<div class="nebula n3"></div>
+
+<!-- Lien accueil — AMÉLIORÉ : plus clair, plus visible -->
+<a href="/index.html" class="home-link" title="Connecte-toi">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Connecte-toi
+</a>
+
+<!-- Contenu principal -->
+<div class="wrapper">
+
+    <!-- En-tête artiste -->
+    <div class="artist-header">
+        <div class="artist-name">DJ HUSTLA</div>
+        <div class="artist-tagline">— Official Mix Player —</div>
+    </div>
+
+    <!-- Lecteur -->
+    <div class="player-card">
+
+        <div class="track-info">
+            <div class="track-title" id="trackTitle">Chargement du mix...</div>
+            <div class="track-sub">DJ HUSTLA</div>
+
+            <div class="load-bar-wrap" id="loadBarWrap">
+                <div class="load-bar-track">
+                    <div class="load-bar-fill" id="loadBarFill"></div>
+                </div>
+                <div class="load-bar-pct" id="loadBarPct">0 %</div>
+            </div>
+        </div>
+
+        <!-- Waveform -->
+        <div class="waveform-wrap" id="waveformWrap">
+            <div class="waveform" id="waveform"></div>
+            <div class="progress-overlay" id="progressOverlay"></div>
+        </div>
+
+        <!-- Temps -->
+        <div class="time-row">
+            <span id="currentTime">0:00</span>
+            <span id="totalTime">0:00</span>
+        </div>
+
+        <!-- Contrôles -->
+        <div class="controls">
+            <button class="ctrl-btn secondary" id="prevBtn" title="Piste précédente" disabled>
+                <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+            </button>
+
+            <button class="ctrl-btn secondary" id="stopBtn" title="Stop" disabled>
+                <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+            </button>
+
+            <button class="ctrl-btn primary" id="playPauseBtn" title="Play / Pause" disabled>
+                <!-- Icône play par défaut -->
+                <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg id="pauseIcon" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+
+            <button class="ctrl-btn secondary" id="nextBtn" title="Piste suivante" disabled>
+                <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm10-12v12h2V6h-2z"/></svg>
+            </button>
+        </div>
+
+        <div class="track-counter" id="trackCounter">— / —</div>
+
+        <audio id="audioPlayer" preload="metadata" playsinline crossorigin="anonymous"></audio>
+    </div>
+
+    <!-- Follow Me -->
+    <div class="follow-section">
+        <div class="follow-header">
+            <div class="follow-line"></div>
+            <div class="follow-label">FOLLOW ME</div>
+            <div class="follow-line"></div>
+        </div>
+
+        <div class="icons-grid">
+            <a href="javascript:void(0)" class="icon-bubble" data-network="instagram" title="Instagram">
+                <img src="https://github.com/djhustla/music-storage/raw/main/logos_reseaux/instagram.png" alt="Instagram">
+            </a>
+            <a href="javascript:void(0)" class="icon-bubble" data-network="tiktok" title="TikTok">
+                <img src="https://github.com/djhustla/music-storage/raw/main/logos_reseaux/tiktok.png" alt="TikTok">
+            </a>
+            <a href="javascript:void(0)" class="icon-bubble" data-network="snapchat" title="Snapchat">
+                <img src="https://github.com/djhustla/music-storage/raw/main/logos_reseaux/snap.png" alt="Snapchat">
+            </a>
+            <a href="javascript:void(0)" class="icon-bubble" data-network="facebook" title="Facebook">
+                <img src="https://github.com/djhustla/music-storage/raw/main/logos_reseaux/facebook.png" alt="Facebook">
+            </a>
+        </div>
+    </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+    /* ===========================
+       CONFIG RÉSEAUX SOCIAUX
+    =========================== */
+    const socialConfig = {
+        instagram: { webUrl: "https://www.instagram.com/djhustla32",       appUrl: "instagram://user?username=djhustla32" },
+        tiktok:    { webUrl: "https://www.tiktok.com/@djhustla32",          appUrl: "tiktok://@djhustla32" },
+        facebook:  { webUrl: "https://www.facebook.com/djhustla.kumbo",     appUrl: "fb://profile/djhustla.kumbo" },
+        snapchat:  { webUrl: "https://www.snapchat.com/@djhustla.bel",      appUrl: "snapchat://add/djhustla.bel" }
+    };
+
+    const API_URL = '/api/dropbox/liens';
+
+    /* ===========================
+       ÉTAT GLOBAL
+    =========================== */
+    let allMixUrls      = [];
+    let currentIndex    = -1;
+    let isPlaying       = false;
+    let waveBars        = [];
+    let audioCtx        = null;
+    let analyser        = null;
+    let dataArray       = null;
+    let sourceNode      = null;
+    let rafId           = null;
+
+    /* ===========================
+       ÉLÉMENTS DOM
+    =========================== */
+    const audio          = document.getElementById('audioPlayer');
+    const trackTitleEl   = document.getElementById('trackTitle');
+    const currentTimeEl  = document.getElementById('currentTime');
+    const totalTimeEl    = document.getElementById('totalTime');
+    const progressOverlay= document.getElementById('progressOverlay');
+    const waveformEl     = document.getElementById('waveform');
+    const waveformWrap   = document.getElementById('waveformWrap');
+    const trackCounterEl = document.getElementById('trackCounter');
+    const loadBarWrap    = document.getElementById('loadBarWrap');
+    const loadBarFill    = document.getElementById('loadBarFill');
+    const loadBarPct     = document.getElementById('loadBarPct');
+    const playPauseBtn   = document.getElementById('playPauseBtn');
+    const playIcon       = document.getElementById('playIcon');
+    const pauseIcon      = document.getElementById('pauseIcon');
+    const prevBtn        = document.getElementById('prevBtn');
+    const nextBtn        = document.getElementById('nextBtn');
+    const stopBtn        = document.getElementById('stopBtn');
+
+    /* ===========================
+       UTILITAIRES
+    =========================== */
+    function isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    function formatTime(s) {
+        if (isNaN(s) || s < 0) return '0:00';
+        const m = Math.floor(s / 60);
+        const sec = Math.floor(s % 60);
+        return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    function fixDropboxUrl(url) {
+        if (!url) return { streamUrl: '', downloadUrl: '' };
+        let clean = url.replace(/&e=\d+/g, '').replace(/&st=[^&]+/g, '');
+        if (clean.includes('/scl/fi/')) {
+            const streamUrl = clean
+                .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                .replace('?dl=0', '').replace('&dl=0', '');
+            return { streamUrl, downloadUrl: clean.replace('?dl=0','?dl=1').replace('&dl=0','?dl=1') };
+        }
+        return { streamUrl: clean.replace('?dl=0','?raw=1'), downloadUrl: clean.replace('?dl=0','?dl=1') };
+    }
+
+    function getFileNameFromUrl(url) {
+        try {
+            const parts = new URL(url).pathname.split('/');
+            let name = decodeURIComponent(parts[parts.length - 1].split('?')[0]);
+            return name.replace(/\.mp3$/i,'').replace(/[_-]/g,' ') || 'Mix DJ Hustla';
+        } catch { return 'Mix DJ Hustla'; }
+    }
+
+    /* ===========================
+       RÉSEAUX SOCIAUX
+    =========================== */
+    function openSocial(network) {
+        const c = socialConfig[network];
+        if (!c) return;
+        if (isMobile() && c.appUrl) {
+            window.location.href = c.appUrl;
+            setTimeout(() => { if (!document.hidden) window.location.href = c.webUrl; }, 500);
+        } else {
+            window.open(c.webUrl, '_blank');
+        }
+    }
+
+    /* ===========================
+       WAVEFORM
+    =========================== */
+    function buildWaveform() {
+        waveformEl.innerHTML = '';
+        waveBars = [];
+        const count = Math.floor((waveformEl.offsetWidth || 300) / 8);
+        for (let i = 0; i < count; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'w-bar';
+            bar.style.height = `${12 + Math.random() * 45}%`;
+            waveformEl.appendChild(bar);
+            waveBars.push(bar);
+        }
+    }
+
+    function setupAnalyser() {
+        try {
+            if (audioCtx) audioCtx.close().catch(() => {});
+            audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
+            analyser  = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            analyser.smoothingTimeConstant = 0.82;
+            sourceNode = audioCtx.createMediaElementSource(audio);
+            sourceNode.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            dataArray  = new Uint8Array(analyser.frequencyBinCount);
+            return true;
+        } catch (e) { console.error('Analyser error:', e); return false; }
+    }
+
+    function animateWave() {
+        if (!analyser || !isPlaying) return;
+        analyser.getByteFrequencyData(dataArray);
+        const step = Math.floor(dataArray.length / waveBars.length);
+        waveBars.forEach((bar, i) => {
+            const v = dataArray[i * step] || 0;
+            bar.style.height  = `${Math.max(8, (v / 255) * 100)}%`;
+            bar.style.opacity = `${0.45 + (v / 255) * 0.55}`;
+        });
+        rafId = requestAnimationFrame(animateWave);
+    }
+
+    /* ===========================
+       UI CONTROLS
+    =========================== */
+    function setPlayingUI(playing) {
+        playIcon.style.display  = playing ? 'none' : '';
+        pauseIcon.style.display = playing ? ''     : 'none';
+    }
+
+    function refreshButtons() {
+        const ready = audio.src && audio.readyState >= 2;
+        playPauseBtn.disabled = !ready;
+        stopBtn.disabled      = !ready;
+        prevBtn.disabled      = currentIndex <= 0;
+        nextBtn.disabled      = currentIndex >= allMixUrls.length - 1;
+        prevBtn.style.opacity = currentIndex > 0 ? '1' : '.35';
+        nextBtn.style.opacity = currentIndex < allMixUrls.length - 1 ? '1' : '.35';
+        setPlayingUI(isPlaying);
+    }
+
+    function setLoadingUI(pct, msg) {
+        if (pct > 0 && pct < 100) {
+            loadBarWrap.style.display = 'block';
+            loadBarFill.style.width   = `${pct}%`;
+            loadBarPct.textContent    = `${Math.floor(pct)} %`;
+        } else {
+            loadBarWrap.style.display = 'none';
+        }
+        if (msg) trackTitleEl.textContent = msg;
+    }
+
+    /* ===========================
+       CHARGEMENT D'UNE PISTE
+    =========================== */
+    function loadTrack(index) {
+        return new Promise((resolve) => {
+            if (index < 0 || index >= allMixUrls.length) return resolve(false);
+
+            if (isPlaying) { audio.pause(); isPlaying = false; cancelAnimationFrame(rafId); }
+
+            currentIndex = index;
+            const url    = allMixUrls[index];
+            const name   = getFileNameFromUrl(url);
+            const { streamUrl } = fixDropboxUrl(url);
+
+            trackTitleEl.textContent = name;
+            trackCounterEl.textContent = `${index + 1} / ${allMixUrls.length}`;
+            progressOverlay.style.width = '0%';
+            currentTimeEl.textContent   = '0:00';
+            totalTimeEl.textContent     = '0:00';
+
+            audio.src = streamUrl;
+            audio.load();
+            refreshButtons();
+
+            const onMeta = () => {
+                totalTimeEl.textContent = formatTime(audio.duration);
+                audio.removeEventListener('loadedmetadata', onMeta);
+                audio.removeEventListener('error', onErr);
+                refreshButtons();
+                resolve(true);
+            };
+            const onErr = () => {
+                trackTitleEl.textContent = 'Erreur de chargement';
+                audio.removeEventListener('loadedmetadata', onMeta);
+                audio.removeEventListener('error', onErr);
+                refreshButtons();
+                resolve(false);
+            };
+
+            audio.addEventListener('loadedmetadata', onMeta);
+            audio.addEventListener('error', onErr);
+            setTimeout(() => { audio.removeEventListener('loadedmetadata', onMeta); audio.removeEventListener('error', onErr); resolve(false); }, 15000);
+        });
+    }
+
+    /* ===========================
+       LECTURE
+    =========================== */
+    async function play() {
+        if (!audio.src) return;
+        try {
+            if (!audioCtx || audioCtx.state === 'suspended') {
+                if (!audioCtx) setupAnalyser();
+                else await audioCtx.resume();
+            }
+            await audio.play();
+            isPlaying = true;
+            refreshButtons();
+            cancelAnimationFrame(rafId);
+            animateWave();
+        } catch (e) {
+            console.error('Play error:', e);
+            isPlaying = false;
+            refreshButtons();
+            if (e.name === 'NotAllowedError') alert('Cliquez sur le bouton Play pour démarrer la lecture.');
+        }
+    }
+
+    function pause() {
+        if (isPlaying) {
+            audio.pause();
+            isPlaying = false;
+            cancelAnimationFrame(rafId);
+            refreshButtons();
+        }
+    }
+
+    function stop() {
+        audio.pause();
+        audio.currentTime  = 0;
+        isPlaying = false;
+        cancelAnimationFrame(rafId);
+        progressOverlay.style.width = '0%';
+        currentTimeEl.textContent   = '0:00';
+        refreshButtons();
+    }
+
+    async function prev() {
+        if (currentIndex <= 0) return;
+        await loadTrack(currentIndex - 1);
+        play();
+    }
+
+    async function next() {
+        if (currentIndex >= allMixUrls.length - 1) return;
+        await loadTrack(currentIndex + 1);
+        play();
+    }
+
+    /* ===========================
+       RÉCUPÉRER LES LIENS API
+    =========================== */
+    async function fetchUrls() {
+        setLoadingUI(10, "Connexion à l'API...");
+        const res  = await fetch(API_URL);
+        setLoadingUI(50, "Traitement des données...");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        setLoadingUI(90, "Extraction des liens...");
+        if (!data.success || !data.liens?.length) throw new Error('Aucun mix trouvé');
+        setLoadingUI(100);
+        return data.liens;
+    }
+
+    /* ===========================
+       INIT
+    =========================== */
+    async function init() {
+        buildWaveform();
+
+        try {
+            allMixUrls = await fetchUrls();
+            await loadTrack(0);
+        } catch (err) {
+            console.error('Init error:', err);
+            trackTitleEl.textContent = 'Erreur de chargement';
+            setLoadingUI(0);
+
+            const errBox = document.createElement('div');
+            errBox.className = 'error-box';
+            errBox.innerHTML = `<p>Impossible de charger les mixes</p><p><small>${err.message}</small></p>
+                <button onclick="location.reload()">Réessayer</button>`;
+            document.querySelector('.player-card').appendChild(errBox);
+            refreshButtons();
+        }
+    }
+
+    /* ===========================
+       MEDIA SESSION (lock screen)
+    =========================== */
+    function setupMediaSession() {
+        if (!('mediaSession' in navigator)) return;
+        navigator.mediaSession.setActionHandler('play',          play);
+        navigator.mediaSession.setActionHandler('pause',         pause);
+        navigator.mediaSession.setActionHandler('previoustrack', prev);
+        navigator.mediaSession.setActionHandler('nexttrack',     next);
+    }
+
+    function updateMediaSession() {
+        if (!('mediaSession' in navigator) || currentIndex < 0) return;
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title:   getFileNameFromUrl(allMixUrls[currentIndex]),
+            artist:  'DJ HUSTLA',
+            artwork: [{ src: 'https://github.com/djhustla/music-storage/raw/main/logos_reseaux/instagram.png', sizes:'512x512', type:'image/png' }]
+        });
+    }
+
+    /* ===========================
+       ÉVÉNEMENTS
+    =========================== */
+    document.addEventListener('DOMContentLoaded', () => {
+
+        /* Boutons contrôles */
+        playPauseBtn.addEventListener('click', () => isPlaying ? pause() : play());
+        stopBtn.addEventListener('click', stop);
+        prevBtn.addEventListener('click', prev);
+        nextBtn.addEventListener('click', next);
+
+        /* Clic sur la waveform → seek */
+        waveformWrap.addEventListener('click', (e) => {
+            if (isNaN(audio.duration) || audio.duration <= 0) return;
+            const rect = waveformWrap.getBoundingClientRect();
+            audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+        });
+
+        /* Mise à jour progression */
+        audio.addEventListener('timeupdate', () => {
+            if (!isNaN(audio.duration) && audio.duration > 0) {
+                const pct = (audio.currentTime / audio.duration) * 100;
+                progressOverlay.style.width  = `${pct}%`;
+                currentTimeEl.textContent    = formatTime(audio.currentTime);
+            }
+            updateMediaSession();
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            totalTimeEl.textContent = formatTime(audio.duration);
+        });
+
+        /* Fin de piste → suivante automatique */
+        audio.addEventListener('ended', () => {
+            isPlaying = false;
+            cancelAnimationFrame(rafId);
+            refreshButtons();
+            if (currentIndex < allMixUrls.length - 1) setTimeout(next, 800);
+        });
+
+        audio.addEventListener('error', () => {
+            trackTitleEl.textContent = 'Erreur de lecture';
+            isPlaying = false;
+            cancelAnimationFrame(rafId);
+            refreshButtons();
+        });
+
+        /* Visibilité page */
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && isPlaying && audioCtx?.state === 'suspended') {
+                audioCtx.resume().then(() => { cancelAnimationFrame(rafId); animateWave(); });
+            }
+        });
+
+        /* Resize waveform */
+        window.addEventListener('resize', buildWaveform);
+
+        /* Réseaux sociaux */
+        document.querySelectorAll('.icon-bubble').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                openSocial(el.dataset.network);
+            });
+        });
+
+        /* Service Worker */
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js', { scope:'/' })
+                .then(() => setupMediaSession())
+                .catch(() => setupMediaSession());
+        } else {
+            setupMediaSession();
+        }
+
+        init();
+    });
+</script>
+</body>
+</html>

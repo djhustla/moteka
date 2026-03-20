@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Import Artistes — Moteka</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sp:     #1DB954;
+      --sp2:    #1ed760;
+      --bg:     #080808;
+      --s1:     #111;
+      --s2:     #181818;
+      --s3:     #222;
+      --border: rgba(255,255,255,.08);
+      --text:   #f0f0f0;
+      --muted:  rgba(240,240,240,.38);
+      --err:    #ff5555;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: clamp(16px, 4vw, 40px);
+    }
+
+    body::before {
+      content:''; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.025;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    .container {
+      position: relative; z-index: 1;
+      max-width: 760px; margin: 0 auto;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: clamp(14px, 3vw, 22px);
+      padding: clamp(20px, 5vw, 40px);
+    }
+
+    /* ── HEADER ── */
+    .header { margin-bottom: 28px; }
+    .header-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: .55rem; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--sp);
+      margin-bottom: 6px;
+    }
+    .header-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      letter-spacing: 2px; line-height: 1; color: #fff;
+    }
+    .header-title span { color: var(--sp); }
+    .header-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: .68rem; color: var(--muted);
+      margin-top: 8px; line-height: 1.55;
+    }
+
+    /* ── TEXTAREA ── */
+    .textarea-wrap {
+      position: relative; margin-bottom: 14px;
+    }
+    textarea {
+      width: 100%;
+      height: clamp(180px, 30vh, 300px);
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--sp2);
+      font-family: 'DM Mono', monospace;
+      font-size: clamp(.72rem, 1.8vw, .85rem);
+      outline: none; resize: vertical;
+      transition: border-color .2s, box-shadow .2s;
+      line-height: 1.6;
+    }
+    textarea:focus {
+      border-color: rgba(29,185,84,.4);
+      box-shadow: 0 0 0 3px rgba(29,185,84,.07);
+    }
+    textarea::placeholder { color: var(--muted); }
+
+    .format-hint {
+      font-family: 'DM Mono', monospace;
+      font-size: .6rem; color: var(--muted);
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      background: rgba(29,185,84,.05);
+      border: 1px solid rgba(29,185,84,.12);
+      border-radius: 8px;
+    }
+    .format-hint strong { color: var(--sp); }
+
+    /* ── BOUTON IMPORT ── */
+    .btn-import {
+      width: 100%; padding: clamp(13px, 3vw, 17px);
+      background: var(--sp); color: #000;
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(.8rem, 2.2vw, .95rem);
+      font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+      border: none; border-radius: 12px; cursor: pointer;
+      transition: background .2s, transform .2s, box-shadow .2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-import:hover:not(:disabled) {
+      background: var(--sp2);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(29,185,84,.3);
+    }
+    .btn-import:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .btn-import .ring {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(0,0,0,.2); border-top-color: #000;
+      border-radius: 50%; animation: spin .7s linear infinite; display: none;
+    }
+    .btn-import.loading .btn-lbl { display: none; }
+    .btn-import.loading .ring    { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── LOG ── */
+    .log-box {
+      margin-top: 18px;
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: clamp(.65rem, 1.6vw, .78rem);
+      max-height: clamp(160px, 25vh, 220px);
+      overflow-y: auto;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+    .log-box .ok  { color: var(--sp); }
+    .log-box .err { color: var(--err); }
+    .log-box .bold { color: var(--text); font-weight: 700; }
+
+    /* ── BTN MENU ── */
+    .btn-menu {
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 14px; padding: clamp(11px, 2.5vw, 14px);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(.72rem, 1.8vw, .8rem);
+      font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      text-decoration: none;
+      transition: color .2s, border-color .2s, background .2s;
+    }
+    .btn-menu:hover { color: var(--text); border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.03); }
+
+    /* ── POPUP ── */
+    .popup-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,.88);
+      backdrop-filter: blur(10px);
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .popup-box {
+      background: var(--s2);
+      border: 1px solid rgba(29,185,84,.22);
+      border-radius: 18px;
+      padding: clamp(22px, 5vw, 36px);
+      width: 100%; max-width: 420px;
+      max-height: 85vh; overflow-y: auto;
+      text-align: center;
+      box-shadow: 0 30px 80px rgba(0,0,0,.9);
+      animation: popIn .28s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes popIn { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+
+    .popup-emoji { font-size: 2.4rem; margin-bottom: 10px; display: block; }
+    .popup-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(1.3rem, 4vw, 1.8rem);
+      letter-spacing: 2px; color: var(--sp);
+      margin-bottom: 16px;
+    }
+    .popup-body {
+      font-family: 'DM Mono', monospace;
+      font-size: clamp(.65rem, 1.8vw, .75rem);
+      color: var(--muted);
+      line-height: 1.7;
+      text-align: left;
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .popup-body .tag {
+      display: inline-block;
+      background: rgba(29,185,84,.1);
+      border: 1px solid rgba(29,185,84,.25);
+      color: var(--sp);
+      padding: 3px 10px; border-radius: 20px;
+      font-size: .65rem; margin: 3px 3px 3px 0;
+    }
+    .popup-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+    .popup-btn {
+      flex: 1; min-width: 100px;
+      padding: clamp(10px, 2.5vw, 13px);
+      background: var(--sp); color: #000;
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(.72rem, 1.8vw, .8rem);
+      font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      border: none; border-radius: 10px; cursor: pointer;
+      transition: background .2s, transform .15s;
+    }
+    .popup-btn:hover { background: var(--sp2); transform: translateY(-1px); }
+    .popup-btn.secondary {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .popup-btn.secondary:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(29,185,84,.35); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="header-eyebrow">Moteka • Admin</div>
+    <div class="header-title">IMPORT <span>ARTISTES</span></div>
+    <div class="header-sub">Importation massive · Genres Spotify · Auto-tag préférences</div>
+  </div>
+
+  <div class="format-hint">
+    Format : <strong>Nom|URL_Spotify|insta;fb;tiktok;snap</strong>
+  </div>
+
+  <div class="textarea-wrap">
+    <textarea id="dataInput" placeholder="Davido|https://open.spotify.com/artist/...|https://instagram.com/davido;https://tiktok.com/@davido"></textarea>
+  </div>
+
+  <button class="btn-import" id="btnImport">
+    <div class="ring"></div>
+    <span class="btn-lbl">🚀 Lancer l'importation</span>
+  </button>
+
+  <div class="log-box" id="log">En attente…</div>
+
+  <a href="/menu/menu.html" class="btn-menu">← Menu principal</a>
+
+</div>
+
+<!-- POPUP GENRES -->
+<div class="popup-overlay" id="popupGenres">
+  <div class="popup-box">
+    <span class="popup-emoji">🎵</span>
+    <div class="popup-title">Genres Spotify</div>
+    <div class="popup-body" id="popupGenresList">Chargement…</div>
+    <div class="popup-btns">
+      <button class="popup-btn" onclick="closeGenresPopup()">OK, continuer</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP FAVORIS -->
+<div class="popup-overlay" id="popupFavoris">
+  <div class="popup-box">
+    <span class="popup-emoji">⭐</span>
+    <div class="popup-title">Préférences encodées</div>
+    <div class="popup-body" id="popupFavorisList">Chargement…</div>
+    <div class="popup-btns">
+      <button class="popup-btn" onclick="closeFavorisPopup()">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentArtistId   = null;
+  let currentArtistName = '';
+
+  const logBox    = document.getElementById('log');
+  const btnImport = document.getElementById('btnImport');
+
+  function addLog(html) {
+    logBox.innerHTML += html + '<br>';
+    logBox.scrollTop  = logBox.scrollHeight;
+  }
+
+  // ── POPUPS ──────────────────────────────────────────────────────────────
+  function showGenresPopup(artistName, genres) {
+    currentArtistName = artistName;
+    const listDiv = document.getElementById('popupGenresList');
+    if (genres && genres.length > 0) {
+      listDiv.innerHTML = `<strong style="color:var(--text)">${artistName}</strong><br><br>`
+        + genres.map(g => `<span class="tag">${g}</span>`).join('');
+    } else {
+      listDiv.innerHTML = `<strong style="color:var(--text)">${artistName}</strong><br><br>Aucun genre trouvé sur Spotify.`;
+    }
+    document.getElementById('popupGenres').style.display = 'flex';
+  }
+
+  function closeGenresPopup() {
+    document.getElementById('popupGenres').style.display = 'none';
+    processAutoTag();
+  }
+
+  function showFavorisPopup(artistName, result) {
+    const listDiv = document.getElementById('popupFavorisList');
+    let html = `<strong style="color:var(--text)">${artistName}</strong><br><br>`;
+    if (result.success) {
+      const ids = result.genres_attribues || [];
+      html += ids.length > 0
+        ? `✅ ${ids.length} préférence(s) ajoutée(s) :<br>` + ids.map(id => `<span class="tag">ID ${id}</span>`).join('')
+        : 'Aucune préférence attribuée.';
+    } else {
+      html += `❌ ${result.error || 'Échec de l\'encodage'}`;
+    }
+    listDiv.innerHTML = html;
+    document.getElementById('popupFavoris').style.display = 'flex';
+  }
+
+  function closeFavorisPopup() {
+    document.getElementById('popupFavoris').style.display = 'none';
+  }
+
+  // ── IMPORT ───────────────────────────────────────────────────────────────
+  btnImport.addEventListener('click', async () => {
+    const text  = document.getElementById('dataInput').value.trim();
+    const token = localStorage.getItem('accessToken');
+    if (!text) return alert('La liste est vide !');
+
+    const lines = text.split('\n').filter(l => l.trim());
+    logBox.innerHTML = '';
+    addLog('Importation en cours…');
+    btnImport.classList.add('loading');
+    btnImport.disabled = true;
+
+    try {
+      const res    = await fetch('/api/users/import-bulk-artists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify(lines)
+      });
+      const result = await res.json();
+
+      addLog(`<span class="bold">✔ ${result.successfullyImported} / ${result.totalProcessed} importés</span>`);
+
+      result.details.forEach(item => {
+        const cls = item.status === 'SUCCESS' ? 'ok' : 'err';
+        addLog(`<span class="${cls}">[${item.status}] ${item.artist || item.line}</span>`);
+      });
+
+      // Traitement séquentiel des artistes importés avec succès
+      const successItems = result.details.filter(i => i.status === 'SUCCESS' && i.userId);
+      for (let i = 0; i < successItems.length; i++) {
+        const item = successItems[i];
+        addLog(`<br><span class="bold">→ ${item.artist} (${i+1}/${successItems.length})</span>`);
+
+        // Sync genres Spotify
+        addLog('  Synchronisation des genres…');
+        const gr = await fetch(`/api/users/${item.userId}/sync-genres-spotify`, { method: 'POST' }).then(r => r.json());
+
+        if (gr.success) {
+          addLog(`<span class="ok">  ✓ Genres : ${(gr.genres || []).join(', ') || 'aucun'}</span>`);
+          currentArtistId = item.userId;
+          showGenresPopup(item.artist, gr.genres || []);
+
+          // Attendre que l'utilisateur ferme le popup
+          await new Promise(resolve => { window.resolveGenresPopup = resolve; });
+        } else {
+          addLog(`<span class="err">  ✗ Erreur sync : ${gr.error || ''}</span>`);
+        }
+      }
+
+      addLog('<br><span class="bold">✅ Importation terminée.</span>');
+
+    } catch(e) {
+      addLog(`<span class="err">Erreur réseau : ${e.message}</span>`);
+    } finally {
+      btnImport.classList.remove('loading');
+      btnImport.disabled = false;
+    }
+  });
+
+  // ── AUTO-TAG ─────────────────────────────────────────────────────────────
+  async function processAutoTag() {
+    addLog('  Auto-tag des préférences…');
+    try {
+      const res  = await fetch(`/api/users/${currentArtistId}/auto-tag-preferences`, { method: 'POST' });
+      const data = await res.json();
+
+      showFavorisPopup(currentArtistName, data);
+
+      if (data.success) {
+        addLog(`<span class="ok">  ✓ Auto-tag réussi</span>`);
+      } else {
+        addLog(`<span class="err">  ✗ Auto-tag : ${data.error || ''}</span>`);
+      }
+    } catch(e) {
+      addLog(`<span class="err">  ✗ Erreur auto-tag : ${e.message}</span>`);
+    } finally {
+      if (window.resolveGenresPopup) window.resolveGenresPopup();
+    }
+  }
+</script>
+</body>
+</html>

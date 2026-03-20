@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription Artiste</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sp:     #1DB954;
+      --sp2:    #1ed760;
+      --bg:     #080808;
+      --s1:     #111;
+      --s2:     #181818;
+      --border: rgba(255,255,255,.08);
+      --text:   #f0f0f0;
+      --muted:  rgba(240,240,240,.38);
+      --err:    #ff5555;
+      --warn:   rgba(255,193,7,.8);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 32px 16px;
+    }
+    body::before {
+      content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:
+        radial-gradient(ellipse 50% 40% at 15% 50%, rgba(29,185,84,.08) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 50% at 85% 50%, rgba(29,185,84,.05) 0%, transparent 65%);
+    }
+
+    /* CARD */
+    .card {
+      position:relative; z-index:1;
+      width:100%; max-width:460px;
+      background:rgba(12,12,12,.96);
+      border:1px solid var(--border); border-radius:24px; overflow:hidden;
+      backdrop-filter:blur(22px);
+      box-shadow:0 36px 90px rgba(0,0,0,.75);
+      animation:rise .6s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes rise { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+
+    /* HEADER */
+    .card-header {
+      padding:26px 26px 20px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:14px;
+      position: relative;
+    }
+    .btn-back-header {
+      position: absolute; right: 26px; top: 32px;
+      color: var(--muted); text-decoration: none; font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 5px;
+      transition: color 0.2s;
+    }
+    .btn-back-header:hover { color: var(--text); }
+
+    .sp-icon { width:40px; height:40px; border-radius:10px; background:var(--sp); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .sp-icon svg { width:22px; height:22px; fill:#000; }
+    .h-title { font-size:1.15rem; font-weight:800; color:#fff; }
+    .h-sub   { font-size:.65rem; color:var(--muted); margin-top:2px; }
+
+    /* STEP 1 — FORMULAIRE */
+    #stepForm { padding:26px; display:flex; flex-direction:column; gap:18px; }
+
+    .preview-zone {
+      width:100%; height:200px; border-radius:14px;
+      background:var(--s2); border:2px dashed var(--border);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:8px; overflow:hidden; position:relative; transition:border-color .3s;
+    }
+    .preview-zone.has-img { border-style:solid; border-color:rgba(29,185,84,.4); }
+    .preview-zone img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+    .preview-ph { display:flex; flex-direction:column; align-items:center; gap:6px; z-index:1; pointer-events:none; }
+    .preview-ph svg { width:30px; height:30px; opacity:.2; fill:var(--text); }
+    .preview-ph span { font-size:.65rem; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; }
+
+    .field { display:flex; flex-direction:column; gap:7px; }
+    .field label { font-size:.6rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--sp); }
+    .field input {
+      background:var(--s1); border:1px solid var(--border); border-radius:10px;
+      padding:13px 16px; color:var(--text);
+      font-family:'DM Mono',monospace; font-size:.88rem;
+      outline:none; transition:border-color .2s, box-shadow .2s;
+    }
+    .field input::placeholder { color:var(--muted); }
+    .field input:focus { border-color:rgba(29,185,84,.5); box-shadow:0 0 0 3px rgba(29,185,84,.1); }
+
+    .auto-fields { display:flex; flex-direction:column; gap:7px; }
+    .auto-row { background:var(--s2); border:1px solid var(--border); border-radius:9px; padding:9px 13px; }
+    .auto-lbl { font-size:.55rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+    .auto-val { font-family:'DM Mono',monospace; font-size:.76rem; color:var(--text); margin-top:2px; word-break:break-all; }
+
+    .btn {
+      width:100%; padding:14px;
+      background:var(--sp); color:#000;
+      font-family:'Syne',sans-serif; font-size:.85rem; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+      border:none; border-radius:11px; cursor:pointer;
+      transition:background .2s, transform .2s, box-shadow .2s;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .btn:hover:not(:disabled) { background:var(--sp2); transform:translateY(-2px); box-shadow:0 8px 24px rgba(29,185,84,.3); }
+    .btn:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+    .btn .ring { width:16px; height:16px; border:2px solid rgba(0,0,0,.2); border-top-color:#000; border-radius:50%; animation:spin .7s linear infinite; display:none; }
+    .btn.loading .btn-lbl { display:none; }
+    .btn.loading .ring    { display:block; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    .btn-secondary {
+      width:100%; padding:12px;
+      background:rgba(255,255,255,0.03); color:var(--muted);
+      font-family:'Syne',sans-serif; font-size:.75rem; font-weight:600; letter-spacing:1px; text-transform:uppercase;
+      border:1px solid var(--border); border-radius:11px; cursor:pointer;
+      text-decoration: none; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { background:rgba(255,255,255,0.08); color:var(--text); border-color: rgba(255,255,255,0.2); }
+
+    .err-msg { display:none; padding:10px 13px; border-radius:9px; background:rgba(255,85,85,.07); border:1px solid rgba(255,85,85,.2); color:var(--err); font-size:.78rem; }
+    .err-msg.show { display:block; }
+
+    /* STEP 2 — PROGRESSION */
+    #stepProgress { display:none; padding:26px; }
+    .steps-bar { display:flex; gap:4px; margin-bottom:7px; }
+    .step-seg { flex:1; height:3px; border-radius:2px; background:var(--s2); transition:background .4s; }
+    .step-seg.active { background:var(--sp); }
+    .step-seg.done   { background:rgba(29,185,84,.3); }
+    .step-lbl-txt { font-size:.6rem; letter-spacing:2px; text-transform:uppercase; color:var(--sp); margin-bottom:20px; }
+
+    .log-list { display:flex; flex-direction:column; gap:8px; }
+    .log-item { display:flex; align-items:flex-start; gap:10px; animation:fadeUp .25s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+    .log-icon {
+      width:22px; height:22px; border-radius:50%; flex-shrink:0; margin-top:1px;
+      display:flex; align-items:center; justify-content:center; font-size:.65rem;
+    }
+    .log-icon.pending { background:rgba(255,255,255,.07); animation:pulse 1.2s ease infinite; }
+    @keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+    .log-icon.ok   { background:rgba(29,185,84,.18);  color:var(--sp); }
+    .log-icon.ko   { background:rgba(255,85,85,.18);  color:var(--err); }
+    .log-icon.skip { background:rgba(255,193,7,.1);   color:var(--warn); }
+    .log-body { flex:1; }
+    .log-title { font-size:.82rem; font-weight:600; line-height:1.3; }
+    .log-title.ok   { color:var(--text); }
+    .log-title.ko   { color:var(--err); }
+    .log-title.skip { color:var(--warn); }
+    .log-sub { font-family:'DM Mono',monospace; font-size:.67rem; color:var(--muted); margin-top:2px; word-break:break-all; }
+
+    /* STEP 3 — SUCCÈS */
+    #stepSuccess { display:none; }
+    .success-block {
+      padding:28px 26px;
+      display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center;
+    }
+    .success-avatar { width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid var(--sp); box-shadow:0 0 28px rgba(29,185,84,.3); animation:pop .4s cubic-bezier(.22,1,.36,1); }
+    .success-avatar-ph { width:80px; height:80px; border-radius:50%; background:var(--s2); border:3px solid var(--sp); display:flex; align-items:center; justify-content:center; font-size:1.8rem; animation:pop .4s cubic-bezier(.22,1,.36,1); }
+    @keyframes pop { from{transform:scale(0)} to{transform:scale(1)} }
+    .success-title { font-size:1.2rem; font-weight:800; color:#fff; }
+    .success-name  { font-family:'DM Mono',monospace; color:var(--sp); font-size:.9rem; }
+    .success-sub   { font-size:.8rem; color:var(--muted); line-height:1.7; }
+
+    .recap { width:100%; display:flex; flex-direction:column; gap:6px; border-top:1px solid var(--border); padding-top:14px; margin-bottom:10px; }
+    .recap-row { background:var(--s1); border:1px solid var(--border); border-radius:9px; padding:8px 13px; text-align: left; }
+    .recap-lbl { font-size:.52rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+    .recap-val { font-family:'DM Mono',monospace; font-size:.75rem; color:var(--text); margin-top:2px; word-break:break-all; }
+    .recap-val a { color:var(--sp); text-decoration:none; }
+    .recap-val a:hover { text-decoration:underline; }
+
+    /* BUTTONS GROUP */
+    .success-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+    .reset-btn, .menu-btn, .preview-btn {
+      width: 100%; padding:12px;
+      font-family:'Syne',sans-serif; font-size:.7rem; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+      border-radius:10px; cursor:pointer; transition:all .2s;
+      text-decoration: none; display: flex; align-items: center; justify-content: center;
+    }
+    .reset-btn {
+      background:transparent; color:var(--muted);
+      border:1px solid var(--border);
+    }
+    .reset-btn:hover { color:var(--text); border-color:rgba(255,255,255,.2); background: rgba(255,255,255,0.03); }
+
+    .menu-btn {
+      background: rgba(255,255,255,0.05); color: #fff;
+      border: 1px solid var(--border);
+    }
+    .menu-btn:hover { background: rgba(255,255,255,0.15); }
+
+    .preview-btn {
+      background: rgba(29,185,84,0.1); color: var(--sp);
+      border: 1px solid rgba(29,185,84,0.3);
+    }
+    .preview-btn:hover { background: var(--sp); color: #000; }
+
+    /* FOOTER */
+    .card-footer {
+      padding:12px 26px; border-top:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .footer-brand { display:flex; align-items:center; gap:6px; font-size:.65rem; color:var(--muted); }
+    .footer-brand svg { width:12px; height:12px; fill:var(--sp); }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="card-header">
+    <a href="/menu/menu.html" class="btn-back-header">✕ Fermer</a>
+    <div class="sp-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141 4.14-1.26 9.419-.6 13.079 1.56.42.24.539.78.301 1.26zm.119-3.36c-3.84-2.28-10.14-2.52-13.74-1.38-.6.18-1.26-.18-1.44-.78-.18-.6.18-1.26.78-1.44 4.14-1.26 11.099-.96 15.36 1.62.54.3.72 1.02.42 1.56-.3.48-1.02.66-1.56.42z"/></svg>
+    </div>
+    <div>
+      <div class="h-title">Inscription Artiste</div>
+      <div class="h-sub">Spotify + MusicBrainz Automation</div>
+    </div>
+  </div>
+
+  <div id="stepForm">
+
+    <div class="preview-zone" id="previewZone">
+      <img id="previewImg" src="" alt="" style="display:none;">
+      <div class="preview-ph" id="previewPh">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        <span>Aperçu Spotify</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Nom de l'artiste</label>
+      <input type="text" id="nomArtiste" placeholder="ex: Ava Peace" autocomplete="off">
+    </div>
+
+    <div class="auto-fields" id="autoFields" style="display:none;">
+      <div class="auto-row"><div class="auto-lbl">Email automatique</div><div class="auto-val" id="autoEmail">—</div></div>
+    </div>
+
+    <div class="err-msg" id="errMsg"></div>
+
+    <button class="btn" id="validerBtn" onclick="startFlow()">
+      <div class="ring"></div>
+      <span class="btn-lbl">Lancer l'inscription</span>
+    </button>
+
+    <a href="/menu/menu.html" class="btn-secondary">Annuler et Retour au menu</a>
+
+  </div>
+
+  <div id="stepProgress">
+    <div class="steps-bar">
+      <div class="step-seg" id="seg1"></div>
+      <div class="step-seg" id="seg2"></div>
+      <div class="step-seg" id="seg3"></div>
+      <div class="step-seg" id="seg4"></div>
+      <div class="step-seg" id="seg5"></div>
+      <div class="step-seg" id="seg6"></div>
+      <div class="step-seg" id="seg7"></div>
+      <div class="step-seg" id="seg8"></div>
+      <div class="step-seg" id="seg9"></div>
+    </div>
+    <div class="step-lbl-txt" id="stepLbl">Démarrage…</div>
+    <div class="log-list" id="logList"></div>
+  </div>
+
+  <div id="stepSuccess">
+    <div class="success-block">
+      <div id="successAvatarWrap"></div>
+      <div class="success-title">Compte créé !</div>
+      <div class="success-name" id="successName"></div>
+      <div class="success-sub">Le profil a été entièrement automatisé.</div>
+      <div class="recap">
+        <div class="recap-row"><div class="recap-lbl">Email</div><div class="recap-val" id="recapEmail">—</div></div>
+        <div class="recap-row"><div class="recap-lbl">Mot de passe</div><div class="recap-val" id="recapPass">—</div></div>
+        <div class="recap-row"><div class="recap-lbl">ID</div><div class="recap-val" id="recapId">—</div></div>
+        <div class="recap-row"><div class="recap-lbl">Spotify</div><div class="recap-val" id="recapSpotify">—</div></div>
+      </div>
+      <div class="success-actions">
+        <a id="btnApercuProfil" href="#" class="preview-btn">Voir le profil</a>
+        <a href="/menu/menu.html" class="menu-btn">Menu Principal</a>
+        <button class="reset-btn" onclick="reset()">← Nouvel Artiste</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer">
+    <div class="footer-brand">
+      <svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141 4.14-1.26 9.419-.6 13.079 1.56.42.24.539.78.301 1.26zm.119-3.36c-3.84-2.28-10.14-2.52-13.74-1.38-.6.18-1.26-.18-1.44-.78-.18-.6.18-1.26.78-1.44 4.14-1.26 11.099-.96 15.36 1.62.54.3.72 1.02.42 1.56-.3.48-1.02.66-1.56.42z"/></svg>
+      Moteka
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const nomInput = document.getElementById('nomArtiste');
+  nomInput.addEventListener('input',   updateAutoFields);
+  nomInput.addEventListener('blur',    fetchPreview);
+  nomInput.addEventListener('keydown', e => { if (e.key === 'Enter') startFlow(); });
+
+  function updateAutoFields() {
+    const nom = nomInput.value.trim();
+    if (!nom) { document.getElementById('autoFields').style.display = 'none'; return; }
+    const slug = nom.replace(/\s+/g, '_');
+    document.getElementById('autoEmail').textContent = slug.toLowerCase() + '@moteka.com';
+    document.getElementById('autoFields').style.display = 'flex';
+  }
+
+  async function fetchPreview() {
+    const nom = nomInput.value.trim();
+    if (!nom) return;
+    try {
+      const res = await fetch(`/api/spotify/artiste/search?nom=${encodeURIComponent(nom)}`).then(r => r.json());
+      if (res.photoUrl) {
+        document.getElementById('previewImg').src           = res.photoUrl;
+        document.getElementById('previewImg').style.display = 'block';
+        document.getElementById('previewPh').style.display  = 'none';
+        document.getElementById('previewZone').classList.add('has-img');
+      }
+    } catch(e) { }
+  }
+
+  const ICONS = { pending:'…', ok:'✓', ko:'✗', skip:'~' };
+
+  function addLog(title, sub, state = 'pending') {
+    const id  = 'l' + Date.now() + Math.random().toString(36).slice(2);
+    const div = document.createElement('div');
+    div.className = 'log-item'; div.id = id;
+    div.innerHTML = `
+      <div class="log-icon ${state}">${ICONS[state]}</div>
+      <div class="log-body">
+        <div class="log-title ${state}">${title}</div>
+        ${sub ? `<div class="log-sub">${sub}</div>` : ''}
+      </div>`;
+    document.getElementById('logList').appendChild(div);
+    return id;
+  }
+
+  function updateLog(id, title, sub, state) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.querySelector('.log-icon').className    = `log-icon ${state}`;
+    el.querySelector('.log-icon').textContent  = ICONS[state];
+    el.querySelector('.log-title').className   = `log-title ${state}`;
+    el.querySelector('.log-title').textContent = title;
+    if (sub !== undefined) {
+      let s = el.querySelector('.log-sub');
+      if (!s && sub) { s = document.createElement('div'); s.className = 'log-sub'; el.querySelector('.log-body').appendChild(s); }
+      if (s) s.textContent = sub;
+    }
+  }
+
+  function setStep(n) {
+    for (let i = 1; i <= 9; i++) {
+      document.getElementById('seg' + i).className = 'step-seg ' + (i < n ? 'done' : i === n ? 'active' : '');
+    }
+    const lbls = [
+      '',
+      'Spotify…',
+      'Compte…',
+      'Activation…',
+      'Photo…',
+      'Lien…',
+      'Rôle…',
+      'Réseaux…',
+      'Sync Genres…',
+      'Auto-tag…'
+    ];
+    document.getElementById('stepLbl').textContent = lbls[n] || 'Terminé';
+  }
+
+  async function startFlow() {
+    const saisieNom = nomInput.value.trim();
+    if (!saisieNom) return;
+
+    const slug     = saisieNom.replace(/\s+/g, '_');
+    const email    = slug.toLowerCase() + '@moteka.com';
+    const password = slug + '_pass';
+
+    document.getElementById('stepForm').style.display     = 'none';
+    document.getElementById('stepProgress').style.display = 'block';
+
+    let userId     = null;
+    let photoUrl   = '';
+    let spotifyUrl = '';
+    let nomSpotify = saisieNom;
+
+    // 1. Spotify
+    setStep(1);
+    const l1 = addLog('Recherche Spotify…', saisieNom);
+    try {
+      const res = await fetch(`/api/spotify/artiste/search?nom=${encodeURIComponent(saisieNom)}`).then(r => r.json());
+      if (res.success) {
+        photoUrl = res.photoUrl; spotifyUrl = res.spotifyUrl; nomSpotify = res.nom;
+        updateLog(l1, 'Artiste trouvé', nomSpotify, 'ok');
+      } else updateLog(l1, 'Non trouvé', '', 'skip');
+    } catch(e) { updateLog(l1, 'Erreur', e.message, 'skip'); }
+
+    // 2. Register
+    setStep(2);
+    const l2 = addLog('Création compte…', email);
+    try {
+      const form = new FormData();
+      form.append('username', nomSpotify);
+      form.append('email', email);
+      form.append('password', password);
+      form.append('phoneNumber', '0' + Date.now().toString().slice(-9));
+      const res = await fetch('/api/users/register', { method:'POST', body:form }).then(r => r.json());
+      if (res.error) throw new Error(res.error);
+      userId = res.id;
+      updateLog(l2, 'Créé', 'ID:'+userId, 'ok');
+    } catch(e) { updateLog(l2, 'Erreur', e.message, 'ko'); return; }
+
+    // 3. Activation
+    setStep(3);
+    addLog('Activation…', '', 'pending');
+    await fetch(`/api/users/${userId}/activate`, { method:'PUT' });
+
+    // 4. Photo
+    setStep(4);
+    if (photoUrl) await fetch(`/api/users/${userId}/photo-url?photoUrl=${encodeURIComponent(photoUrl)}`, { method:'PUT' });
+
+    // 5. Spotify Link
+    setStep(5);
+    if (spotifyUrl) await fetch(`/api/users/spotify/${userId}?spotifyLink=${encodeURIComponent(spotifyUrl)}`, { method:'PUT' });
+
+    // 6. Role
+    setStep(6);
+    await fetch(`/api/users/${userId}/role?role=ARTISTE`, { method: 'PUT' });
+
+    // 7. MusicBrainz
+    setStep(7);
+    const l7 = addLog('Réseaux (MusicBrainz)…', '', 'pending');
+    try {
+      const resMB = await fetch(`/api/musicbrainz/artiste/reseaux?nom=${encodeURIComponent(nomSpotify)}`).then(r => r.json());
+      if (resMB.success) {
+        const liens = [resMB.instagram, resMB.facebook, resMB.tiktok].filter(Boolean).join(';');
+        if(liens) await fetch(`/api/users/${userId}/listeReseaux?listeReseaux=${encodeURIComponent(liens)}`, { method: 'PUT' });
+        updateLog(l7, 'Réseaux récupérés', '', 'ok');
+      } else {
+        updateLog(l7, 'Aucun réseau trouvé', '', 'skip');
+      }
+    } catch(e){ updateLog(l7, 'Erreur', e.message, 'skip'); }
+
+    // 8. Sync Genres Spotify (NOUVEAU)
+    setStep(8);
+    const l8 = addLog('Synchronisation genres Spotify…', '');
+    try {
+      await fetch(`/api/users/${userId}/sync-genres-spotify`, { method: 'POST' });
+      updateLog(l8, 'Genres synchronisés', '', 'ok');
+    } catch(e) {
+      updateLog(l8, 'Erreur sync genres', e.message, 'skip');
+    }
+
+    // 9. Auto-tag préférences (NOUVEAU)
+    setStep(9);
+    const l9 = addLog('Auto-tag préférences…', '');
+    try {
+      const res = await fetch(`/api/users/${userId}/auto-tag-preferences`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        const genresCount = data.genres_attribues?.length || 0;
+        updateLog(l9, `Auto-tag: ${genresCount} genres attribués`, '', 'ok');
+      } else {
+        updateLog(l9, 'Auto-tag effectué', '', 'ok');
+      }
+    } catch(e) {
+      updateLog(l9, 'Erreur auto-tag', e.message, 'skip');
+    }
+
+    // Fin
+    document.getElementById('stepProgress').style.display = 'none';
+    document.getElementById('stepSuccess').style.display  = 'block';
+    document.getElementById('successName').textContent = nomSpotify;
+    document.getElementById('recapEmail').textContent = email;
+    document.getElementById('recapPass').textContent = password;
+    document.getElementById('recapId').textContent = userId;
+    document.getElementById('recapSpotify').textContent = spotifyUrl || 'Non trouvé';
+    document.getElementById('successAvatarWrap').innerHTML = photoUrl ? `<img class="success-avatar" src="${photoUrl}">` : `<div class="success-avatar-ph">🎤</div>`;
+    document.getElementById('btnApercuProfil').href = `/menu/profil_artist.html?userId=${userId}`;
+  }
+
+  function reset() {
+    location.reload();
+  }
+</script>
+</body>
+</html>

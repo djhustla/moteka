@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier Accès - Infrabel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            color: #333;
+            font-size: 16px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, #2c3e50, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .access-id {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            display: inline-block;
+            margin-top: 10px;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .btn-back {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            min-height: 44px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(149, 165, 166, 0.3);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            min-height: 44px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #d68910);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(243, 156, 18, 0.3);
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .form-col {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .info-box {
+            background: #e8f4fc;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .form-buttons button {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #3498db;
+            font-size: 1.1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .error {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .location-preview {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #3498db;
+            font-weight: bold;
+            padding: 8px 12px;
+            background: #e8f4fc;
+            border-radius: 4px;
+            border: 1px solid #d6eaf8;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, #f39c12, #d68910);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .btn-back {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                width: calc(100% - 20px);
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-col {
+                min-width: 100%;
+            }
+
+            .form-buttons {
+                flex-direction: column;
+            }
+
+            .form-buttons button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+
+            .notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: calc(100% - 20px);
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Bouton Retour -->
+<button class="btn-back" onclick="window.location.href='/infrabel/index.html'">
+    ◄ Retour au Menu
+</button>
+
+<!-- En-tête -->
+<div class="header">
+    <h1>✏️ Modifier un Accès</h1>
+    <div class="subtitle">Version 2.0 - BK étendu à 300km | Indices: 0-9 et A-Z</div>
+    <div class="access-id" id="accessId">Chargement...</div>
+</div>
+
+<!-- Conteneur Principal -->
+<div class="container">
+    <!-- Indicateur de chargement -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div>Chargement des données de l'accès...</div>
+    </div>
+
+    <!-- Messages d'erreur/succès -->
+    <div id="errorMessage" class="error hidden"></div>
+    <div id="successMessage" class="success hidden"></div>
+
+    <!-- Formulaire -->
+    <div id="formContainer" class="hidden">
+        <h2 class="section-title">Modification de l'accès</h2>
+
+        <div class="info-box">
+            <strong>Nouveautés :</strong>
+            BK maximum étendu à 300km | Indices disponibles : 0-9 et A-Z | Format de localisation : Ligne 36B BK 125.400
+        </div>
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="nomAcces">Nom d'Accès *</label>
+                <input type="text" id="nomAcces" placeholder="Ex: Accès chantier Ligne 36B" required>
+            </div>
+
+            <div class="form-group">
+                <label>Localisation Ferroviaire</label>
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="ligne">Ligne *</label>
+                        <select id="ligne" required>
+                            <option value="">Sélectionnez la ligne</option>
+                            <!-- Rempli dynamiquement (0-100) -->
+                        </select>
+                    </div>
+
+                    <div class="form-col">
+                        <label for="indice">Indice</label>
+                        <select id="indice">
+                            <option value="">Aucun indice</option>
+                            <!-- Rempli dynamiquement (0-9, A-Z) -->
+                        </select>
+                    </div>
+
+                    <div class="form-col">
+                        <label for="bk">BK (km) *</label>
+                        <select id="bk" required>
+                            <option value="">Sélectionnez BK</option>
+                            <!-- Rempli dynamiquement (0-300) -->
+                        </select>
+                    </div>
+
+                    <div class="form-col">
+                        <label for="bh">BH (hm)</label>
+                        <select id="bh">
+                            <option value="">Pas de BH</option>
+                            <!-- Rempli dynamiquement (0, 100, 200...900) -->
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" id="ligneBkVoie">
+                <div class="location-preview" id="locationPreview">
+                    Aucune localisation définie
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="adresse">Adresse Postale</label>
+                <input type="text" id="adresse" placeholder="Ex: Rue de la Gare 12, 1000 Bruxelles">
+            </div>
+
+            <div class="form-group">
+                <label>Description de l'Accès</label>
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="typeDescription">Type d'accès</label>
+                        <select id="typeDescription">
+                            <option value="">Sélectionnez un type</option>
+                            <option value="Zone de mise à rail">Zone de mise à rail</option>
+                            <option value="Accessible en remorque">Accessible en remorque</option>
+                            <option value="Accessible en camionette">Accessible en camionette</option>
+                            <option value="Accessible pieton">Accessible pieton</option>
+                        </select>
+                    </div>
+
+                    <div class="form-col">
+                        <label for="coteVoie">Côté voie</label>
+                        <select id="coteVoie">
+                            <option value="">Sélectionnez côté</option>
+                            <option value="Cote Voie A">Côté Voie A</option>
+                            <option value="Cote Voie B">Côté Voie B</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" id="description">
+            </div>
+
+            <div class="form-group">
+                <label>Coordonnées GPS</label>
+                <div class="form-row">
+                    <div class="form-col">
+                        <input type="text" id="latitude" placeholder="Latitude (ex: 50.846557)">
+                    </div>
+                    <div class="form-col">
+                        <input type="text" id="longitude" placeholder="Longitude (ex: 4.351697)">
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <button type="button" onclick="getCurrentLocation()" class="btn btn-primary" style="width: auto;">
+                        📍 Utiliser ma position actuelle
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-buttons">
+                <button id="saveBtn" class="btn btn-success" onclick="updateAccess()">
+                    💾 Enregistrer les modifications
+                </button>
+                <button type="button" onclick="window.location.href='/infrabel/index.html'" class="btn btn-danger">
+                    ❌ Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = '/api/acces';
+    let currentAccessId = null;
+
+    // Initialisation des listes déroulantes avec les NOUVELLES VALEURS
+    function initializeDropdowns() {
+        // Lignes (0-100)
+        const ligneSelect = document.getElementById('ligne');
+        ligneSelect.innerHTML = '<option value="">Sélectionnez la ligne</option>';
+        for (let i = 0; i <= 100; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `Ligne ${i}`;
+            ligneSelect.appendChild(option);
+        }
+
+        // Indices (0-9 ET A-Z)
+        const indiceSelect = document.getElementById('indice');
+        indiceSelect.innerHTML = '<option value="">Aucun indice</option>';
+
+        // Ajouter les chiffres 0-9
+        for (let i = 0; i <= 9; i++) {
+            const option = document.createElement('option');
+            option.value = i.toString();
+            option.textContent = i.toString();
+            indiceSelect.appendChild(option);
+        }
+
+        // Ajouter les lettres A-Z
+        for (let i = 65; i <= 90; i++) {
+            const option = document.createElement('option');
+            const letter = String.fromCharCode(i);
+            option.value = letter;
+            option.textContent = letter;
+            indiceSelect.appendChild(option);
+        }
+
+        // BK (0-300 km) - ÉTENDU
+        const bkSelect = document.getElementById('bk');
+        bkSelect.innerHTML = '<option value="">Sélectionnez BK</option>';
+        for (let i = 0; i <= 300; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${i} km`;
+            bkSelect.appendChild(option);
+        }
+
+        // BH (0, 100, 200, ..., 900)
+        const bhSelect = document.getElementById('bh');
+        bhSelect.innerHTML = '<option value="">Pas de BH</option>';
+        for (let i = 0; i <= 9; i++) {
+            const option = document.createElement('option');
+            const valeur = i * 100;
+            option.value = valeur;
+            option.textContent = `${valeur} m`;
+            bhSelect.appendChild(option);
+        }
+
+        // Écouteurs pour mise à jour en temps réel
+        ['ligne', 'indice', 'bk', 'bh'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updateLocationPreview);
+        });
+
+        ['typeDescription', 'coteVoie'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updateDescription);
+        });
+    }
+
+    // Mise à jour de l'aperçu de localisation
+    function updateLocationPreview() {
+        const ligne = document.getElementById('ligne').value;
+        const indice = document.getElementById('indice').value;
+        const bk = document.getElementById('bk').value;
+        const bh = document.getElementById('bh').value;
+
+        let locationText = '';
+        let fullLocation = '';
+
+        if (ligne) {
+            locationText = `Ligne ${ligne}`;
+            fullLocation = `Ligne ${ligne}`;
+
+            if (indice) {
+                locationText += indice;
+                fullLocation += indice;
+            }
+
+            if (bk) {
+                locationText += ` | BK: ${bk} km`;
+                fullLocation += ` BK ${bk}`;
+
+                if (bh && bh !== '0') {
+                    // Formater BH avec 3 chiffres
+                    const bhFormatted = bh.padStart(3, '0');
+                    locationText += `.${bhFormatted}`;
+                    fullLocation += `.${bhFormatted}`;
+                } else if (bh === '0') {
+                    fullLocation += '.000';
+                }
+            }
+
+            document.getElementById('locationPreview').textContent = locationText;
+            document.getElementById('ligneBkVoie').value = fullLocation;
+        } else {
+            document.getElementById('locationPreview').textContent = 'Aucune localisation définie';
+            document.getElementById('ligneBkVoie').value = '';
+        }
+    }
+
+    // Mise à jour de la description
+    function updateDescription() {
+        const type = document.getElementById('typeDescription').value;
+        const cote = document.getElementById('coteVoie').value;
+
+        if (type && cote) {
+            document.getElementById('description').value = `${type} - ${cote}`;
+        } else if (type) {
+            document.getElementById('description').value = type;
+        } else if (cote) {
+            document.getElementById('description').value = cote;
+        } else {
+            document.getElementById('description').value = '';
+        }
+    }
+
+    // Récupérer l'ID depuis l'URL
+    function getAccessIdFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+
+        if (!id) {
+            showError('ID d\'accès non spécifié dans l\'URL');
+            return null;
+        }
+
+        return id;
+    }
+
+    // Afficher une notification
+    function showNotification(message, type) {
+        const oldNotifications = document.querySelectorAll('.notification');
+        oldNotifications.forEach(notif => notif.remove());
+
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                ${getIconForType(type)} ${message}
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideIn 0.3s ease reverse';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    function getIconForType(type) {
+        switch(type) {
+            case 'success': return '✅';
+            case 'error': return '❌';
+            case 'warning': return '⚠️';
+            case 'info': return 'ℹ️';
+            default: return '📢';
+        }
+    }
+
+    // Afficher une erreur
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.innerHTML = `❌ ${message}`;
+        errorDiv.classList.remove('hidden');
+
+        // Masquer après 5 secondes
+        setTimeout(() => {
+            errorDiv.classList.add('hidden');
+        }, 5000);
+    }
+
+    // Afficher un succès
+    function showSuccess(message) {
+        const successDiv = document.getElementById('successMessage');
+        successDiv.innerHTML = `✅ ${message}`;
+        successDiv.classList.remove('hidden');
+
+        // Masquer après 3 secondes
+        setTimeout(() => {
+            successDiv.classList.add('hidden');
+        }, 3000);
+    }
+
+    // Charger les données de l'accès
+    async function loadAccessData() {
+        const accessId = getAccessIdFromURL();
+
+        if (!accessId) {
+            return;
+        }
+
+        currentAccessId = accessId;
+        document.getElementById('accessId').textContent = `ID: ${accessId}`;
+
+        try {
+            showLoading(true);
+
+            const response = await fetch(`${API_BASE_URL}/${accessId}`);
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Accès non trouvé');
+                } else {
+                    throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+                }
+            }
+
+            const access = await response.json();
+
+            // Remplir le formulaire avec les données
+            populateForm(access);
+            showLoading(false);
+            document.getElementById('formContainer').classList.remove('hidden');
+
+        } catch (error) {
+            console.error('Erreur lors du chargement:', error);
+            showError(`Erreur: ${error.message}`);
+            showLoading(false);
+        }
+    }
+
+    // Remplir le formulaire avec les données
+    function populateForm(access) {
+        document.getElementById('nomAcces').value = access.nomAcces || '';
+        document.getElementById('adresse').value = access.adresse || '';
+        document.getElementById('latitude').value = access.latitude || '';
+        document.getElementById('longitude').value = access.longitude || '';
+
+        // Décoder ligneBkVoie
+        if (access.ligneBkVoie) {
+            const match = access.ligneBkVoie.match(/Ligne\s*(\d+)([0-9A-Z]?)\s*(?:BK\s*(\d+)(?:\.(\d+))?)?/);
+
+            if (match) {
+                document.getElementById('ligne').value = match[1];
+
+                if (match[2]) {
+                    document.getElementById('indice').value = match[2];
+                }
+
+                if (match[3]) {
+                    document.getElementById('bk').value = match[3];
+
+                    if (match[4]) {
+                        // Convertir BH (ex: 400) en valeur (400)
+                        const bhValue = parseInt(match[4]);
+                        document.getElementById('bh').value = bhValue.toString();
+                    }
+                }
+            }
+        }
+
+        // Décoder description
+        if (access.description) {
+            const parts = access.description.split(' - ');
+            if (parts.length === 2) {
+                document.getElementById('typeDescription').value = parts[0].trim();
+                document.getElementById('coteVoie').value = parts[1].trim();
+            } else {
+                // Essayer de deviner si c'est un type ou un côté
+                const typeOptions = ['Zone de mise à rail', 'Accessible en remorque',
+                                    'Accessible en camionette', 'Accessible pieton'];
+                const coteOptions = ['Cote Voie A', 'Cote Voie B'];
+
+                if (typeOptions.includes(access.description.trim())) {
+                    document.getElementById('typeDescription').value = access.description.trim();
+                } else if (coteOptions.includes(access.description.trim())) {
+                    document.getElementById('coteVoie').value = access.description.trim();
+                }
+            }
+        }
+
+        // Mettre à jour les aperçus
+        updateLocationPreview();
+        updateDescription();
+    }
+
+    // Mettre à jour l'accès
+    async function updateAccess() {
+        // Validation
+        const nomAcces = document.getElementById('nomAcces').value.trim();
+        const ligne = document.getElementById('ligne').value;
+        const bk = document.getElementById('bk').value;
+
+        if (!nomAcces) {
+            showError('Le nom d\'accès est obligatoire');
+            document.getElementById('nomAcces').focus();
+            return;
+        }
+
+        if (!ligne) {
+            showError('La ligne est obligatoire');
+            document.getElementById('ligne').focus();
+            return;
+        }
+
+        if (!bk) {
+            showError('Le BK (kilomètre) est obligatoire');
+            document.getElementById('bk').focus();
+            return;
+        }
+
+        const accessData = {
+            nomAcces: nomAcces,
+            ligneBkVoie: document.getElementById('ligneBkVoie').value,
+            adresse: document.getElementById('adresse').value.trim(),
+            description: document.getElementById('description').value,
+            latitude: document.getElementById('latitude').value ?
+                     parseFloat(document.getElementById('latitude').value) : null,
+            longitude: document.getElementById('longitude').value ?
+                      parseFloat(document.getElementById('longitude').value) : null
+        };
+
+        try {
+            showNotification('Mise à jour en cours...', 'info');
+
+            const response = await fetch(`${API_BASE_URL}/${currentAccessId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(accessData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Erreur ${response.status}`);
+            }
+
+            showNotification('✅ Accès mis à jour avec succès!', 'success');
+            showSuccess('Accès mis à jour avec succès!');
+
+            // Redirection après 2 secondes
+            setTimeout(() => {
+                window.location.href = '/infrabel/index.html';
+            }, 2000);
+
+        } catch (error) {
+            console.error('Erreur:', error);
+            showNotification(`❌ Erreur: ${error.message}`, 'error');
+            showError(`Erreur: ${error.message}`);
+        }
+    }
+
+    // Géolocalisation
+    function getCurrentLocation() {
+        if (!navigator.geolocation) {
+            showError('Géolocalisation non supportée par votre navigateur');
+            return;
+        }
+
+        showNotification('Récupération de votre position...', 'info');
+
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const lat = position.coords.latitude.toFixed(6);
+                const lng = position.coords.longitude.toFixed(6);
+
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lng;
+
+                showNotification('Position récupérée avec succès!', 'success');
+            },
+            error => {
+                let message = 'Erreur de géolocalisation: ';
+                switch(error.code) {
+                    case 1: message += 'Permission refusée'; break;
+                    case 2: message += 'Position non disponible'; break;
+                    case 3: message += 'Délai dépassé'; break;
+                    default: message += 'Erreur inconnue';
+                }
+                showNotification(message, 'error');
+                showError(message);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    // Afficher/masquer le chargement
+    function showLoading(show) {
+        const loadingDiv = document.getElementById('loading');
+        const formContainer = document.getElementById('formContainer');
+
+        if (show) {
+            loadingDiv.classList.remove('hidden');
+            formContainer.classList.add('hidden');
+        } else {
+            loadingDiv.classList.add('hidden');
+        }
+    }
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser les listes déroulantes
+        initializeDropdowns();
+
+        // Charger les données de l'accès
+        loadAccessData();
+
+        // Empêcher le formulaire de se soumettre avec Enter
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.target.matches('button, input[type="button"]')) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+</body>
+</html>
