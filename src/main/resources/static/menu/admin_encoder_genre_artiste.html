@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Assigner des Genres aux Artistes — Moteka</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sp: #1DB954;
+            --sp2: #1ed760;
+            --bg: #060606;
+            --card-bg: #121212;
+            --text: #ffffff;
+            --muted: #a7a7a7;
+            --border: rgba(255,255,255,0.08);
+            --nav-h: 70px;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding-top: var(--nav-h);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .fixed-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-h);
+            z-index: 1000;
+            background: rgba(6,6,6,0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+        }
+
+        .nav-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--sp);
+        }
+
+        .nav-menu-btn {
+            height: 44px;
+            background: var(--sp);
+            color: black;
+            padding: 0 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Conteneur principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Carte principale */
+        .main-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            padding: 30px;
+        }
+
+        .main-card h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .main-card p {
+            color: var(--muted);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Tableau */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        td {
+            font-size: 0.9rem;
+        }
+
+        .artist-name {
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .artist-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .current-genre-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: rgba(29,185,84,0.2);
+            color: var(--sp);
+        }
+
+        select {
+            width: 100%;
+            min-width: 150px;
+            background: #0a0a0a;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 10px 16px;
+            color: white;
+            font-size: 0.85rem;
+            font-family: 'Syne', sans-serif;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--sp);
+        }
+
+        select option {
+            background: #0a0a0a;
+            color: white;
+        }
+
+        /* Boutons */
+        .btn {
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Syne', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--sp);
+            color: black;
+        }
+
+        .btn-primary:hover {
+            background: var(--sp2);
+            transform: scale(1.02);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #2a2a2a;
+            color: white;
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #3a3a3a;
+            transform: scale(1.02);
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Statut */
+        .status-card {
+            margin-top: 20px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            background: #0a0a0a;
+            border: 1px solid var(--border);
+            display: none;
+        }
+
+        .status-card.show {
+            display: block;
+        }
+
+        .status-title {
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-title i {
+            color: var(--sp);
+        }
+
+        .status-content {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--muted);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .status-success {
+            color: var(--success);
+        }
+
+        .status-error {
+            color: var(--error);
+        }
+
+        .status-warning {
+            color: var(--warning);
+        }
+
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-top-color: var(--sp);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--sp);
+            color: black;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            :root {
+                --nav-h: 60px;
+            }
+
+            .fixed-nav {
+                padding: 0 20px;
+            }
+
+            .nav-title {
+                font-size: 1rem;
+            }
+
+            .nav-menu-btn {
+                padding: 0 16px;
+                font-size: 0.8rem;
+            }
+
+            .nav-menu-btn span {
+                display: none;
+            }
+
+            .container {
+                padding: 20px 16px;
+            }
+
+            .main-card {
+                padding: 20px;
+            }
+
+            th, td {
+                padding: 12px 8px;
+            }
+
+            select {
+                min-width: 120px;
+                font-size: 0.75rem;
+                padding: 8px 12px;
+            }
+
+            .artist-photo {
+                width: 40px;
+                height: 40px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            th, td {
+                font-size: 0.75rem;
+            }
+
+            .artist-name {
+                max-width: 150px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="fixed-nav">
+    <div class="nav-title">🎵 ASSIGNER LES GENRES AUX ARTISTES</div>
+    <a href="menu.html" class="nav-menu-btn">
+        <i class="fa fa-arrow-left"></i> <span>MENU</span>
+    </a>
+</nav>
+
+<div class="container">
+    <div class="main-card">
+        <h2>🏷️ Assignation des genres aux artistes</h2>
+        <p>Sélectionnez un genre pour chaque artiste, puis validez pour mettre à jour les informations</p>
+
+        <div class="table-wrapper" id="tableWrapper">
+            <div class="loading" style="text-align: center; padding: 40px;">
+                <div class="loader" style="width: 30px; height: 30px;"></div>
+                <div style="margin-top: 15px;">Chargement des données...</div>
+            </div>
+        </div>
+
+        <div class="actions" id="actions" style="display: none;">
+            <button class="btn btn-primary" id="validateBtn">
+                <i class="fas fa-check-circle"></i> Valider les modifications
+            </button>
+            <button class="btn btn-secondary" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i> Actualiser
+            </button>
+        </div>
+
+        <div id="statusCard" class="status-card">
+            <div class="status-title">
+                <i class="fas fa-info-circle"></i> Journal des opérations
+            </div>
+            <div id="statusContent" class="status-content"></div>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast">Lien copié !</div>
+
+<script>
+    let allArtists = [];
+    let genresList = [];
+    let selectedGenres = {};
+
+    // Récupérer l'utilisateur connecté
+    async function getCurrentUser() {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            showToast('❌ Non connecté. Veuillez vous connecter.', true);
+            return null;
+        }
+        try {
+            const res = await fetch('/api/users/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!res.ok) throw new Error('Token invalide');
+            const data = await res.json();
+            return data.id;
+        } catch (e) {
+            console.error('Erreur récupération utilisateur:', e);
+            showToast('❌ Erreur de connexion', true);
+            return null;
+        }
+    }
+
+    // Charger tous les genres
+    async function loadGenres() {
+        try {
+            const response = await fetch('/api/music-genres');
+            const genres = await response.json();
+            genresList = genres;
+            return genres;
+        } catch (error) {
+            console.error('Erreur chargement genres:', error);
+            showToast('❌ Erreur chargement des genres', true);
+            return [];
+        }
+    }
+
+    // Récupérer le genre actuel d'un artiste (depuis MusicFavoris avec cote 9)
+    async function getArtistCurrentGenre(artistId) {
+        try {
+            const response = await fetch(`/api/music-favoris/users/${artistId}`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('accessToken') }
+            });
+
+            if (!response.ok) return null;
+
+            const favorisList = await response.json();
+            const favoriWithCote9 = favorisList.find(f => f.cotePreference === 9);
+
+            if (favoriWithCote9 && favoriWithCote9.genres && favoriWithCote9.genres.length > 0) {
+                return favoriWithCote9.genres[0].description;
+            }
+            return null;
+        } catch (error) {
+            console.error(`Erreur récupération genre pour artiste ${artistId}:`, error);
+            return null;
+        }
+    }
+
+    // Charger tous les artistes
+    async function loadArtists() {
+        try {
+            const res = await fetch('/api/users/artistes');
+            const data = await res.json();
+
+            if (!data.artistes) throw new Error("Erreur API");
+
+            const artists = data.artistes || [];
+
+            // Pour chaque artiste, récupérer son genre actuel
+            const artistsWithGenres = [];
+            for (const artist of artists) {
+                const currentGenre = await getArtistCurrentGenre(artist.id);
+                artistsWithGenres.push({
+                    id: artist.id,
+                    username: artist.username || "Sans nom",
+                    photoUrl: artist.photoUrl || null,
+                    lienSpotify: artist.lienSpotify || null,
+                    currentGenre: currentGenre || ""
+                });
+            }
+
+            return artistsWithGenres;
+        } catch (err) {
+            console.error('Erreur chargement artistes:', err);
+            showToast('❌ Erreur chargement des artistes', true);
+            return [];
+        }
+    }
+
+    // Supprimer l'ancien MusicFavoris avec cote 9
+    async function deleteExistingMusicFavoris(artistId) {
+        try {
+            const response = await fetch(`/api/music-favoris/users/${artistId}`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('accessToken') }
+            });
+
+            if (!response.ok) return null;
+
+            const favorisList = await response.json();
+            const favoriWithCote9 = favorisList.find(f => f.cotePreference === 9);
+
+            if (favoriWithCote9) {
+                await fetch(`/api/music-favoris/${favoriWithCote9.id}/users/${artistId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('accessToken') }
+                });
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error(`Erreur suppression MusicFavoris pour artiste ${artistId}:`, error);
+            return false;
+        }
+    }
+
+    // Créer un nouveau MusicFavoris pour l'artiste avec le genre sélectionné
+    async function createMusicFavorisForArtist(artistId, genreId) {
+        try {
+            const response = await fetch(`/api/music-favoris/users/${artistId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                },
+                body: JSON.stringify({
+                    cotePreference: 9,
+                    genreIds: [genreId]
+                })
+            });
+            return response.ok;
+        } catch (error) {
+            console.error(`Erreur création MusicFavoris pour artiste ${artistId}:`, error);
+            return false;
+        }
+    }
+
+    // Afficher le tableau des artistes
+    function renderTable() {
+        const wrapper = document.getElementById('tableWrapper');
+
+        if (allArtists.length === 0) {
+            wrapper.innerHTML = '<div class="error" style="text-align: center; padding: 40px;">Aucun artiste trouvé.</div>';
+            document.getElementById('actions').style.display = 'none';
+            return;
+        }
+
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Nom de l'artiste</th>
+                        <th>Genre actuel</th>
+                        <th>Genre à assigner</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        allArtists.forEach(artist => {
+            const currentGenre = artist.currentGenre || "";
+
+            html += `
+                <tr data-id="${artist.id}">
+                    <td>
+                        ${artist.photoUrl ? `<img src="${artist.photoUrl}" class="artist-photo" alt="photo">` : '<div style="width:50px;height:50px;background:#2a2a2a;border-radius:8px;"></div>'}
+                    </td>
+                    <td class="artist-name" title="${escapeHtml(artist.username)}">${escapeHtml(artist.username)}</td>
+                    <td>
+                        ${currentGenre ? `<span class="current-genre-badge">${escapeHtml(currentGenre)}</span>` : '<span class="current-genre-badge" style="background:rgba(239,68,68,0.2);color:#ef4444;">Non défini</span>'}
+                    </td>
+                    <td>
+                        <select class="genre-select" data-id="${artist.id}" data-current="${escapeHtml(currentGenre)}">
+                            <option value="">-- Non classé --</option>
+            `;
+
+            genresList.forEach(genre => {
+                const selected = (genre.description === currentGenre) ? 'selected' : '';
+                html += `<option value="${genre.id}" data-name="${escapeHtml(genre.description)}" ${selected}>${escapeHtml(genre.description)}</option>`;
+            });
+
+            html += `
+                        </select>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                </tbody>
+            </table>
+        `;
+
+        wrapper.innerHTML = html;
+        document.getElementById('actions').style.display = 'flex';
+
+        // Initialiser les écouteurs d'événements sur les selects
+        document.querySelectorAll('.genre-select').forEach(select => {
+            select.addEventListener('change', (e) => {
+                const artistId = parseInt(select.getAttribute('data-id'));
+                const selectedOption = select.options[select.selectedIndex];
+                const genreId = select.value;
+                const genreName = selectedOption ? selectedOption.getAttribute('data-name') : "";
+                selectedGenres[artistId] = { id: genreId, name: genreName };
+            });
+        });
+    }
+
+    // Fonction principale de validation
+    async function validateAndUpdate() {
+        const validateBtn = document.getElementById('validateBtn');
+        const statusCard = document.getElementById('statusCard');
+        const statusContent = document.getElementById('statusContent');
+
+        validateBtn.disabled = true;
+        validateBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Traitement en cours...';
+        statusCard.classList.add('show');
+        statusContent.innerHTML = '<div>⏳ Début du traitement...</div>';
+
+        let results = [];
+        let successCount = 0;
+        let errorCount = 0;
+        let skippedCount = 0;
+
+        for (const artist of allArtists) {
+            const selected = selectedGenres[artist.id];
+            const selectedGenreId = selected ? selected.id : "";
+            const selectedGenreName = selected ? selected.name : "";
+            const currentGenre = artist.currentGenre || "";
+
+            // Vérifier si le genre a changé
+            const genreChanged = selectedGenreId !== "" && selectedGenreName !== currentGenre;
+
+            // Si rien n'a changé ou si aucun genre sélectionné, on passe
+            if (!genreChanged) {
+                if (selectedGenreId === "") {
+                    skippedCount++;
+                    results.push({
+                        id: artist.id,
+                        username: artist.username,
+                        status: 'skipped',
+                        message: 'Aucun genre sélectionné'
+                    });
+                } else if (selectedGenreName === currentGenre) {
+                    skippedCount++;
+                    results.push({
+                        id: artist.id,
+                        username: artist.username,
+                        status: 'skipped',
+                        message: 'Déjà assigné à ce genre'
+                    });
+                } else {
+                    skippedCount++;
+                    results.push({
+                        id: artist.id,
+                        username: artist.username,
+                        status: 'skipped',
+                        message: 'Aucun changement'
+                    });
+                }
+                continue;
+            }
+
+            try {
+                // 1. Supprimer l'ancien MusicFavoris avec cote 9
+                await deleteExistingMusicFavoris(artist.id);
+
+                // 2. Créer le nouveau MusicFavoris avec le genre sélectionné
+                const created = await createMusicFavorisForArtist(artist.id, parseInt(selectedGenreId));
+
+                if (created) {
+                    successCount++;
+                    results.push({
+                        id: artist.id,
+                        username: artist.username,
+                        status: 'success',
+                        message: `Genre: "${selectedGenreName}"`
+                    });
+
+                    // Mettre à jour les données locales
+                    artist.currentGenre = selectedGenreName;
+                } else {
+                    errorCount++;
+                    results.push({
+                        id: artist.id,
+                        username: artist.username,
+                        status: 'error',
+                        message: 'Erreur lors de la création du favori'
+                    });
+                }
+
+                // Ajouter un petit délai pour ne pas surcharger le serveur
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+            } catch (error) {
+                errorCount++;
+                results.push({
+                    id: artist.id,
+                    username: artist.username,
+                    status: 'error',
+                    message: error.message
+                });
+            }
+
+            // Mettre à jour l'affichage progressif
+            statusContent.innerHTML = `
+                <div>🔄 Traitement en cours... (${successCount + errorCount + skippedCount}/${allArtists.length})</div>
+                <div style="margin-top: 10px;">
+                    ${results.slice(-5).map(r => {
+                        if (r.status === 'success') return `<div class="status-success">✅ ${r.username} : ${r.message}</div>`;
+                        if (r.status === 'error') return `<div class="status-error">❌ ${r.username} : ${r.message}</div>`;
+                        return `<div class="status-warning">⏭️ ${r.username} : ${r.message}</div>`;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        // Affichage du résumé final
+        let finalMessage = '';
+        if (successCount > 0) {
+            finalMessage += `<div class="status-success">✅ ${successCount} artiste(s) mis à jour avec succès</div>`;
+        }
+        if (skippedCount > 0) {
+            finalMessage += `<div class="status-warning">⏭️ ${skippedCount} artiste(s) ignoré(s)</div>`;
+        }
+        if (errorCount > 0) {
+            finalMessage += `<div class="status-error">❌ ${errorCount} erreur(s) lors de la mise à jour</div>`;
+        }
+
+        statusContent.innerHTML = `
+            <div><strong>📊 RÉSUMÉ FINAL</strong></div>
+            ${finalMessage}
+            <div style="margin-top: 15px;"><strong>Détails complets :</strong></div>
+            <div style="max-height: 400px; overflow-y: auto; margin-top: 10px;">
+                ${results.map(r => {
+                    if (r.status === 'success') return `<div class="status-success">✅ ${r.username} : ${r.message}</div>`;
+                    if (r.status === 'error') return `<div class="status-error">❌ ${r.username} : ${r.message}</div>`;
+                    return `<div class="status-warning">⏭️ ${r.username} : ${r.message}</div>`;
+                }).join('')}
+            </div>
+        `;
+
+        showToast(`✅ ${successCount} artistes mis à jour, ${errorCount} erreurs, ${skippedCount} ignorés`);
+
+        validateBtn.disabled = false;
+        validateBtn.innerHTML = '<i class="fas fa-check-circle"></i> Valider les modifications';
+
+        // Rafraîchir le tableau pour refléter les changements
+        renderTable();
+    }
+
+    // Actualiser les données
+    async function refreshData() {
+        const validateBtn = document.getElementById('validateBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+
+        validateBtn.disabled = true;
+        refreshBtn.disabled = true;
+        validateBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Chargement...';
+
+        showToast('🔄 Actualisation des données...');
+
+        // Réinitialiser
+        selectedGenres = {};
+
+        // Recharger les données
+        await loadGenres();
+        allArtists = await loadArtists();
+
+        // Réafficher
+        renderTable();
+
+        validateBtn.disabled = false;
+        refreshBtn.disabled = false;
+        validateBtn.innerHTML = '<i class="fas fa-check-circle"></i> Valider les modifications';
+
+        showToast('✅ Données actualisées');
+    }
+
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.style.background = isError ? '#e91429' : 'var(--sp)';
+        toast.style.color = 'white';
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+            toast.style.background = 'var(--sp)';
+            toast.style.color = 'black';
+        }, 3000);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', async () => {
+        const currentUser = await getCurrentUser();
+
+        if (!currentUser) {
+            document.getElementById('tableWrapper').innerHTML = '<div class="error" style="text-align: center; padding: 40px;">⚠️ Veuillez vous connecter pour utiliser cette fonctionnalité.</div>';
+            return;
+        }
+
+        await loadGenres();
+        allArtists = await loadArtists();
+        renderTable();
+
+        document.getElementById('validateBtn').addEventListener('click', validateAndUpdate);
+        document.getElementById('refreshBtn').addEventListener('click', refreshData);
+    });
+</script>
+</body>
+</html>

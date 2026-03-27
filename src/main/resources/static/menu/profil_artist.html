@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+  <title>Artiste — Moteka</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sp:     #1DB954;
+      --sp2:    #1ed760;
+      --bg:     #060606;
+      --s1:     #0d0d0d;
+      --s2:     #141414;
+      --s3:     #1a1a1a;
+      --border: rgba(255,255,255,.07);
+      --text:   #f0f0f0;
+      --muted:  rgba(240,240,240,.38);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html {
+      scroll-behavior:smooth;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family:'Syne',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+      width: 100%;
+      position: relative;
+    }
+
+    body::after {
+      content:'';
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      opacity:.025;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    .hero-bg {
+      position:fixed;
+      inset:0;
+      z-index:0;
+      background-size:cover;
+      background-position:center top;
+      filter:blur(90px) saturate(1.6) brightness(.2);
+      transform:scale(1.15);
+      transition:background-image 1.2s ease;
+    }
+
+    .page {
+      position:relative;
+      z-index:1;
+      max-width:680px;
+      margin:0 auto;
+      padding:0 16px 80px;
+      width: 100%;
+    }
+
+    /* ══ SIDEBAR RÉSEAUX FIXE RESPONSIVE ══ */
+    .sidebar-reseaux {
+      position: fixed;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .sidebar-reseaux.visible { display: flex; }
+
+    .sb-icon-img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      cursor: pointer;
+      flex-shrink: 0;
+      background: rgba(255,255,255,.08);
+      border: 2.5px solid rgba(255,255,255,.18);
+      box-shadow: 0 6px 20px rgba(0,0,0,.7);
+      transition: all .35s cubic-bezier(.175,.885,.32,1.275);
+    }
+    .sb-icon-img img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      transition:all .3s;
+    }
+    .sb-icon-img:hover {
+      transform:scale(1.28);
+      border-color:rgba(255,255,255,.5);
+    }
+    .sb-icon-img:hover img {
+      filter:brightness(1.3) saturate(1.2);
+    }
+
+    .sb-icon-custom {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      cursor: pointer;
+      flex-shrink: 0;
+      background: rgba(255,255,255,.08);
+      border: 2.5px solid rgba(255,255,255,.18);
+      box-shadow: 0 6px 20px rgba(0,0,0,.7);
+      transition: all .35s cubic-bezier(.175,.885,.32,1.275);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: white;
+      backdrop-filter: blur(10px);
+    }
+    .sb-icon-custom .r-symbol {
+      font-size:1.4rem;
+      filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));
+      transition:all .3s;
+    }
+    .sb-icon-custom .r-name   {
+      font-family:'DM Mono',monospace;
+      font-size:.38rem;
+      font-weight:900;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+      margin-top:3px;
+      transition:all .3s;
+    }
+    .sb-icon-custom:hover {
+      transform:scale(1.28);
+      border-color:rgba(255,255,255,.5);
+    }
+
+    /* Hover effects */
+    .sb-icon-img[data-n="instagram"]:hover { border-color:#E4405F; box-shadow:0 0 60px #E4405F,0 0 90px rgba(228,64,95,.7); }
+    .sb-icon-img[data-n="facebook"]:hover  { border-color:#1877F2; box-shadow:0 0 60px #1877F2,0 0 90px rgba(24,119,242,.7); }
+    .sb-icon-img[data-n="tiktok"]:hover    { border-color:#00F2EA; box-shadow:0 0 60px #00F2EA,0 0 90px rgba(0,242,234,.7); }
+    .sb-icon-img[data-n="snapchat"]:hover  { border-color:#FFFC00; box-shadow:0 0 60px #FFFC00,0 0 90px rgba(255,252,0,.7); }
+    .sb-icon-img[data-n="twitter"]:hover   { border-color:#1DA1F2; box-shadow:0 0 60px #1DA1F2,0 0 90px rgba(29,161,242,.7); }
+    .sb-icon-img[data-n="spotify"]:hover   { border-color:#1DB954; box-shadow:0 0 60px #1DB954,0 0 90px rgba(29,185,84,.7); }
+    .sb-icon-img[data-n="default"]:hover   { border-color:#667eea; box-shadow:0 0 60px #667eea,0 0 90px rgba(102,126,234,.7); }
+
+    .sb-icon-custom[data-n="youtube"]:hover    { border-color:#FF0000; box-shadow:0 0 60px #FF0000,0 0 90px rgba(255,0,0,.7); }
+    .sb-icon-custom[data-n="youtube"]:hover .r-symbol,
+    .sb-icon-custom[data-n="youtube"]:hover .r-name { color:#FF0000; text-shadow:0 0 12px rgba(255,0,0,.8); }
+    .sb-icon-custom[data-n="whatsapp"]:hover   { border-color:#25D366; box-shadow:0 0 60px #25D366,0 0 90px rgba(37,211,102,.7); }
+    .sb-icon-custom[data-n="whatsapp"]:hover .r-symbol,
+    .sb-icon-custom[data-n="whatsapp"]:hover .r-name { color:#25D366; text-shadow:0 0 12px rgba(37,211,102,.8); }
+    .sb-icon-custom[data-n="linkedin"]:hover   { border-color:#0077B5; box-shadow:0 0 60px #0077B5,0 0 90px rgba(0,119,181,.7); }
+    .sb-icon-custom[data-n="linkedin"]:hover .r-symbol,
+    .sb-icon-custom[data-n="linkedin"]:hover .r-name { color:#0077B5; text-shadow:0 0 12px rgba(0,119,181,.8); }
+    .sb-icon-custom[data-n="telegram"]:hover   { border-color:#0088CC; box-shadow:0 0 60px #0088CC,0 0 90px rgba(0,136,204,.7); }
+    .sb-icon-custom[data-n="telegram"]:hover .r-symbol,
+    .sb-icon-custom[data-n="telegram"]:hover .r-name { color:#0088CC; text-shadow:0 0 12px rgba(0,136,204,.8); }
+    .sb-icon-custom[data-n="soundcloud"]:hover { border-color:#FF5500; box-shadow:0 0 60px #FF5500,0 0 90px rgba(255,85,0,.7); }
+    .sb-icon-custom[data-n="soundcloud"]:hover .r-symbol,
+    .sb-icon-custom[data-n="soundcloud"]:hover .r-name { color:#FF5500; text-shadow:0 0 12px rgba(255,85,0,.8); }
+    .sb-icon-custom[data-n="mixcloud"]:hover   { border-color:#52aad8; box-shadow:0 0 60px #52aad8,0 0 90px rgba(82,170,216,.7); }
+    .sb-icon-custom[data-n="mixcloud"]:hover .r-symbol,
+    .sb-icon-custom[data-n="mixcloud"]:hover .r-name { color:#52aad8; text-shadow:0 0 12px rgba(82,170,216,.8); }
+    .sb-icon-custom[data-n="pinterest"]:hover  { border-color:#E60023; box-shadow:0 0 60px #E60023,0 0 90px rgba(230,0,35,.7); }
+    .sb-icon-custom[data-n="pinterest"]:hover .r-symbol,
+    .sb-icon-custom[data-n="pinterest"]:hover .r-name { color:#E60023; text-shadow:0 0 12px rgba(230,0,35,.8); }
+
+    /* ══ HEADER CONTROLS RESPONSIVE ══ */
+    .header-controls {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 100;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .back-btn, .admin-btn {
+      background:rgba(0,0,0,.8);
+      border:1.5px solid rgba(255,255,255,.15);
+      border-radius: 40px;
+      padding: 10px 20px;
+      font-family:'DM Mono',monospace;
+      font-size: 0.8rem;
+      color:#fff;
+      cursor:pointer;
+      backdrop-filter:blur(16px);
+      transition:all .2s;
+      text-decoration:none;
+      display:inline-block;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      white-space: nowrap;
+    }
+    .back-btn:hover, .admin-btn:hover {
+      border-color:rgba(255,255,255,.4);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    }
+    .admin-btn {
+      color: var(--sp);
+      border-color: rgba(29, 185, 84, 0.4);
+      display: none;
+    }
+
+    /* ══ LOADING & ERROR ══ */
+    #screenLoad {
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:16px;
+    }
+    .load-spinner {
+      width:40px;
+      height:40px;
+      border:3px solid var(--s3);
+      border-top-color:var(--sp);
+      border-radius:50%;
+      animation:spin .7s linear infinite;
+    }
+    .load-text {
+      font-family:'DM Mono',monospace;
+      font-size:.65rem;
+      letter-spacing:3px;
+      color:var(--muted);
+      text-transform:uppercase;
+    }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    #screenError {
+      min-height:100vh;
+      display:none;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:16px;
+      text-align:center;
+      padding:40px 20px;
+    }
+    .err-title {
+      font-family:'Bebas Neue',sans-serif;
+      font-size: clamp(1.5rem, 6vw, 2rem);
+      color:#ff5555;
+    }
+    .err-sub   {
+      font-family:'DM Mono',monospace;
+      font-size: clamp(0.7rem, 3vw, 0.85rem);
+      color:var(--muted);
+      max-width: 90%;
+      word-break: break-word;
+    }
+    .back-link {
+      margin-top:8px;
+      background:none;
+      border:1px solid var(--border);
+      color:var(--muted);
+      padding:10px 20px;
+      border-radius:8px;
+      cursor:pointer;
+      font-family:'Syne',sans-serif;
+      text-decoration:none;
+      transition:color .2s, border-color .2s;
+      display:inline-block;
+    }
+    .back-link:hover { color:#fff; border-color:rgba(255,255,255,.2); }
+
+    /* ══ DASHBOARD ══ */
+    #screenDash { display:none; }
+
+    .hero {
+      position:relative;
+      width: calc(100% + 32px);
+      margin-left: -16px;
+      height: clamp(240px, 45vw, 420px);
+      overflow:hidden;
+      margin-bottom: 24px;
+    }
+    .hero-img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center top;
+      display:block;
+    }
+    .hero-overlay {
+      position:absolute;
+      inset:0;
+      background:linear-gradient(to bottom, rgba(6,6,6,0) 20%, rgba(6,6,6,1) 100%);
+    }
+    .hero-content {
+      position:absolute;
+      bottom:0;
+      left:0;
+      right:0;
+      padding: 20px 20px 24px;
+    }
+    .hero-tag {
+      font-family:'DM Mono',monospace;
+      font-size: clamp(0.5rem, 2.5vw, 0.65rem);
+      letter-spacing:3px;
+      color:var(--sp);
+      text-transform:uppercase;
+      margin-bottom:6px;
+    }
+    .hero-name {
+      font-family:'Bebas Neue',sans-serif;
+      font-size: clamp(2rem, 8vw, 4rem);
+      line-height:1;
+      color:#fff;
+      letter-spacing:2px;
+      word-break: break-word;
+    }
+    .hero-genre {
+      font-family:'DM Mono',monospace;
+      font-size: clamp(0.7rem, 3vw, 0.85rem);
+      color: var(--sp);
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .hero-genre i {
+      font-size: 0.8rem;
+    }
+    .hero-genre .genre-label {
+      color: var(--muted);
+    }
+    .hero-genre .genre-value {
+      color: var(--sp);
+      font-weight: 600;
+    }
+
+    .section {
+      margin-bottom: 24px;
+      animation:fadeUp .45s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes fadeUp {
+      from{opacity:0;transform:translateY(14px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    .section-label {
+      font-family:'DM Mono',monospace;
+      font-size: clamp(0.55rem, 2.5vw, 0.7rem);
+      letter-spacing:3px;
+      text-transform:uppercase;
+      color:var(--sp);
+      margin-bottom:12px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap: wrap;
+    }
+    .section-label::after {
+      content:'';
+      flex:1;
+      height:1px;
+      background:var(--border);
+      min-width: 40px;
+    }
+
+    .card {
+      background:var(--s1);
+      border:1px solid var(--border);
+      border-radius:20px;
+      overflow:hidden;
+    }
+
+    .top5-item {
+      display:flex;
+      flex-direction:column;
+      border-bottom:1px solid var(--border);
+    }
+    .top5-item:last-child { border-bottom:none; }
+    .top5-row {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 16px;
+      cursor:pointer;
+      transition:background .15s;
+      min-width: 0;
+    }
+    .top5-row:hover {
+      background:rgba(255,255,255,.02);
+    }
+    .top5-rank  {
+      font-family:'Bebas Neue',sans-serif;
+      font-size: clamp(1.2rem, 4vw, 1.5rem);
+      color:rgba(29,185,84,.35);
+      width:28px;
+      text-align:center;
+      flex-shrink:0;
+    }
+    .top5-cover {
+      width: 48px;
+      height: 48px;
+      border-radius:8px;
+      object-fit:cover;
+      flex-shrink:0;
+    }
+    .top5-info  {
+      flex:1;
+      min-width:0;
+    }
+    .top5-name  {
+      font-size: clamp(0.8rem, 3vw, 0.9rem);
+      font-weight:700;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      margin-bottom:4px;
+    }
+    .top5-album {
+      font-family:'DM Mono',monospace;
+      font-size: clamp(0.55rem, 2vw, 0.65rem);
+      color:var(--muted);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .top5-right {
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:4px;
+      flex-shrink:0;
+    }
+    .top5-pop-num {
+      font-family:'DM Mono',monospace;
+      font-size: clamp(0.65rem, 2.5vw, 0.75rem);
+      font-weight:700;
+      color:var(--sp);
+    }
+    .pop-bar {
+      width: 48px;
+      height:3px;
+      background:rgba(255,255,255,.08);
+      border-radius:2px;
+      overflow:hidden;
+    }
+    .pop-fill {
+      height:100%;
+      background:linear-gradient(90deg,var(--sp),var(--sp2));
+      border-radius:2px;
+      transition:width .6s ease;
+    }
+    .top5-player {
+      padding:0 16px 12px;
+      display:none;
+    }
+    .top5-item.open .top5-player { display:block; }
+    .top5-item.open .top5-name   { color:var(--sp); }
+
+    /* PLAYER */
+    .player-wrap {
+      position:relative;
+      width: 100%;
+    }
+    .player-encode-popup {
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 8px 0 0;
+    }
+    .player-wrap:hover .player-encode-popup { display:flex; }
+    /* Mobile : toujours visible */
+    @media(hover:none) and (max-width: 768px) {
+      .player-encode-popup { display:flex !important; }
+    }
+    .btn-encode-track {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      background:#e91429;
+      color:white;
+      border:none;
+      border-radius:30px;
+      padding: 8px 16px;
+      font-family:'Syne',sans-serif;
+      font-weight:800;
+      font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+      cursor:pointer;
+      box-shadow:0 4px 16px rgba(233,20,41,.4);
+      transition:background .2s, transform .2s;
+      white-space: nowrap;
+      text-decoration:none;
+      width:100%;
+      justify-content:center;
+    }
+    .btn-encode-track:hover {
+      background:#ff2d40;
+      transform:scale(1.02);
+    }
+
+    /* Album section */
+    .album-head {
+      display:flex;
+      align-items:center;
+      gap:16px;
+      padding: 16px;
+      flex-wrap: wrap;
+    }
+    .album-cover {
+      width: 64px;
+      height: 64px;
+      border-radius:12px;
+      object-fit:cover;
+      flex-shrink:0;
+    }
+    .album-name  {
+      font-size: clamp(0.9rem, 3.5vw, 1rem);
+      font-weight:800;
+      color:#fff;
+      margin-bottom:4px;
+      word-break: break-word;
+    }
+    .album-meta  {
+      font-family:'DM Mono',monospace;
+      font-size: clamp(0.6rem, 2.5vw, 0.7rem);
+      color:var(--muted);
+    }
+    .tracklist   {
+      border-top:1px solid var(--border);
+    }
+    .track-item  {
+      border-bottom:1px solid var(--border);
+      padding: 12px 16px;
+      cursor:pointer;
+      transition:background .15s;
+    }
+    .track-item:last-child { border-bottom:none; }
+    .track-item:hover { background:rgba(255,255,255,.025); }
+    .track-name-row {
+      font-size: clamp(0.8rem, 3vw, 0.9rem);
+      font-weight:600;
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      word-break: break-word;
+    }
+    .track-name-row::before {
+      content:'▶';
+      font-size:0.55rem;
+      color:var(--muted);
+      transition:color .2s;
+      flex-shrink: 0;
+    }
+    .track-item.open .track-name-row { color:var(--sp); margin-bottom:8px; }
+    .track-item.open .track-name-row::before { color:var(--sp); }
+    .track-player { display:none; }
+    .track-item.open .track-player { display:block; }
+
+    /* iframe responsive */
+    iframe {
+      max-width: 100%;
+      height: auto;
+      min-height: 80px;
+    }
+
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-thumb { background:rgba(29,185,84,.4); border-radius:4px; }
+
+    /* ══ RESPONSIVE TABLETTE ET MOBILE ══ */
+    @media (max-width: 768px) {
+      .page {
+        padding: 0 12px 60px;
+      }
+
+      .sidebar-reseaux {
+        right: 8px;
+        gap: 8px;
+      }
+
+      .sb-icon-img, .sb-icon-custom {
+        width: 48px;
+        height: 48px;
+      }
+
+      .sb-icon-custom .r-symbol {
+        font-size: 1.2rem;
+      }
+
+      .sb-icon-custom .r-name {
+        font-size: 0.32rem;
+      }
+
+      .header-controls {
+        top: 12px;
+        left: 12px;
+        gap: 8px;
+      }
+
+      .back-btn, .admin-btn {
+        padding: 8px 16px;
+        font-size: 0.7rem;
+      }
+
+      .hero {
+        width: calc(100% + 24px);
+        margin-left: -12px;
+        margin-bottom: 20px;
+      }
+
+      .hero-content {
+        padding: 16px;
+      }
+
+      .hero-genre {
+        margin-top: 6px;
+      }
+
+      .top5-row {
+        gap: 10px;
+        padding: 10px 12px;
+      }
+
+      .top5-rank {
+        width: 24px;
+        font-size: 1.1rem;
+      }
+
+      .top5-cover {
+        width: 44px;
+        height: 44px;
+      }
+
+      .pop-bar {
+        width: 40px;
+      }
+
+      .album-head {
+        padding: 14px;
+      }
+
+      .album-cover {
+        width: 56px;
+        height: 56px;
+      }
+
+      .track-item {
+        padding: 10px 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .sidebar-reseaux {
+        right: 6px;
+        gap: 6px;
+      }
+
+      .sb-icon-img, .sb-icon-custom {
+        width: 42px;
+        height: 42px;
+      }
+
+      .sb-icon-custom .r-symbol {
+        font-size: 1rem;
+      }
+
+      .sb-icon-custom .r-name {
+        font-size: 0.28rem;
+      }
+
+      .header-controls {
+        top: 10px;
+        left: 10px;
+      }
+
+      .back-btn, .admin-btn {
+        padding: 6px 12px;
+        font-size: 0.65rem;
+      }
+
+      .hero {
+        height: clamp(200px, 40vw, 280px);
+      }
+
+      .hero-content {
+        padding: 12px;
+      }
+
+      .hero-tag {
+        letter-spacing: 2px;
+        margin-bottom: 4px;
+      }
+
+      .hero-genre {
+        margin-top: 4px;
+        font-size: 0.65rem;
+      }
+
+      .section {
+        margin-bottom: 20px;
+      }
+
+      .section-label {
+        margin-bottom: 10px;
+      }
+
+      .top5-row {
+        gap: 8px;
+        padding: 8px 10px;
+      }
+
+      .top5-rank {
+        width: 20px;
+        font-size: 1rem;
+      }
+
+      .top5-cover {
+        width: 40px;
+        height: 40px;
+      }
+
+      .top5-name {
+        font-size: 0.75rem;
+      }
+
+      .top5-album {
+        font-size: 0.5rem;
+      }
+
+      .top5-pop-num {
+        font-size: 0.6rem;
+      }
+
+      .pop-bar {
+        width: 35px;
+      }
+
+      .album-head {
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .album-cover {
+        width: 48px;
+        height: 48px;
+      }
+
+      .album-name {
+        font-size: 0.85rem;
+      }
+
+      .album-meta {
+        font-size: 0.55rem;
+      }
+
+      .track-item {
+        padding: 8px 12px;
+      }
+
+      .track-name-row {
+        font-size: 0.75rem;
+      }
+
+      .btn-encode-track {
+        padding: 6px 12px;
+        font-size: 0.65rem;
+      }
+
+      .top5-player, .track-player {
+        padding-top: 4px;
+      }
+    }
+
+    /* Pour les très petits écrans */
+    @media (max-width: 360px) {
+      .sb-icon-img, .sb-icon-custom {
+        width: 38px;
+        height: 38px;
+      }
+
+      .top5-cover {
+        width: 36px;
+        height: 36px;
+      }
+
+      .album-cover {
+        width: 44px;
+        height: 44px;
+      }
+    }
+
+    /* Pour les écrans larges */
+    @media (min-width: 1200px) {
+      .page {
+        max-width: 720px;
+      }
+
+      .sidebar-reseaux {
+        right: calc((100% - 720px) / 2 - 70px);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero-bg" id="heroBg"></div>
+
+<div class="sidebar-reseaux" id="sidebarReseaux"></div>
+
+<div class="page">
+
+  <div id="screenLoad">
+    <div class="load-spinner"></div>
+    <div class="load-text">Chargement…</div>
+  </div>
+
+  <div id="screenError">
+    <div class="err-title" id="errTitle">Erreur</div>
+    <div class="err-sub"   id="errSub">Une erreur est survenue</div>
+    <a class="back-link" href="javascript:history.back()">← Retour</a>
+  </div>
+
+  <div id="screenDash">
+
+    <div class="header-controls">
+      <a class="back-btn" href="/menu/listeArtistes.html">← Retour</a>
+      <a id="adminEditBtn" class="admin-btn" href="">✎ Modifier lien et genre</a>
+    </div>
+
+    <div class="hero">
+      <img class="hero-img" id="heroImg" src="" alt="">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-tag">Artiste Spotify</div>
+        <div class="hero-name" id="heroName">—</div>
+        <div class="hero-genre" id="heroGenre">
+          <i class="fa-regular fa-music" style="font-family: 'Font Awesome 6 Free';">🎵</i>
+          <span class="genre-label">genre musical :</span>
+          <span class="genre-value" id="genreValue">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 DERNIERS SINGLES -->
+    <div class="section" style="animation-delay:.05s">
+      <div class="section-label">3 Derniers Singles</div>
+      <div class="card"><div id="singlesList"></div></div>
+    </div>
+
+    <!-- TOP 5 -->
+    <div class="section" style="animation-delay:.1s">
+      <div class="section-label">🔥 Top 5</div>
+      <div class="card"><div id="top5List"></div></div>
+    </div>
+
+    <!-- DERNIER PROJET (album ou EP, le plus récent) -->
+    <div class="section" style="animation-delay:.15s">
+      <div class="section-label" id="projetLabel">Dernier Projet</div>
+      <div class="card">
+        <div class="album-head">
+          <img class="album-cover" id="projetCover" src="" alt="">
+          <div>
+            <div class="album-name" id="projetNom">—</div>
+            <div class="album-meta" id="projetMeta">—</div>
+          </div>
+        </div>
+        <div class="tracklist" id="projetTracklist"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem('accessToken');
+  if (!token) { alert('Connexion requise.'); window.location.href = '/connection/connection.html'; }
+
+  const LOGOS = 'https://raw.githubusercontent.com/djhustla/music-storage/main/logos_reseaux/';
+
+  function player(url, h=152) {
+    if (!url) return '';
+    const enc = encodeURIComponent(url);
+    return `<div class="player-wrap"><iframe src="${url.replace('open.spotify.com/','open.spotify.com/embed/')}" width="100%" height="${h}" frameborder="0" allowtransparency="true" allow="encrypted-media" style="border-radius:10px;display:block;max-width:100%;"></iframe><div class="player-encode-popup"><a class="btn-encode-track" href="/menu/encoder_morceau.html?lienSpotify=${enc}">🎬 Encoder le son</a></div></div>`;
+  }
+  function dur(ms) {
+    if (!ms) return '—';
+    const m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000).toString().padStart(2,'0');
+    return `${m}:${s}`;
+  }
+  function clean(url) { return url ? url.replace(/\n|\r/g,'').trim() : ''; }
+
+  function showError(title, sub) {
+    document.getElementById('screenLoad').style.display='none';
+    document.getElementById('screenDash').style.display='none';
+    document.getElementById('errTitle').textContent=title;
+    document.getElementById('errSub').textContent=sub;
+    document.getElementById('screenError').style.display='flex';
+  }
+
+  function openLink(url) { url=clean(url); if(url) window.open(url,'_blank'); }
+
+  function netInfo(url) {
+    const u=url.toLowerCase();
+    if(u.includes('instagram.com')) return {n:'instagram', logo:LOGOS+'instagram.png'};
+    if(u.includes('facebook.com'))  return {n:'facebook',  logo:LOGOS+'facebook.png'};
+    if(u.includes('tiktok.com'))    return {n:'tiktok',    logo:LOGOS+'tiktok.png'};
+    if(u.includes('snapchat.com'))  return {n:'snapchat',  logo:LOGOS+'snap.png'};
+    if(u.includes('twitter.com')||u.includes('x.com')) return {n:'twitter', logo:LOGOS+'twitter.png'};
+    if(u.includes('spotify.com'))   return {n:'spotify',   logo:LOGOS+'spotify.png'};
+    if(u.includes('youtube.com'))   return {n:'youtube',   custom:'▶',  label:'YouTube'};
+    if(u.includes('whatsapp.com'))  return {n:'whatsapp',  custom:'📱', label:'WhatsApp'};
+    if(u.includes('linkedin.com'))  return {n:'linkedin',  custom:'in', label:'LinkedIn'};
+    if(u.includes('t.me')||u.includes('telegram')) return {n:'telegram',custom:'✈',label:'Telegram'};
+    if(u.includes('soundcloud.com'))return {n:'soundcloud',custom:'♫', label:'SoundCloud'};
+    if(u.includes('mixcloud.com'))  return {n:'mixcloud',  custom:'☁', label:'Mixcloud'};
+    if(u.includes('pinterest.com')) return {n:'pinterest', custom:'P', label:'Pinterest'};
+    return {n:'default', logo:LOGOS+'default.png'};
+  }
+
+  function parseJwt(token) {
+    try { return JSON.parse(atob(token.split('.')[1])); } catch (e) { return null; }
+  }
+
+  function checkAdminAccess(userId) {
+    const payload = parseJwt(token);
+    if (!payload) return;
+    const username = (payload.sub || payload.username || '').toLowerCase();
+    const adminUsernames = ['administrateur', 'doka', 'hustla'];
+    if (adminUsernames.includes(username)) {
+      const btn = document.getElementById('adminEditBtn');
+      btn.href = `/menu/modifier_info_artiste.html?userId=${userId}`;
+      btn.style.display = 'inline-block';
+    }
+  }
+
+  function buildSidebar(listeReseaux) {
+    const sidebar = document.getElementById('sidebarReseaux');
+    sidebar.innerHTML = '';
+    if (!listeReseaux || listeReseaux.trim() === '') return;
+    const urls = listeReseaux.split(';').map(u=>clean(u)).filter(u=>u.length>0);
+    if (!urls.length) return;
+
+    urls.forEach(url => {
+      if (url.toLowerCase().includes('spotify.com')) {
+        return;
+      }
+
+      const i = netInfo(url);
+      const el = document.createElement('a');
+      el.href = 'javascript:void(0)';
+      el.onclick = () => openLink(url);
+
+      if (i.logo) {
+        el.className = 'sb-icon-img';
+        el.setAttribute('data-n', i.n);
+        el.title = i.n;
+        el.innerHTML = `<img src="${i.logo}" alt="${i.n}" onerror="this.src='${LOGOS}default.png'">`;
+      } else {
+        el.className = 'sb-icon-custom';
+        el.setAttribute('data-n', i.n);
+        el.title = i.label;
+        el.innerHTML = `<div class="r-symbol">${i.custom}</div><div class="r-name">${i.label}</div>`;
+      }
+
+      sidebar.appendChild(el);
+    });
+
+    if (sidebar.children.length > 0) {
+      sidebar.classList.add('visible');
+    }
+  }
+
+  // Fonction pour récupérer et afficher le genre musical de l'artiste
+  let cachedGenre = null;
+  let currentArtistUserId = null;
+
+  async function fetchAndDisplayGenre(userId) {
+    const genreValueSpan = document.getElementById('genreValue');
+
+    // Si on a déjà le genre en cache pour cet artiste
+    if (cachedGenre && cachedGenre.userId === userId) {
+      genreValueSpan.textContent = cachedGenre.genre;
+      return;
+    }
+
+    try {
+      // Appel à l'API pour récupérer les favoris musicaux de l'artiste
+      const response = await fetch(`/api/music-favoris/users/${userId}`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des favoris');
+      }
+
+      const favorisList = await response.json();
+
+      // Chercher l'entrée avec cotePreference = 9
+      const favoriWithCote9 = favorisList.find(f => f.cotePreference === 9);
+
+      let genreText = 'Non défini';
+
+      if (favoriWithCote9 && favoriWithCote9.genres && favoriWithCote9.genres.length > 0) {
+        // Récupérer les descriptions des genres
+        const genreNames = favoriWithCote9.genres.map(g => g.description).filter(d => d);
+        if (genreNames.length > 0) {
+          genreText = genreNames.join(', ');
+        }
+      }
+
+      // Mettre en cache
+      cachedGenre = { userId: userId, genre: genreText };
+      genreValueSpan.textContent = genreText;
+
+    } catch (error) {
+      console.error('Erreur fetch genre:', error);
+      genreValueSpan.textContent = 'Erreur';
+    }
+  }
+
+  async function launch() {
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('userId');
+    if (!userId) { showError('Paramètre manquant','userId requis — ex: ?userId=42'); return; }
+
+    currentArtistUserId = userId;
+    checkAdminAccess(userId);
+
+    try {
+      const [rUser, rSp] = await Promise.all([
+        fetch(`/api/users/${userId}`,         {headers:{'Authorization':'Bearer '+token}}).then(r=>r.json()),
+        fetch(`/api/users/spotify/${userId}`, {headers:{'Authorization':'Bearer '+token}}).then(r=>r.json()),
+      ]);
+
+      buildSidebar(rUser.listeReseaux || '');
+
+      const spotifyLink = rSp.spotifyLink ? clean(rSp.spotifyLink) : null;
+      if (!spotifyLink) {
+        showError('Pas de lien Spotify','Cet artiste n\'a pas encore enregistré son lien Spotify.');
+        return;
+      }
+
+      const enc = encodeURIComponent(spotifyLink);
+      const [rA, rS, rP, rT] = await Promise.all([
+        fetch(`/api/spotify/artiste/photo?url=${enc}`).then(r=>r.json()),
+        fetch(`/api/spotify/artiste/les-3-derniers-singles?url=${enc}`).then(r=>r.json()),
+        fetch(`/api/spotify/artiste/dernier-projet?url=${enc}`).then(r=>r.json()),
+        fetch(`/api/spotify/artiste/top5?url=${enc}`).then(r=>r.json()),
+      ]);
+
+      if (rA.success) {
+        document.getElementById('heroImg').src=rA.photoUrl;
+        document.getElementById('heroName').textContent=rA.artistName;
+        document.getElementById('heroBg').style.backgroundImage=`url('${rA.photoUrl}')`;
+      }
+
+      // Récupérer et afficher le genre musical
+      await fetchAndDisplayGenre(userId);
+
+      if (rS.success && rS.singles) {
+        const list=document.getElementById('singlesList');
+        rS.singles.forEach((t,i)=>{
+          const el=document.createElement('div');
+          el.className='top5-item';
+          el.innerHTML=`
+            <div class="top5-row">
+              <span class="top5-rank">${i+1}</span>
+              <img class="top5-cover" src="${t.photoUrl}" alt="">
+              <div class="top5-info">
+                <div class="top5-name">${t.titre}</div>
+                <div class="top5-album">${t.dateSortie||''}</div>
+              </div>
+              <div class="top5-right">
+                <span class="top5-pop-num">${t.popularite}</span>
+                <div class="pop-bar"><div class="pop-fill" style="width:${t.popularite}%"></div></div>
+              </div>
+            </div>
+            <div class="top5-player">${player(t.urlSpotify,80)}</div>`;
+          el.querySelector('.top5-row').addEventListener('click',()=>el.classList.toggle('open'));
+          list.appendChild(el);
+        });
+      }
+
+      if (rT.success && rT.tracks) {
+        const list=document.getElementById('top5List');
+        rT.tracks.forEach((t,i)=>{
+          const el=document.createElement('div');
+          el.className='top5-item';
+          el.innerHTML=`
+            <div class="top5-row">
+              <span class="top5-rank">${i+1}</span>
+              <img class="top5-cover" src="${t.photoUrl}" alt="">
+              <div class="top5-info">
+                <div class="top5-name">${t.nom}</div>
+                <div class="top5-album">${t.albumNom||''}</div>
+              </div>
+              <div class="top5-right">
+                <span class="top5-pop-num">${t.popularite}</span>
+                <div class="pop-bar"><div class="pop-fill" style="width:${t.popularite}%"></div></div>
+              </div>
+            </div>
+            <div class="top5-player">${player(t.urlSpotify,80)}</div>`;
+          el.querySelector('.top5-row').addEventListener('click',()=>el.classList.toggle('open'));
+          list.appendChild(el);
+        });
+      }
+
+      if (rP.success) {
+        const typeLabel = rP.type === 'album' ? 'Album' : 'EP';
+        document.getElementById('projetLabel').innerHTML =
+          'Dernier ' + typeLabel +
+          '<span style="flex:1;height:1px;background:var(--border);margin-left:10px;display:inline-block;vertical-align:middle;"></span>';
+        document.getElementById('projetCover').src        = rP.photoUrl || '';
+        document.getElementById('projetNom').textContent  = rP.titre;
+        document.getElementById('projetMeta').textContent = rP.dateSortie + ' · ' + rP.nbTitres + ' titre' + (rP.nbTitres > 1 ? 's' : '');
+        const tl = document.getElementById('projetTracklist');
+        rP.tracks.forEach(t => {
+          const el = document.createElement('div');
+          el.className = 'track-item';
+          el.innerHTML = `<div class="track-name-row">${t.nom}</div><div class="track-player">${player(t.urlSpotify, 80)}</div>`;
+          el.addEventListener('click', () => el.classList.toggle('open'));
+          tl.appendChild(el);
+        });
+      }
+
+      document.getElementById('screenLoad').style.display='none';
+      document.getElementById('screenDash').style.display='block';
+
+    } catch(e) { showError('Erreur',e.message); }
+  }
+
+  document.addEventListener('DOMContentLoaded', launch);
+</script>
+</body>
+</html>

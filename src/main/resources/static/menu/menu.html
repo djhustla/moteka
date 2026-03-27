@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu Principal</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+    }
+    .menu-container {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+      z-index: 1;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 30px;
+      text-align: center;
+      color: white;
+    }
+    h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+    .subtitle { font-size: 1rem; opacity: 0.9; font-weight: 400; }
+    .user-info {
+      background: rgba(255,255,255,0.2);
+      padding: 10px 15px;
+      border-radius: 50px;
+      display: inline-block;
+      margin-top: 15px;
+      font-size: 0.9rem;
+      backdrop-filter: blur(5px);
+    }
+    .menu-content { padding: 30px; }
+    .menu { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .menu button {
+      padding: 16px 20px;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .menu button::before { content: attr(data-icon); font-size: 1.3rem; }
+    .menu button:not(:disabled) {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+    }
+    .menu button:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+    }
+
+    /* Styles Couleurs Spécifiques */
+    .menu button.encoder-artist-btn:not(:disabled)       { background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%); box-shadow: 0 4px 12px rgba(255,140,0,0.3); }
+    .menu button.auto-encoder-btn:not(:disabled)         { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); box-shadow: 0 4px 12px rgba(17,153,142,0.3); }
+    .menu button.artist-search-btn:not(:disabled)        { background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%); box-shadow: 0 4px 12px rgba(142,45,226,0.3); }
+    .menu button.artist-list-btn:not(:disabled)          { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); box-shadow: 0 4px 12px rgba(106,17,203,0.3); }
+    .menu button.logout-btn:not(:disabled)               { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); box-shadow: 0 4px 12px rgba(255,107,107,0.3); }
+    .menu button.admin-btn:not(:disabled)                { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); box-shadow: 0 4px 12px rgba(240,147,251,0.3); }
+    .menu button.search-btn:not(:disabled)               { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 4px 12px rgba(79,172,254,0.3); }
+    .menu button.music-manager-btn:not(:disabled)        { background: linear-gradient(135deg, #f97316 0%, #f59e0b 100%); box-shadow: 0 4px 12px rgba(249,115,22,0.3); }
+    .menu button.recommandation-btn:not(:disabled)       { background: linear-gradient(135deg, #ec489a 0%, #f43f5e 100%); box-shadow: 0 4px 12px rgba(236,72,154,0.3); }
+
+    .divider { height: 1px; background: linear-gradient(to right, transparent, #e5e7eb, transparent); margin: 20px 0; }
+    .output { background: #f8f9ff; border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center; color: #374151; font-size: 0.95rem; font-weight: 500; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<div class="menu-container">
+  <div class="header">
+    <h1>Menu Principal</h1>
+    <p class="subtitle">Gérez votre espace</p>
+    <div class="user-info" id="userInfo">Chargement...</div>
+  </div>
+
+  <div class="menu-content">
+    <div class="menu">
+      <button id="btnVoirProfil"              data-icon="👤">Mon profil</button>
+
+      <div class="divider" id="divider1"></div>
+      <button id="btnEncoderArtisteMainstream" data-icon="➕" class="encoder-artist-btn">Encoder artiste</button>
+      <button id="btnEncoderArtisteManuel"    data-icon="✍️" class="encoder-artist-btn">Encoder artiste manuel</button>
+      <button id="btnEncodageAutomatique"     data-icon="🤖" class="auto-encoder-btn">Encodage automatique</button>
+      <div class="divider" id="divider2"></div>
+
+      <button id="btnRechercheArtiste"        data-icon="🎤" class="artist-search-btn">Rechercher un titre, album,...</button>
+      <button id="btnListeArtistes"           data-icon="📜" class="artist-list-btn">Liste des artistes</button>
+      <button id="btnAllAboutMusic"           data-icon="🎵">All About Music</button>
+      <button id="btnEcouterMorceau"          data-icon="🎧">Écouter un morceau</button>
+
+      <!-- Encoder une music -->
+      <button id="btnEncoderMusic"             data-icon="🎼" class="encoder-artist-btn">Encoder une music</button>
+
+      <!-- Liste des music -->
+      <button id="btnListeMusic"               data-icon="🎼" class="artist-list-btn">Liste des music</button>
+
+      <!-- NOUVEAU BOUTON : Recommandation -->
+      <button id="btnRecommandation"           data-icon="🎯" class="recommandation-btn">Recommandation</button>
+
+      <button id="btnTeam"                    data-icon="💬">Parler avec ma team</button>
+      <button id="btnRecherche"               data-icon="🔍" class="search-btn">Recherchez quelqu'un...</button>
+      <button id="btnShowUsers"               data-icon="👥">Afficher la liste des utilisateurs</button>
+    </div>
+
+    <div id="adminSection" class="menu" style="display: none;">
+      <div class="divider"></div>
+      <h3 style="text-align:center; margin-bottom:10px; color:#764ba2; font-size:1rem;">Options Administrateur</h3>
+      <button id="btnDeleteUser"   data-icon="🗑️" class="admin-btn">Effacer un utilisateur</button>
+      <button id="btnAddGenre"     data-icon="➕"  class="admin-btn">Ajouter un genre musical</button>
+      <button id="btnListeDetails" data-icon="📋" class="admin-btn">Liste détaillés des users</button>
+      <!-- NOUVEAU BOUTON : Gestion des music (visible uniquement pour les admins) -->
+      <button id="btnGestionMusic" data-icon="🎛️" class="music-manager-btn">Gestion des music</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="menu">
+      <button id="btnLogout" data-icon="🚪" class="logout-btn">Déconnexion</button>
+    </div>
+
+    <div class="output" id="output">Sélectionnez une option ci-dessus</div>
+  </div>
+</div>
+
+<script>
+  const output       = document.getElementById("output");
+  const adminSection = document.getElementById("adminSection");
+  const userInfo     = document.getElementById("userInfo");
+  const token        = localStorage.getItem('accessToken');
+
+  // Récupération des éléments à masquer pour les utilisateurs non autorisés
+  const btnEncoderArtisteMainstream = document.getElementById("btnEncoderArtisteMainstream");
+  const btnEncoderArtisteManuel = document.getElementById("btnEncoderArtisteManuel");
+  const btnEncodageAutomatique = document.getElementById("btnEncodageAutomatique");
+  const divider1 = document.getElementById("divider1");
+  const divider2 = document.getElementById("divider2");
+
+  if (!token) {
+    alert('Vous devez être connecté pour accéder au menu');
+    window.location.href = '/connection/connection.html';
+  }
+
+  let currentUserId   = null;
+  let currentUsername = null;
+
+  async function checkAuth() {
+    try {
+      const response = await fetch('/api/users/me', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!response.ok) throw new Error('Token invalide');
+      const userData  = await response.json();
+      currentUserId   = userData.id;
+      currentUsername = userData.username;
+      userInfo.textContent = `Connecté en tant que : ${currentUsername}`;
+
+      // Vérification des usernames autorisés pour les boutons d'encodage
+      const authorizedUsernames = ["doka", "hustla", "administrateur"];
+
+      if (!authorizedUsernames.includes(currentUsername)) {
+        // Masquer les boutons et les diviseurs
+        btnEncoderArtisteMainstream.style.display = "none";
+        btnEncoderArtisteManuel.style.display = "none";
+        btnEncodageAutomatique.style.display = "none";
+        divider1.style.display = "none";
+        divider2.style.display = "none";
+      }
+
+      // Section admin visible pour les utilisateurs autorisés
+      if (authorizedUsernames.includes(currentUsername)) {
+        adminSection.style.display = "flex";
+      }
+    } catch (err) {
+      localStorage.removeItem('accessToken');
+      window.location.href = '/connection/connection.html';
+    }
+  }
+
+  // --- Événements ---
+  document.getElementById("btnVoirProfil").addEventListener("click", () => { window.location.href = "/menu/profil_menu.html"; });
+  document.getElementById("btnEncoderArtisteMainstream").addEventListener("click", () => { window.location.href = "/menu/encoder_artiste_mainstream.html"; });
+  document.getElementById("btnEncoderArtisteManuel").addEventListener("click", () => { window.location.href = "/menu/encoder_artiste_manuel.html"; });
+  document.getElementById("btnEncodageAutomatique").addEventListener("click", () => { window.location.href = "/menu/encodage_automatique.html"; });
+  document.getElementById("btnRechercheArtiste").addEventListener("click", () => { window.location.href = "/menu/recherche_globale.html"; });
+  document.getElementById("btnListeArtistes").addEventListener("click", () => {
+    output.textContent = "Chargement de la liste des artistes...";
+    setTimeout(() => { window.location.href = "/menu/listeArtistes.html"; }, 300);
+  });
+  document.getElementById("btnAllAboutMusic").addEventListener("click", () => { window.location.href = "/menu/all_about_music.html"; });
+  document.getElementById("btnEcouterMorceau").addEventListener("click", () => { window.location.href = "/menu/ecouter_un_morceau.html"; });
+  document.getElementById("btnEncoderMusic").addEventListener("click", () => {
+    output.textContent = "Redirection vers l'encodeur de musique...";
+    setTimeout(() => { window.location.href = "/menu/encoder_morceau.html"; }, 300);
+  });
+  document.getElementById("btnListeMusic").addEventListener("click", () => {
+    output.textContent = "Chargement de la liste des musiques...";
+    setTimeout(() => { window.location.href = "/menu/liste_music.html"; }, 300);
+  });
+
+  // NOUVEAU BOUTON : Recommandation avec transmission du userId
+  document.getElementById("btnRecommandation").addEventListener("click", () => {
+    if (currentUserId) {
+      output.textContent = "Redirection vers les recommandations...";
+      setTimeout(() => { window.location.href = `/menu/recommandation.html?userId=${currentUserId}`; }, 300);
+    } else {
+      output.textContent = "Erreur : utilisateur non identifié";
+    }
+  });
+
+  document.getElementById("btnTeam").addEventListener("click", () => { window.location.href = "ma_communaute/ma_communaute.html"; });
+  document.getElementById("btnRecherche").addEventListener("click", () => { window.location.href = "/menu/recherche.html"; });
+  document.getElementById("btnShowUsers").addEventListener("click", () => { window.location.href = "/menu/afficherUserList.html"; });
+  document.getElementById("btnDeleteUser").addEventListener("click", () => { window.location.href = "/menu/suppression.html"; });
+  document.getElementById("btnAddGenre").addEventListener("click", () => { window.location.href = "/menu/ajouter_genre_musical.html"; });
+  document.getElementById("btnListeDetails").addEventListener("click", () => { window.location.href = "/menu/liste_users_details.html"; });
+
+  // NOUVEAU BOUTON : Gestion des music
+  document.getElementById("btnGestionMusic").addEventListener("click", () => {
+    output.textContent = "Redirection vers la gestion des musiques...";
+    setTimeout(() => { window.location.href = "/menu/admin_encoder_genre_music.html"; }, 300);
+  });
+
+  document.getElementById("btnLogout").addEventListener("click", async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken })
+    });
+    localStorage.clear();
+    window.location.href = '/connection/connection.html';
+  });
+
+  checkAuth();
+</script>
+</body>
+</html>

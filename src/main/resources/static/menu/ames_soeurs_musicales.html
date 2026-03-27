@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Total - Music Social</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          min-height: 100vh;
+          padding: 15px;
+        }
+        .main-container {
+          width: 100%; max-width: 1000px; margin: 0 auto;
+          background: white; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+          overflow: hidden; min-height: 90vh; display: flex; flex-direction: column;
+        }
+        .header {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          padding: 25px 20px; color: white; text-align: center;
+        }
+        .header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+        .header .subtitle { font-size: 0.9rem; opacity: 0.9; max-width: 500px; margin: 0 auto; }
+
+        /* Barre d'action avec les 3 boutons alignés */
+        .action-buttons {
+          display: flex;
+          justify-content: center;
+          padding: 12px 20px;
+          background: #d1fae5;
+          border-bottom: 2px solid #a7f3d0;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+        .btn {
+          padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 0.85rem;
+          cursor: pointer; transition: all 0.3s; text-decoration: none;
+          display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+          border: 2px solid transparent;
+          flex: 1;
+          min-width: 160px;
+        }
+        .btn-menu { background: #10b981; color: white; }
+        .btn-menu:hover { background: #059669; transform: translateY(-2px); }
+        .btn-prev { background: #059669; color: white; }
+        .btn-prev:hover { background: #047857; transform: translateY(-2px); }
+        .btn-logout { background: #333; color: white; border: none; font-family: inherit; }
+        .btn-logout:hover { background: #222; transform: translateY(-2px); }
+
+        .content { padding: 20px; flex: 1; }
+        .message { padding: 14px; border-radius: 10px; margin-bottom: 15px; border: 2px solid; text-align: center; }
+        .error-message { background: #fee; color: #dc2626; border-color: #fecaca; display: none; }
+        .loading-message { background: #d1fae5; color: #059669; border-color: #a7f3d0; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+        .stats-container { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
+        .stat-card { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; text-align: center; min-width: 120px; }
+        .stat-number { font-size: 1.5rem; font-weight: 700; display: block; }
+        .stat-label { font-size: 0.8rem; opacity: 0.9; }
+
+        .users-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; margin-top: 15px; }
+
+        /* CARTE UTILISATEUR - EXACTEMENT LA MÊME QUE LES AUTRES PAGES */
+        .user-card {
+            background: #f8f9ff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .user-card:hover {
+            border-color: #10b981;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15);
+        }
+
+        /* Photo container - structure identique */
+        .user-photo-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 180px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            background: #eee;
+            border: 3px solid #10b981; /* Couleur adaptée au thème vert */
+        }
+        .user-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* Dégradé vert */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #374151;
+            margin-bottom: 20px;
+            word-break: break-word;
+        }
+
+        .profile-link {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* Dégradé vert */
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .profile-link:hover {
+            filter: brightness(1.1);
+        }
+
+        .empty-state { text-align: center; padding: 30px; color: #6b7280; display: none; }
+        .footer { text-align: center; padding: 12px; color: #6b7280; font-size: 0.8rem; border-top: 2px solid #a7f3d0; margin-top: auto; }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-spinner { width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite; }
+
+        @media (max-width: 768px) {
+          .action-buttons { flex-direction: column; }
+          .btn { width: 100%; }
+          .users-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <div class="header">
+        <h1>💫 Match Total</h1>
+        <p class="subtitle">Personnes avec exactement les mêmes favoris 10/10</p>
+        <div class="stats-container">
+            <div class="stat-card">
+                <span class="stat-number" id="totalUsers">0</span>
+                <span class="stat-label">Matches parfaits</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <a href="/menu/menu.html" class="btn btn-menu">🏠 Retour au menu principal</a>
+        <a href="/menu/connection_musical_menu.html" class="btn btn-prev">⬅️ Menu précédent</a>
+        <button id="logoutBtn" class="btn btn-logout">🚪 Déconnexion</button>
+    </div>
+
+    <div class="content">
+        <div class="message loading-message" id="loadingMessage">
+            <div class="loading-spinner"></div> Recherche des matches...
+        </div>
+        <div class="message error-message" id="errorMessage">
+            ❌ <span id="errorText"></span>
+        </div>
+
+        <div class="users-grid" id="usersGrid"></div>
+
+        <div class="empty-state" id="emptyState">
+            <p>Aucun match parfait trouvé pour le moment.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Mis à jour: <span id="lastUpdate">--:--</span></p>
+    </div>
+</div>
+
+<script>
+    const CONFIG = {
+      apiBaseUrl: '/api/music-favoris',
+      token: localStorage.getItem('accessToken')
+    };
+
+    const DOM = {
+      loadingMessage: document.getElementById('loadingMessage'),
+      errorMessage: document.getElementById('errorMessage'),
+      errorText: document.getElementById('errorText'),
+      usersGrid: document.getElementById('usersGrid'),
+      emptyState: document.getElementById('emptyState'),
+      logoutBtn: document.getElementById('logoutBtn'),
+      totalUsers: document.getElementById('totalUsers'),
+      lastUpdate: document.getElementById('lastUpdate')
+    };
+
+    class MatchTotalManager {
+      constructor() {
+        this.users = [];
+      }
+
+      async init() {
+        if (!CONFIG.token) {
+          window.location.href = '/connection/connection.html';
+          return;
+        }
+        this.setupEventListeners();
+        await this.loadUsers();
+        this.updateLastUpdate();
+      }
+
+      setupEventListeners() {
+        DOM.logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('userData');
+          window.location.href = '/connection/connection.html';
+        });
+      }
+
+      async loadUsers() {
+        try {
+          DOM.loadingMessage.style.display = 'flex';
+          DOM.errorMessage.style.display = 'none';
+          DOM.usersGrid.style.display = 'none';
+          DOM.emptyState.style.display = 'none';
+
+          const response = await fetch(`${CONFIG.apiBaseUrl}/me/match-total`, {
+            headers: { 'Authorization': `Bearer ${CONFIG.token}` }
+          });
+
+          if (response.status === 401) {
+            window.location.href = '/connection/connection.html';
+            return;
+          }
+
+          const data = await response.json();
+          this.users = data.users || [];
+          this.renderUsers();
+          DOM.totalUsers.textContent = data.count || 0;
+
+          if (this.users.length === 0) {
+            DOM.emptyState.style.display = 'block';
+          } else {
+            DOM.usersGrid.style.display = 'grid';
+          }
+
+        } catch (error) {
+          DOM.errorText.textContent = error.message;
+          DOM.errorMessage.style.display = 'block';
+        } finally {
+          DOM.loadingMessage.style.display = 'none';
+        }
+      }
+
+      renderUsers() {
+        DOM.usersGrid.innerHTML = '';
+
+        this.users.forEach(user => {
+            const card = document.createElement('div');
+            card.className = 'user-card';
+
+            // Créer le conteneur de photo (structure identique)
+            const photoContainer = document.createElement('div');
+            photoContainer.className = 'user-photo-container';
+
+            if (user.photoUrl) {
+                const img = document.createElement('img');
+                img.className = 'user-avatar';
+                img.src = user.photoUrl;
+                img.onerror = () => {
+                    // Si l'image échoue, afficher un placeholder avec la première lettre
+                    photoContainer.innerHTML = `
+                        <div class="avatar-placeholder">
+                            ${user.username ? user.username.charAt(0).toUpperCase() : '?'}
+                        </div>
+                    `;
+                };
+                photoContainer.appendChild(img);
+            } else {
+                photoContainer.innerHTML = `
+                    <div class="avatar-placeholder">
+                        ${user.username ? user.username.charAt(0).toUpperCase() : '?'}
+                    </div>
+                `;
+            }
+
+            // Créer le nom
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'user-name';
+            nameDiv.textContent = user.username || 'Utilisateur';
+
+            // Créer le lien
+            const link = document.createElement('a');
+            link.href = `/menu/profil_user.html?userId=${encodeURIComponent(user.id)}`;
+            link.className = 'profile-link';
+            link.textContent = '👤 Voir le profil';
+
+            // Assembler la carte (structure identique)
+            card.appendChild(photoContainer);
+            card.appendChild(nameDiv);
+            card.appendChild(link);
+
+            DOM.usersGrid.appendChild(card);
+        });
+      }
+
+      updateLastUpdate() {
+        DOM.lastUpdate.textContent = new Date().toLocaleTimeString('fr-FR', {
+          hour: '2-digit', minute: '2-digit'
+        });
+      }
+
+      escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      new MatchTotalManager().init();
+    });
+</script>
+</body>
+</html>

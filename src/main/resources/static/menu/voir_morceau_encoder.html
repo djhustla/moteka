@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Détails du Morceau — Moteka</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+        --sp: #1DB954;
+        --bg: #060606;
+        --card-bg: #121212;
+        --text: #ffffff;
+        --muted: rgba(255, 255, 255, 0.5);
+        --border: rgba(255, 255, 255, 0.08);
+        --edit: #3b82f6;
+        --gold: #FBBF24;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+        font-family: 'Syne', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        margin: 0;
+        padding: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    /* ── BOUTONS MENU FIXES ── */
+    .btn-menu-fixed {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 1000;
+        background: var(--sp);
+        color: #000;
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        font-size: 0.85rem;
+        padding: 10px 20px;
+        border-radius: 30px;
+        text-decoration: none;
+        box-shadow: 0 4px 16px rgba(29,185,84,.4);
+        transition: background .2s, transform .2s;
+    }
+    .btn-menu-fixed:hover {
+        background: #1ed760;
+        transform: translateY(-2px);
+    }
+
+    .btn-edit-fixed {
+        position: fixed;
+        top: 16px;
+        right: 116px;
+        z-index: 1000;
+        background: var(--edit);
+        color: #fff;
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        font-size: 0.85rem;
+        padding: 10px 20px;
+        border-radius: 30px;
+        text-decoration: none;
+        box-shadow: 0 4px 16px rgba(59,130,246,.4);
+        transition: background .2s, transform .2s;
+    }
+    .btn-edit-fixed:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 480px) {
+        .btn-menu-fixed, .btn-edit-fixed {
+            font-size: 0.7rem;
+            padding: 8px 14px;
+        }
+        .btn-edit-fixed {
+            right: 100px;
+        }
+    }
+
+    .container {
+        width: 100%;
+        max-width: 900px;
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        display: none;
+    }
+
+    .header {
+        position: relative;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    @media (min-width: 768px) {
+        .header {
+            flex-direction: row;
+            text-align: left;
+            padding: 60px 50px;
+            gap: 40px;
+        }
+    }
+
+    .header-bg {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        filter: blur(50px) brightness(0.3);
+        z-index: 0;
+        transform: scale(1.2);
+    }
+
+    .track-photo {
+        width: 160px;
+        height: 160px;
+        border-radius: 12px;
+        object-fit: cover;
+        position: relative;
+        z-index: 1;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    }
+
+    @media (min-width: 768px) {
+        .track-photo { width: 220px; height: 220px; }
+    }
+
+    .track-info {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+    }
+
+    .track-title {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: clamp(2rem, 8vw, 4.5rem);
+        line-height: 0.9;
+        margin: 0;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        word-break: break-word;
+    }
+
+    .track-meta {
+        font-family: 'DM Mono', monospace;
+        color: var(--sp);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 0.8rem;
+        margin-top: 15px;
+        font-weight: 600;
+    }
+
+    /* Nouvelle section pour le genre et la note */
+    .track-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 12px;
+        align-items: center;
+    }
+
+    .track-genre {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(29, 185, 84, 0.15);
+        padding: 6px 14px;
+        border-radius: 40px;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.7rem;
+        color: var(--sp);
+        border: 1px solid rgba(29, 185, 84, 0.3);
+    }
+
+    .track-genre i {
+        font-size: 0.75rem;
+    }
+
+    .track-note {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(251, 191, 36, 0.15);
+        padding: 6px 14px;
+        border-radius: 40px;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.7rem;
+        color: var(--gold);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .track-note i {
+        font-size: 0.75rem;
+        color: var(--gold);
+    }
+
+    .content {
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    @media (min-width: 768px) {
+        .content { padding: 40px; }
+    }
+
+    .section-label {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        letter-spacing: 2px;
+    }
+
+    .section-label::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+    .media-box {
+        background: rgba(255,255,255,0.03);
+        border-radius: 15px;
+        padding: 10px;
+        border: 1px solid var(--border);
+    }
+
+    iframe {
+        border-radius: 10px;
+        border: none;
+        display: block;
+        width: 100%;
+    }
+
+    .video-wrapper {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%;
+        height: 0;
+    }
+
+    .video-wrapper iframe {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+    }
+
+    #status-msg {
+        font-family: 'DM Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        font-size: 0.8rem;
+        text-align: center;
+    }
+
+    .error-msg {
+        color: #ff4444;
+        border: 1px solid #ff4444;
+        padding: 20px;
+        border-radius: 10px;
+        word-break: break-word;
+    }
+
+    /* Responsive supplémentaire */
+    @media (max-width: 480px) {
+        .track-details {
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .track-genre, .track-note {
+            padding: 4px 10px;
+            font-size: 0.6rem;
+        }
+
+        .track-genre i, .track-note i {
+            font-size: 0.65rem;
+        }
+
+        .content {
+            padding: 16px;
+            gap: 20px;
+        }
+
+        .section-label {
+            font-size: 0.55rem;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .track-details {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .track-genre, .track-note {
+            width: auto;
+        }
+    }
+  </style>
+</head>
+<body>
+
+<!-- BOUTONS MENU FIXES -->
+<a href="/menu/menu.html" class="btn-menu-fixed">MENU</a>
+<a href="/menu/modifier_morceau.html" id="btnEdit" class="btn-edit-fixed">MODIFIER</a>
+
+<div id="status-msg">Initialisation...</div>
+
+<div class="container" id="musicCard">
+  <div class="header">
+    <div class="header-bg" id="bgBlur"></div>
+    <img src="" alt="Cover" class="track-photo" id="trackImg">
+    <div class="track-info">
+      <h1 class="track-title" id="title">—</h1>
+      <div class="track-details" id="trackDetails">
+        <span class="track-genre" id="trackGenre">
+          <i class="fa-regular fa-music" style="font-family: 'Font Awesome 6 Free';">🎵</i>
+          <span id="genreValue">—</span>
+        </span>
+        <span class="track-note" id="trackNote">
+          <i class="fa-regular fa-star" style="font-family: 'Font Awesome 6 Free';">⭐</i>
+          <span id="noteValue">—</span>
+        </span>
+      </div>
+      <div class="track-meta" id="meta">CHARGEMENT...</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div id="spotifySection">
+      <span class="section-label">Streaming</span>
+      <div class="media-box" id="spotifyPlayer"></div>
+    </div>
+
+    <div id="youtubeSection">
+      <span class="section-label">Visuals</span>
+      <div class="media-box">
+        <div class="video-wrapper">
+          <iframe id="ytPlayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function getSpotifyEmbed(url) {
+      if (!url) return null;
+      return url.replace('open.spotify.com/track/', 'open.spotify.com/embed/track/');
+  }
+
+  function getYoutubeId(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+  }
+
+  async function init() {
+      const status = document.getElementById('status-msg');
+      const card = document.getElementById('musicCard');
+
+      const params = new URLSearchParams(window.location.search);
+      const musicId = params.get('musicId');
+
+      // Mise à jour du lien du bouton Modifier avec le musicId
+      const btnEdit = document.getElementById('btnEdit');
+      if (btnEdit && musicId) {
+          btnEdit.href = `/menu/modifier_morceau.html?musicId=${encodeURIComponent(musicId)}`;
+      }
+
+      if (!musicId) {
+          status.innerHTML = "<div class='error-msg'>Erreur : musicId manquant dans l'URL.</div>";
+          return;
+      }
+
+      status.innerText = "Chargement du morceau...";
+
+      try {
+          const response = await fetch(`/api/music/${musicId}`, {
+              headers: { 'Authorization': 'Bearer ' + localStorage.getItem('accessToken') }
+          });
+
+          if (!response.ok) throw new Error("Le morceau est introuvable");
+
+          const data = await response.json();
+
+          // Titre
+          document.getElementById('title').innerText = data.titre || "Untitled";
+
+          // Meta (popularité)
+          document.getElementById('meta').innerHTML = `Popularité Spotify : ${data.popularite || 0}%`;
+
+          // Genre musical
+          const genreValue = data.genreMusical;
+          const genreSpan = document.getElementById('genreValue');
+          if (genreValue && genreValue.trim() !== "") {
+              genreSpan.textContent = genreValue;
+          } else {
+              genreSpan.textContent = "Non défini";
+          }
+
+          // Note
+          const noteValue = data.note;
+          const noteSpan = document.getElementById('noteValue');
+          if (noteValue !== undefined && noteValue !== null && noteValue !== 0) {
+              noteSpan.textContent = `${noteValue}/10`;
+          } else {
+              noteSpan.textContent = "Non noté";
+          }
+
+          // Image
+          const img = data.urlImageSpotify || 'https://via.placeholder.com/500x500?text=No+Cover';
+          document.getElementById('trackImg').src = img;
+          document.getElementById('bgBlur').style.backgroundImage = `url('${img}')`;
+
+          // Spotify
+          const spotLink = getSpotifyEmbed(data.lienSpotify);
+          if (spotLink) {
+              document.getElementById('spotifyPlayer').innerHTML =
+                  `<iframe src="${spotLink}" width="100%" height="80" frameBorder="0" allow="encrypted-media" style="border-radius:10px;"></iframe>`;
+          } else {
+              document.getElementById('spotifySection').style.display = 'none';
+          }
+
+          // YouTube
+          const ytId = getYoutubeId(data.lienYoutube);
+          if (ytId) {
+              document.getElementById('ytPlayer').src = `https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1`;
+          } else {
+              document.getElementById('youtubeSection').style.display = 'none';
+          }
+
+          status.style.display = 'none';
+          card.style.display = 'block';
+
+      } catch (err) {
+          status.innerHTML = `<div class='error-msg'>${err.message}</div>`;
+      }
+  }
+
+  window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

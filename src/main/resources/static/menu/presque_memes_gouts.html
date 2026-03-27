@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goûts +/- Similaires</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background: #f8f9ff;
+            border-bottom: 2px solid #e5e7eb;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            flex: 1;
+            min-width: 160px;
+            gap: 8px;
+        }
+
+        .btn-main {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-prev {
+            background: #764ba2;
+            color: white;
+        }
+
+        .btn-logout {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .content {
+            padding: 30px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid;
+            text-align: center;
+            display: none;
+        }
+
+        .loading-message {
+            background: #e0f2fe;
+            color: #0369a1;
+            border-color: #bae6fd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+
+        .info-message {
+            background: #f0fff4;
+            color: #38a169;
+            border-color: #9ae6b4;
+            display: none;
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .user-card {
+            background: #f8f9ff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .user-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .user-photo-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 180px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            background: #eee;
+            border: 3px solid #667eea;
+        }
+
+        .user-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #374151;
+            margin-bottom: 15px;
+            word-break: break-word;
+        }
+
+        .profile-link {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .profile-link:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .music-info {
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #6b7280;
+            padding: 8px 12px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+            display: none;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+
+        .empty-state p {
+            margin-bottom: 25px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .refresh-btn {
+            cursor: pointer;
+            padding: 12px 28px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: #6b7280;
+            font-size: 0.85rem;
+            border-top: 2px solid #e5e7eb;
+            margin-top: auto;
+            background: #f9fafb;
+        }
+
+        .last-update {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #0369a1;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .users-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                border-radius: 16px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .user-card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <div class="header">
+        <h1>🎵 Goûts +/- Similaires</h1>
+        <p class="subtitle">Découvrez les utilisateurs avec des goûts musicaux proches des vôtres</p>
+    </div>
+
+    <div class="action-buttons">
+        <a href="/menu/menu.html" class="btn btn-main">🏠 Retour au menu principal</a>
+        <a href="/menu/connection_musical_menu.html" class="btn btn-prev">⬅️ Menu précédent</a>
+        <button id="logoutBtn" class="btn btn-logout">🚪 Déconnexion</button>
+    </div>
+
+    <div class="content">
+        <div class="message loading-message" id="loadingMessage">
+            <div class="loading-spinner"></div>
+            <span>Recherche des utilisateurs...</span>
+        </div>
+
+        <div class="message error-message" id="errorMessage">
+            ❌ <span id="errorText"></span>
+            <button onclick="location.reload()" style="margin-left: 15px; padding: 6px 12px; border-radius: 6px; border: none; background: #dc2626; color: white; cursor: pointer;">
+                Réessayer
+            </button>
+        </div>
+
+        <div class="message info-message" id="infoMessage">
+            ✅ <span id="infoText"></span>
+        </div>
+
+        <div class="users-grid" id="usersGrid"></div>
+
+        <div class="empty-state" id="emptyState">
+            <h3>🎧 Aucun utilisateur trouvé</h3>
+            <p>Aucun utilisateur avec des goûts musicaux similaires n'a été trouvé pour le moment.</p>
+            <button onclick="location.reload()" class="refresh-btn">
+                🔄 Actualiser la recherche
+            </button>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p class="last-update">⏱️ Mis à jour: <span id="lastUpdate">--:--</span></p>
+    </div>
+</div>
+
+<script>
+    const CONFIG = {
+        apiBaseUrl: '/api/music-favoris',
+        token: localStorage.getItem('accessToken')
+    };
+
+    const DOM = {
+        loadingMessage: document.getElementById('loadingMessage'),
+        errorMessage: document.getElementById('errorMessage'),
+        errorText: document.getElementById('errorText'),
+        infoMessage: document.getElementById('infoMessage'),
+        infoText: document.getElementById('infoText'),
+        usersGrid: document.getElementById('usersGrid'),
+        emptyState: document.getElementById('emptyState'),
+        logoutBtn: document.getElementById('logoutBtn'),
+        lastUpdate: document.getElementById('lastUpdate')
+    };
+
+    class GoutsSimilairesManager {
+        constructor() {
+            this.init();
+        }
+
+        async init() {
+            if (!CONFIG.token) {
+                window.location.href = '/connection/connection.html';
+                return;
+            }
+
+            this.setupEventListeners();
+            await this.loadSimilarUsers();
+            this.updateTime();
+        }
+
+        setupEventListeners() {
+            DOM.logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userData');
+                window.location.href = '/connection/connection.html';
+            });
+        }
+
+        async loadSimilarUsers() {
+            try {
+                DOM.loadingMessage.style.display = 'flex';
+                DOM.errorMessage.style.display = 'none';
+                DOM.infoMessage.style.display = 'none';
+                DOM.usersGrid.style.display = 'none';
+                DOM.emptyState.style.display = 'none';
+
+                const response = await fetch(`${CONFIG.apiBaseUrl}/me/concordence-moyenne`, {
+                    headers: { 'Authorization': `Bearer ${CONFIG.token}` }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('accessToken');
+                    window.location.href = '/connection/connection.html';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Erreur serveur');
+                }
+
+                DOM.loadingMessage.style.display = 'none';
+
+                const users = data.users || [];
+
+                if (users.length > 0) {
+                    this.renderUsers(users);
+                    this.showInfo(`${users.length} utilisateur${users.length > 1 ? 's' : ''} trouvé${users.length > 1 ? 's' : ''}`, 3000);
+                } else {
+                    DOM.emptyState.style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                DOM.loadingMessage.style.display = 'none';
+                DOM.errorText.textContent = error.message || 'Erreur de connexion au serveur';
+                DOM.errorMessage.style.display = 'block';
+            }
+        }
+
+        renderUsers(users) {
+            DOM.usersGrid.innerHTML = '';
+            DOM.usersGrid.style.display = 'grid';
+
+            users.forEach(user => {
+                const card = document.createElement('div');
+                card.className = 'user-card';
+
+                const photoContainer = document.createElement('div');
+                photoContainer.className = 'user-photo-container';
+
+                if (user.photoUrl) {
+                    const img = document.createElement('img');
+                    img.className = 'user-avatar';
+                    img.src = user.photoUrl;
+                    img.alt = `Photo de ${user.username}`;
+                    img.onerror = () => {
+                        photoContainer.innerHTML = `
+                            <div class="avatar-placeholder">
+                                ${user.username ? user.username.charAt(0).toUpperCase() : '?'}
+                            </div>
+                        `;
+                    };
+                    photoContainer.appendChild(img);
+                } else {
+                    photoContainer.innerHTML = `
+                        <div class="avatar-placeholder">
+                            ${user.username ? user.username.charAt(0).toUpperCase() : '?'}
+                        </div>
+                    `;
+                }
+
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'user-name';
+                nameDiv.textContent = user.username || 'Utilisateur';
+
+                const musicInfo = document.createElement('div');
+                musicInfo.className = 'music-info';
+                musicInfo.textContent = 'Goûts musicaux similaires';
+
+                const link = document.createElement('a');
+                link.href = `/menu/profil_user.html?userId=${encodeURIComponent(user.id)}`;
+                link.className = 'profile-link';
+                link.textContent = '👤 Voir le profil';
+
+                card.appendChild(photoContainer);
+                card.appendChild(nameDiv);
+                card.appendChild(musicInfo);
+                card.appendChild(link);
+
+                DOM.usersGrid.appendChild(card);
+            });
+        }
+
+        showInfo(message, duration = 3000) {
+            DOM.infoText.textContent = message;
+            DOM.infoMessage.style.display = 'block';
+            setTimeout(() => {
+                DOM.infoMessage.style.display = 'none';
+            }, duration);
+        }
+
+        updateTime() {
+            const now = new Date();
+            DOM.lastUpdate.textContent = now.toLocaleTimeString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        new GoutsSimilairesManager();
+    });
+</script>
+</body>
+</html>

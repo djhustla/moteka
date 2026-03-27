@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All About Music</title>
+    <style>
+        * {
+          margin:0;
+          padding:0;
+          box-sizing:border-box;
+        }
+
+        body {
+          font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height:100vh;
+          display:flex;
+          justify-content:center;
+          align-items:center;
+          padding:20px;
+          position:relative;
+        }
+
+        /* Boutons fixes en haut - Style amélioré */
+        .fixed-header {
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 15px;
+          padding: 0;
+          background: transparent;
+          z-index: 1000;
+          flex-wrap: wrap;
+          justify-content: center;
+          max-width: 90%;
+        }
+
+        .fixed-header button {
+          padding: 12px 20px;
+          border: none;
+          border-radius: 12px;
+          font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-family: inherit;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+          white-space: nowrap;
+        }
+
+        .fixed-header button::before {
+          font-size: 1.1rem;
+        }
+
+        .btn-retour {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        }
+
+        .btn-retour:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+        }
+
+        .btn-deconnexion {
+          background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+          color: white;
+        }
+
+        .btn-deconnexion:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Responsive pour petits écrans */
+        @media (max-width: 480px) {
+          .fixed-header {
+            top: 15px;
+            gap: 10px;
+          }
+
+          .fixed-header button {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+          }
+        }
+
+        /* Menu principal */
+        .menu-container {
+          background:white;
+          border-radius:24px;
+          box-shadow:0 20px 60px rgba(0,0,0,0.3);
+          overflow:hidden;
+          width:100%;
+          max-width:500px;
+          position:relative;
+          z-index:1;
+          margin-top: 80px;
+        }
+
+        .header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          padding:50px 30px;
+          text-align:center;
+          color:white;
+        }
+
+        h1 {
+          font-size:2.5rem;
+          font-weight:700;
+          margin-bottom:8px;
+          letter-spacing:-0.5px;
+        }
+
+        .subtitle {
+          font-size:1rem;
+          opacity:0.9;
+          font-weight:400;
+        }
+
+        .menu-content {
+          padding:30px;
+        }
+
+        .menu {
+          display:flex;
+          flex-direction:column;
+          gap:14px;
+          margin-bottom:25px;
+        }
+
+        .menu button {
+          padding:16px 20px;
+          border:none;
+          border-radius:14px;
+          font-size:1.1rem;
+          font-weight:600;
+          cursor:pointer;
+          transition: all 0.3s;
+          font-family:inherit;
+          text-align:left;
+          display:flex;
+          align-items:center;
+          gap:12px;
+          position:relative;
+        }
+
+        .menu button::before {
+          content:attr(data-icon);
+          font-size:1.3rem;
+        }
+
+        .menu button:not(:disabled) {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color:white;
+          box-shadow:0 4px 12px rgba(102,126,234,0.3);
+        }
+
+        .menu button:not(:disabled):hover {
+          transform:translateY(-2px);
+          box-shadow:0 6px 20px rgba(102,126,234,0.4);
+        }
+
+        .menu button:not(:disabled):active {
+          transform:translateY(0);
+        }
+
+        /* Style spécial pour le bouton de connexion musicale */
+        .menu button.music-connection:not(:disabled) {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          box-shadow:0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        .menu button.music-connection:not(:disabled):hover {
+          box-shadow:0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Style pour bouton désactivé */
+        .menu button:disabled {
+          background: #e5e7eb;
+          color: #9ca3af;
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+
+        .divider {
+          height:1px;
+          background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+          margin:25px 0;
+        }
+
+        .output {
+          background:#f8f9ff;
+          border:2px solid #e5e7eb;
+          border-radius:12px;
+          padding:16px;
+          text-align:center;
+          color:#374151;
+          font-size:0.95rem;
+          font-weight:500;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Boutons fixes en haut -->
+<div class="fixed-header">
+    <button id="btnRetour" class="btn-retour" data-icon="⬅️">Retour au menu principal</button>
+    <button id="btnDeconnexion" class="btn-deconnexion" data-icon="🚪">Déconnexion</button>
+</div>
+
+<div class="menu-container">
+    <div class="header">
+        <h1>All About Music</h1>
+        <p class="subtitle">Explorez votre univers musical</p>
+    </div>
+
+    <div class="menu-content">
+        <div class="menu">
+            <!-- Bouton 1: Encoder - modifier vos préférences musicales -->
+            <button id="btnPreferences" data-icon="🎵">Mes gouts musicaux</button>
+
+            <!-- Bouton 2: Connecte toi avec ceux qui aime les memes musique que toi -->
+            <button id="btnConnectionMusicale" data-icon="👥" class="music-connection">Rencontre ceux qui aiment les mêmes gouts que toi(ou pas)</button>
+
+            <!-- Bouton 3: Ecouter des Playlists et Set DJ -->
+            <button id="btnPlaylists" data-icon="🎧">Ecouter des Playlists et Set DJ</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="output" id="output">Sélectionnez une option musicale ci-dessus</div>
+    </div>
+</div>
+
+<script>
+    const output = document.getElementById("output");
+
+    // Vérifier l'authentification
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      alert('Vous devez être connecté pour accéder à cette page');
+      window.location.href = '/connection/connection.html';
+    }
+
+    // Bouton Retour au menu principal
+    document.getElementById("btnRetour").addEventListener("click", () => {
+      window.location.href = "/menu/menu.html";
+    });
+
+    // Bouton Déconnexion
+    document.getElementById("btnDeconnexion").addEventListener("click", async () => {
+      const refreshToken = localStorage.getItem('refreshToken');
+
+      try {
+        const response = await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify({ refreshToken })
+        });
+
+        if (response.ok) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('currentUserData');
+          alert('Déconnexion réussie');
+          window.location.href = '/index.html';
+        } else {
+          alert('Erreur lors de la déconnexion');
+        }
+      } catch (err) {
+        alert('Erreur réseau lors de la déconnexion');
+      }
+    });
+
+    // Bouton 1: Encoder - modifier vos préférences musicales
+    document.getElementById("btnPreferences").addEventListener("click", () => {
+      output.textContent = "Ouverture des préférences musicales...";
+      setTimeout(() => {
+        window.location.href = "/menu/encoder_gouts_musicaux.html";
+      }, 300);
+    });
+
+    // Bouton 2: Connecte toi avec ceux qui aime les memes musique que toi
+    document.getElementById("btnConnectionMusicale").addEventListener("click", () => {
+      output.textContent = "Ouverture des connexions musicales...";
+      setTimeout(() => {
+        window.location.href = "/menu/connection_musical_menu.html";
+      }, 300);
+    });
+
+    // Bouton 3: Ecouter des Playlists et Set DJ
+    document.getElementById("btnPlaylists").addEventListener("click", () => {
+      output.textContent = "Ouverture des playlists et sets DJ...";
+      setTimeout(() => {
+        window.location.href = "/menu/playlist_mixtape.html";
+      }, 300);
+    });
+</script>
+
+</body>
+</html>

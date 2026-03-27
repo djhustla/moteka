@@ -1,0 +1,229 @@
+package main.EnvoiFichiersFTP;
+
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.*;
+import com.dropbox.core.v2.sharing.*;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+public class DropboxListerDossierPartage {
+
+    // ====================================================
+    // 1. PARTIE : GÉNÉRATION DU TOKEN D'ACCÈS
+    // ====================================================
+    private static String genererTokenDropBox() throws IOException, InterruptedException, URISyntaxException {
+        String APP_KEY = "ee8ls3to59pj4n7";
+        String APP_SECRET = "0e03idj50kpfjlv";
+        String REDIRECT_URI = "http://localhost:8080/callback";
+
+        String authBaseUrl = "https://www.dropbox.com/oauth2/authorize";
+        String generateAuthUrl = authBaseUrl + "?response_type=code"
+                + "&client_id=" + URLEncoder.encode(APP_KEY, StandardCharsets.UTF_8)
+                + "&redirect_uri=" + URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8);
+
+        System.out.println("[1/4] 🔗 Ouverture du navigateur pour l'authentification...");
+        if (Desktop.isDesktopSupported()) {
+            Desktop.getDesktop().browse(new URI(generateAuthUrl));
+        }
+
+        com.sun.net.httpserver.HttpServer server = com.sun.net.httpserver.HttpServer.create(new InetSocketAddress(8080), 0);
+        final String[] authorizationCode = new String[1];
+        server.createContext("/callback", exchange -> {
+            String query = exchange.getRequestURI().getQuery();
+            if (query != null && query.contains("code=")) {
+                authorizationCode[0] = query.split("code=")[1].split("&")[0];
+                String response = "Code reçu ! Tu peux fermer cet onglet.";
+                try {
+                    exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
+                    exchange.getResponseBody().write(response.getBytes(StandardCharsets.UTF_8));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    exchange.close();
+                }
+                server.stop(0);
+            }
+        });
+        server.start();
+        System.out.println("[2/4] ⏳ En attente de l'autorisation sur http://localhost:8080/callback...");
+        while (authorizationCode[0] == null) {
+            Thread.sleep(500);
+        }
+        String code = authorizationCode[0];
+
+        String tokenUrl = "https://api.dropboxapi.com/oauth2/token";
+        String params = "code=" + URLEncoder.encode(code, StandardCharsets.UTF_8)
+                + "&grant_type=authorization_code"
+                + "&client_id=" + URLEncoder.encode(APP_KEY, StandardCharsets.UTF_8)
+                + "&client_secret=" + URLEncoder.encode(APP_SECRET, StandardCharsets.UTF_8)
+                + "&redirect_uri=" + URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8);
+
+        HttpURLConnection conn = (HttpURLConnection) new URL(tokenUrl).openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(params.getBytes(StandardCharsets.UTF_8));
+        }
+
+        StringBuilder response = new StringBuilder();
+        try (Scanner scanner = new Scanner(conn.getInputStream())) {
+            while (scanner.hasNextLine()) {
+                response.append(scanner.nextLine());
+            }
+        }
+
+        org.json.JSONObject json = new org.json.JSONObject(response.toString());
+        if (json.has("access_token")) {
+            System.out.println("[3/4] ✅ Token d'accès généré avec succès !");
+            return json.getString("access_token");
+        } else {
+            throw new IOException("❌ Échec de génération du token. Réponse : " + response);
+        }
+    }
+
+    // ====================================================
+    // 2. PARTIE : LISTER LE DOSSIER PARTAGÉ ET CRÉER LES LIENS
+    // ====================================================
+
+    /**
+     * Extrait le chemin Dropbox à partir d'un lien de partage public
+     */
+    private static String extraireCheminDepuisLienPublic(DbxClientV2 client, String lienPublic) throws DbxException {
+        try {
+            // Utiliser l'API pour obtenir les métadonnées du lien partagé
+            SharedLinkMetadata metadata = client.sharing().getSharedLinkMetadata(lienPublic);
+
+            if (metadata instanceof FolderLinkMetadata) {
+                // C'est un dossier, retourner le chemin
+                return ((FolderLinkMetadata) metadata).getPathLower();
+            } else if (metadata instanceof FileLinkMetadata) {
+                // C'est un fichier
+                return ((FileLinkMetadata) metadata).getPathLower();
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Impossible d'extraire le chemin depuis le lien : " + e.getMessage());
+        }
+        return "/"; // Par défaut, racine
+    }
+
+    public static Map<String, String> listerDossierPartageEtCreerLiens(String accessToken, String lienPublicDossier) throws DbxException {
+        Map<String, String> fichiersAvecLiens = new LinkedHashMap<>();
+
+        DbxRequestConfig config = DbxRequestConfig.newBuilder("DropboxListerApp/1.0").build();
+        DbxClientV2 client = new DbxClientV2(config, accessToken);
+
+        System.out.println("[4/4] 📂 Connexion à Dropbox et listage du dossier...");
+
+        // MÉTHODE CORRIGÉE : Utiliser listFolderBuilder avec le lien partagé
+        String cheminDossier = extraireCheminDepuisLienPublic(client, lienPublicDossier);
+        System.out.println("   📁 Chemin du dossier : " + cheminDossier);
+
+        // Lister le contenu du dossier
+        ListFolderResult result = client.files().listFolderBuilder(cheminDossier)
+                .withRecursive(false)
+                .start();
+
+        // Gestion de la pagination
+        while (true) {
+            for (Metadata entree : result.getEntries()) {
+                if (entree instanceof FileMetadata) {
+                    FileMetadata fichier = (FileMetadata) entree;
+                    String cheminFichier = fichier.getPathLower();
+                    String nomFichier = fichier.getName();
+
+                    try {
+                        String lienPartage = obtenirOuCreerLienPartage(client, cheminFichier);
+                        fichiersAvecLiens.put(nomFichier, lienPartage);
+                        System.out.println("   ✅ Traité : " + nomFichier);
+                    } catch (DbxException e) {
+                        System.err.println("   ❌ Erreur pour '" + nomFichier + "' : " + e.getMessage());
+                        fichiersAvecLiens.put(nomFichier, "ERREUR : " + e.getMessage());
+                    }
+                }
+            }
+            if (!result.getHasMore()) break;
+            result = client.files().listFolderContinue(result.getCursor());
+        }
+        return fichiersAvecLiens;
+    }
+
+    private static String obtenirOuCreerLienPartage(DbxClientV2 client, String cheminFichierDropbox) throws DbxException {
+        // 1. Chercher un lien partagé existant
+        try {
+            ListSharedLinksResult liensExistants = client.sharing().listSharedLinksBuilder()
+                    .withPath(cheminFichierDropbox)
+                    .withDirectOnly(true)
+                    .start();
+            if (!liensExistants.getLinks().isEmpty()) {
+                return liensExistants.getLinks().get(0).getUrl().replace("?dl=0", "?raw=1");
+            }
+        } catch (Exception e) {
+            // Aucun lien trouvé, continuer
+        }
+
+        // 2. Créer un nouveau lien
+        try {
+            SharedLinkMetadata nouveauLien = client.sharing().createSharedLinkWithSettings(cheminFichierDropbox);
+            return nouveauLien.getUrl().replace("?dl=0", "?raw=1");
+        } catch (Exception e) {
+            // Si erreur de création, essayer de récupérer le lien existant autrement
+            ListSharedLinksResult liens = client.sharing().listSharedLinksBuilder()
+                    .withPath(cheminFichierDropbox)
+                    .start();
+            if (!liens.getLinks().isEmpty()) {
+                return liens.getLinks().get(0).getUrl().replace("?dl=0", "?raw=1");
+            }
+            throw e;
+        }
+    }
+
+    // ====================================================
+    // 3. PARTIE : POINT D'ENTRÉE (main)
+    // ====================================================
+    public static void main(String[] args) {
+        try {
+            System.out.println("🚀 Démarrage du programme Dropbox Lister...");
+            System.out.println("=".repeat(50));
+
+            // Étape 1 : Obtenir un token d'accès valide
+            String accessToken = genererTokenDropBox();
+
+            // Étape 2 : Lien du dossier partagé
+            String lienDossierCible = "https://www.dropbox.com/scl/fo/p2uyk3gpy3cbcj8hf3ah5/ALr0jVmJkxdoUckJskrW49A?rlkey=uix0zs0wi9h5fqtz2l7lyidaq&st=e1yb3j39&dl=0";
+
+            // Étape 3 : Appeler la fonction principale
+            System.out.println("\n📋 LISTE DES FICHIERS ET LEURS LIENS :");
+            System.out.println("=".repeat(50));
+
+            Map<String, String> resultats = listerDossierPartageEtCreerLiens(accessToken, lienDossierCible);
+
+            // Étape 4 : Afficher les résultats
+            if (resultats.isEmpty()) {
+                System.out.println("ℹ️  Le dossier semble vide.");
+            } else {
+                int compteur = 1;
+                for (Map.Entry<String, String> entree : resultats.entrySet()) {
+                    System.out.println("\n" + compteur + ". 📄 " + entree.getKey());
+                    System.out.println("   🔗 " + entree.getValue());
+                    compteur++;
+                }
+                System.out.println("\n✅ Opération terminée ! " + resultats.size() + " fichier(s) listé(s).");
+            }
+
+        } catch (Exception e) {
+            System.err.println("\n💥 ERREUR CRITIQUE :");
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "Échec de l'exécution : " + e.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}

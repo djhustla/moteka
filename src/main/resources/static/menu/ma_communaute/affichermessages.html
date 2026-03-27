@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fil d'Actualité - Multi-Média</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #18181f;
+      --surface3: #1e1e28;
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.14);
+      --accent: #7c6af7;
+      --accent2: #f7716a;
+      --accent-glow: rgba(124, 106, 247, 0.25);
+      --text: #f0f0f5;
+      --text-muted: #6b6b80;
+      --text-dim: #9898a8;
+      --radius-sm: 8px;
+      --radius: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* ── Ambient blobs ── */
+    .bg-blobs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.12;
+      animation: drift 20s ease-in-out infinite alternate;
+    }
+    .blob-1 { width: 500px; height: 500px; background: #7c6af7; top: -150px; left: -100px; animation-delay: 0s; }
+    .blob-2 { width: 400px; height: 400px; background: #f7716a; bottom: -100px; right: -80px; animation-delay: -7s; }
+    .blob-3 { width: 300px; height: 300px; background: #4af7c4; top: 50%; left: 50%; animation-delay: -14s; }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(30px, 20px) scale(1.08); }
+    }
+
+    /* ── Layout wrapper ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 80px 16px 60px;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 100;
+    }
+
+    .topbar-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .topbar-actions { display: flex; gap: 8px; }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .btn-ghost:hover {
+      border-color: var(--border-hover);
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    /* ── Feed header ── */
+    .feed-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 4px;
+      line-height: 1.1;
+    }
+    .feed-sub {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      font-weight: 300;
+    }
+    .feed-sub span {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ── Compose box ── */
+    .compose {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 18px 20px;
+      margin-bottom: 28px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .compose:focus-within {
+      border-color: rgba(124,106,247,0.4);
+      box-shadow: 0 0 0 4px var(--accent-glow);
+    }
+
+    .publish-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      resize: none;
+      min-height: 80px;
+      line-height: 1.6;
+      placeholder-color: var(--text-muted);
+    }
+    .publish-input::placeholder { color: var(--text-muted); }
+
+    .compose-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .compose-hints {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hint-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    .hint-chip .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+    .hint-chip.yt .dot   { background: #ff0000; }
+    .hint-chip.sp .dot   { background: #1db954; }
+    .hint-chip.sc .dot   { background: #ff5500; }
+    .hint-chip.mx .dot   { background: #00c0ff; }
+    .hint-chip.db .dot   { background: #0061fe; }
+
+    #charCount { font-size: 0.75rem; color: var(--text-muted); }
+
+    .btn-publish {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 9px 20px;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+    .btn-publish:hover {
+      background: #9180f9;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(124,106,247,0.4);
+    }
+    .btn-publish:active { transform: translateY(0); }
+
+    /* ── Section label ── */
+    .section-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Messages feed ── */
+    #messages {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .loading-state .spinner {
+      width: 28px; height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Post card ── */
+    .message {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      transition: border-color var(--transition), transform var(--transition);
+      animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+    .message:hover { border-color: var(--border-hover); }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stagger animation for initial load */
+    .message:nth-child(1) { animation-delay: 0.05s; }
+    .message:nth-child(2) { animation-delay: 0.10s; }
+    .message:nth-child(3) { animation-delay: 0.15s; }
+    .message:nth-child(4) { animation-delay: 0.20s; }
+
+    .message-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .message-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--surface3);
+      flex-shrink: 0;
+    }
+
+    .user-info { flex: 1; min-width: 0; }
+    .username {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--text);
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .time { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; }
+
+    .message-text {
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+      word-break: break-word;
+    }
+
+    /* ── Media embeds ── */
+    .media-container {
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #000;
+      margin-bottom: 4px;
+    }
+
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+    }
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: 0;
+    }
+
+    .spotify-wrapper { background: #0d0d0d; line-height: 0; }
+    .soundcloud-wrapper { background: #111; line-height: 0; }
+    .mixcloud-wrapper { background: #1a1a1a; line-height: 0; }
+    .dropbox-wrapper { background: #0d0d0d; padding: 0; line-height: 0; }
+
+    /* ── Comments ── */
+    .comments-section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .comments-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+    }
+
+    .comment-count {
+      background: var(--surface3);
+      color: var(--accent);
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      align-items: flex-end;
+    }
+
+    .comment-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      padding: 10px 13px;
+      resize: none;
+      min-height: 40px;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .comment-input::placeholder { color: var(--text-muted); }
+    .comment-input:focus { border-color: rgba(124,106,247,0.4); }
+
+    .comment-submit {
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      padding: 9px 14px;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .comment-submit:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .comment {
+      display: flex;
+      gap: 10px;
+      padding: 11px 13px;
+      margin-bottom: 8px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      transition: border-color var(--transition);
+    }
+    .comment:last-child { margin-bottom: 0; }
+    .comment:hover { border-color: var(--border-hover); }
+
+    .comment-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--surface3);
+      flex-shrink: 0;
+    }
+
+    .comment-author {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-bottom: 3px;
+    }
+    .comment-text {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .page { padding: 72px 12px 40px; }
+      .topbar { padding: 0 14px; }
+      .topbar-logo { font-size: 1rem; }
+      .btn-ghost span { display: none; }
+      .btn-ghost { padding: 7px 10px; }
+      .feed-title { font-size: 1.5rem; }
+      .compose { padding: 14px 16px; }
+      .compose-hints { display: none; }
+      .compose-footer { flex-wrap: wrap; gap: 10px; }
+      .message { padding: 16px; }
+      .hint-chip { font-size: 0.68rem; }
+    }
+
+    @media (max-width: 400px) {
+      .compose-footer { flex-direction: column; align-items: stretch; }
+      .btn-publish { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<!-- ── Top bar ── -->
+<nav class="topbar">
+  <div class="topbar-logo">◈ Fil d'Actualité</div>
+  <div class="topbar-actions">
+    <button class="btn-ghost" onclick="window.location.href='/menu/menu.html'">
+      ← <span>Retour</span>
+    </button>
+    <button class="btn-ghost" id="btnLogout">
+      ⎋ <span>Déconnexion</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ── Main content ── -->
+<div class="page">
+
+  <h1 class="feed-title">Votre fil</h1>
+  <p class="feed-sub">Partagez <span>YouTube · Spotify · SoundCloud · Mixcloud · Dropbox</span></p>
+
+  <!-- Compose -->
+  <div class="compose">
+    <textarea class="publish-input" id="newMessageInput"
+              placeholder="Collez un lien YouTube, Spotify, SoundCloud, Mixcloud ou un fichier audio Dropbox…"
+              maxlength="500"></textarea>
+
+    <div class="compose-footer">
+      <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:0;">
+        <div class="compose-hints">
+          <span class="hint-chip yt"><span class="dot"></span>YouTube</span>
+          <span class="hint-chip sp"><span class="dot"></span>Spotify</span>
+          <span class="hint-chip sc"><span class="dot"></span>SoundCloud</span>
+          <span class="hint-chip mx"><span class="dot"></span>Mixcloud</span>
+          <span class="hint-chip db"><span class="dot"></span>Dropbox MP3/WAV</span>
+        </div>
+        <small id="charCount">0/500</small>
+      </div>
+      <button class="btn-publish" id="publishButton">Publier →</button>
+    </div>
+  </div>
+
+  <div class="section-label">Récents</div>
+
+  <!-- Feed -->
+  <div id="messages">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      Chargement du fil…
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const token = localStorage.getItem('accessToken');
+  if (!token) window.location.href = '/connection/connection.html';
+
+  let currentUserId = null;
+
+  // --- FONCTION DE DÉTECTION MULTI-MÉDIA ---
+  function getMediaEmbed(text) {
+    let html = '';
+
+    // 1. DÉTECTION YOUTUBE
+    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/;
+    const ytMatch = text.match(ytRegex);
+    if (ytMatch && ytMatch[1]) {
+      html += `
+        <div class="media-container video-wrapper">
+          <iframe src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe>
+        </div>`;
+    }
+
+    // 2. DÉTECTION SPOTIFY (Playlist, Album, Track)
+    const spRegex = /open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/;
+    const spMatch = text.match(spRegex);
+    if (spMatch && spMatch[1] && spMatch[2]) {
+        const type = spMatch[1];
+        const id = spMatch[2];
+        const height = (type === 'track') ? '80' : '380';
+        html += `
+            <div class="media-container spotify-wrapper">
+                <iframe src="https://open.spotify.com/embed/${type}/${id}"
+                        width="100%" height="${height}" frameborder="0"
+                        allowtransparency="true" allow="encrypted-media"></iframe>
+            </div>`;
+    }
+
+    // 3. DÉTECTION SOUNDCLOUD
+    const scRegex = /(?:https?:\/\/)?(?:www\.)?soundcloud\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+/;
+    const scMatch = text.match(scRegex);
+    if (scMatch) {
+      const encoded = encodeURIComponent(scMatch[0].startsWith('http') ? scMatch[0] : 'https://' + scMatch[0]);
+      html += `
+        <div class="media-container soundcloud-wrapper">
+          <iframe width="100%" height="166" frameborder="0" scrolling="no"
+            src="https://w.soundcloud.com/player/?url=${encoded}&color=%237c6af7&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false"></iframe>
+        </div>`;
+    }
+
+    // 4. DÉTECTION MIXCLOUD
+    const mxRegex = /(?:https?:\/\/)?(?:www\.)?mixcloud\.com\/([^?\s]+)/;
+    const mxMatch = text.match(mxRegex);
+    if (mxMatch && mxMatch[0]) {
+      const encoded = encodeURIComponent(mxMatch[0].startsWith('http') ? mxMatch[0] : 'https://' + mxMatch[0]);
+      html += `
+        <div class="media-container mixcloud-wrapper">
+          <iframe width="100%" height="120" frameborder="0"
+            src="https://www.mixcloud.com/widget/iframe/?hide_cover=1&feed=${encoded}&light=0"></iframe>
+        </div>`;
+    }
+
+    // 5. DÉTECTION DROPBOX (MP3 / WAV)
+    const dbRegex = /https?:\/\/(?:www\.)?dropbox\.com\/[^\s"'<>]+\.(?:mp3|wav)/i;
+    const dbMatch = text.match(dbRegex);
+    if (dbMatch) {
+      // Convertir dl=0 en dl=1 pour le lien direct
+      const directUrl = dbMatch[0].replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace(/[?&]dl=0/, '').replace(/[?&]dl=1/, '') + '?raw=1';
+      html += `
+        <div class="media-container dropbox-wrapper" style="padding:12px 14px;background:var(--surface2,#18181f);">
+          <audio controls style="width:100%;height:40px;border-radius:6px;outline:none;">
+            <source src="${directUrl}" type="audio/${dbMatch[0].endsWith('.wav') ? 'wav' : 'mpeg'}">
+            Votre navigateur ne supporte pas la lecture audio.
+          </audio>
+        </div>`;
+    }
+
+    return html;
+  }
+
+  // --- LOGIQUE API ---
+
+  async function getCurrentUser() {
+    try {
+      const response = await fetch('/api/users/me', { headers: { 'Authorization': 'Bearer ' + token } });
+      const userData = await response.json();
+      currentUserId = userData.id;
+    } catch (e) { console.error(e); }
+  }
+
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+  }
+
+  async function fetchMessages() {
+    try {
+      const response = await fetch('/api/messages', { headers: { 'Authorization': 'Bearer ' + token } });
+      const messages = await response.json();
+      const container = document.getElementById('messages');
+      container.innerHTML = '';
+
+      const sorted = messages.sort((a, b) => new Date(b.heureMessage) - new Date(a.heureMessage));
+
+      for (const msg of sorted) {
+        const div = document.createElement('div');
+        div.className = 'message';
+
+        const mediaHtml = getMediaEmbed(msg.intituleMessage);
+
+        const commRes = await fetch(`/api/commentaires/message/${msg.id}`, { headers: { 'Authorization': 'Bearer ' + token } });
+        const commData = await commRes.json();
+        const comments = commData.commentaires || [];
+
+        div.innerHTML = `
+          <div class="message-header">
+            <img src="${msg.photoUrl || '/photos/default.png'}" onerror="this.src='/photos/default.png'">
+            <div class="user-info">
+              <div class="username">${msg.username}</div>
+              <div class="time">${formatDate(msg.heureMessage)}</div>
+            </div>
+          </div>
+          <div class="message-text">${msg.intituleMessage}</div>
+          ${mediaHtml}
+
+          <div class="comments-section">
+            <div class="comments-header">💬 Commentaires <span class="comment-count">${comments.length}</span></div>
+            <div class="comment-form">
+              <textarea class="comment-input" placeholder="Répondre..." id="input-${msg.id}"></textarea>
+              <button class="comment-submit" onclick="postComment(${msg.id})">Envoyer</button>
+            </div>
+            <div class="comments-list">
+              ${comments.map(c => `
+                <div class="comment">
+                  <img src="${c.userPhotoUrl || '/photos/default.png'}" class="comment-avatar" onerror="this.src='/photos/default.png'">
+                  <div class="comment-content">
+                    <div class="comment-author">${c.username}</div>
+                    <div class="comment-text">${c.texte}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      }
+    } catch(e) { console.error(e); }
+  }
+
+  async function publierMessage() {
+    const input = document.getElementById('newMessageInput');
+    const text = input.value.trim();
+    if(!text || !currentUserId) return;
+
+    try {
+      const res = await fetch(`/api/messages/user/${currentUserId}`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify(text)
+      });
+      if(res.ok) {
+        input.value = '';
+        fetchMessages();
+      }
+    } catch(e) { console.error(e); }
+  }
+
+  async function postComment(msgId) {
+    const input = document.getElementById(`input-${msgId}`);
+    const texte = input.value.trim();
+    if(!texte) return;
+
+    try {
+      const res = await fetch(`/api/commentaires/message/${msgId}`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texte })
+      });
+      if(res.ok) {
+        input.value = '';
+        fetchMessages();
+      }
+    } catch(e) { console.error(e); }
+  }
+
+  // --- INITIALISATION ---
+  document.getElementById('publishButton').addEventListener('click', publierMessage);
+
+  document.getElementById('newMessageInput').addEventListener('input', function() {
+    document.getElementById('charCount').textContent = `${this.value.length}/500`;
+  });
+
+  document.getElementById('btnLogout').addEventListener('click', () => {
+    localStorage.clear();
+    window.location.href = '/connection/connection.html';
+  });
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    await getCurrentUser();
+    fetchMessages();
+  });
+</script>
+
+</body>
+</html>

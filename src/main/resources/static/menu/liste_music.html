@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Playlist — Moteka</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+
+    body{
+      font-family:Arial,sans-serif;
+      background:#9b59b6;
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      min-height:100vh;
+    }
+
+    /* BARRE FIXE */
+    .buttons-container{
+      position:fixed;
+      top:20px;
+      right:20px;
+      left: 20px;
+      display:flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      background:rgba(255,255,255,.95);
+      padding:10px 15px;
+      border-radius:15px;
+      box-shadow:0 4px 20px rgba(0,0,0,.3);
+      z-index:1000;
+      flex-wrap: wrap;
+    }
+
+    /* STYLE DE LA BARRE DE RECHERCHE */
+    .search-box {
+      display: flex;
+      gap: 5px;
+      margin-right: auto;
+    }
+    .search-box input {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      outline: none;
+      width: 200px;
+    }
+    .btn-search {
+      background: #8e44ad !important;
+      color: white !important;
+    }
+
+    /* STYLE DU SELECTEUR D'AFFICHAGE */
+    .view-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.05);
+      padding: 5px 12px;
+      border-radius: 30px;
+    }
+    .view-selector label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #8e44ad;
+    }
+    .view-selector select {
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid #8e44ad;
+      background: white;
+      color: #8e44ad;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .buttons-container button{
+      background:#fff;
+      color:#8e44ad;
+      border:2px solid #8e44ad;
+      padding:10px 16px;
+      border-radius:12px;
+      font-weight:600;
+      cursor:pointer;
+      transition:.3s;
+    }
+
+    .buttons-container button:hover{
+      background:#8e44ad;
+      color:#fff;
+    }
+
+    /* Bouton retour genre */
+    .back-genre-btn {
+      background: #8e44ad !important;
+      color: white !important;
+      border: none !important;
+    }
+    .back-genre-btn:hover {
+      background: #732d91 !important;
+    }
+
+    h1{
+      margin:100px 0 15px;
+      color:#fff;
+      text-align:center;
+    }
+
+    .playlist-info{
+      color:#fff;
+      margin-bottom:20px;
+      text-align:center;
+    }
+
+    /* Grille des genres */
+    .genres-container{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+      gap:20px;
+      width:100%;
+      max-width:1200px;
+    }
+
+    .genre-card{
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 6px 20px rgba(0,0,0,.15);
+      padding:30px 20px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      transition:.3s;
+      cursor: pointer;
+    }
+
+    .genre-card:hover{
+      transform:translateY(-6px);
+      box-shadow:0 12px 30px rgba(0,0,0,.25);
+      background: #f5f5f5;
+    }
+
+    .genre-icon{
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: #8e44ad;
+    }
+
+    .genre-name{
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #222;
+      margin-bottom: 10px;
+    }
+
+    .genre-count{
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    /* Grille des musiques */
+    .container{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(350px,1fr));
+      gap:20px;
+      width:100%;
+      max-width:1200px;
+    }
+
+    .card{
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 6px 20px rgba(0,0,0,.15);
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      transition:.3s;
+      cursor: pointer;
+    }
+
+    .card:hover{
+      transform:translateY(-6px);
+      box-shadow:0 12px 30px rgba(0,0,0,.25);
+    }
+
+    iframe.youtube{
+      width:100%;
+      height:200px;
+      border-radius:12px;
+      border:none;
+      pointer-events: none;
+    }
+
+    iframe.spotify{
+      width:100%;
+      height:80px;
+      border-radius:8px;
+      border:none;
+      margin-top:10px;
+      pointer-events: none;
+    }
+
+    .info{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:12px;
+      gap:10px;
+    }
+
+    .title{
+      font-weight:bold;
+      color:#222;
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .info img{
+      width:60px;
+      height:60px;
+      border-radius:8px;
+      object-fit:cover;
+    }
+
+    .encoder-tag {
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: #8e44ad;
+        font-style: italic;
+        text-align: right;
+    }
+
+    .btn-discover {
+        margin-top: 15px;
+        background: #8e44ad;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: 0.3s;
+        pointer-events: auto;
+        position: relative;
+        z-index: 2;
+    }
+    .btn-discover:hover { background: #732d91; }
+
+    #artistPopup {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+        z-index: 2000; align-items: center; justify-content: center;
+    }
+    .popup-content { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; }
+    .artist-list { margin: 20px 0; max-height: 350px; overflow-y: auto; }
+
+    .artist-btn-link {
+        display: flex; align-items: center; gap: 15px; background: #f9f9f9;
+        padding: 10px; border-radius: 12px; margin-bottom: 10px;
+        text-decoration: none; color: #333; border: 1px solid #eee; transition: 0.2s;
+    }
+    .artist-btn-link:hover { border-color: #8e44ad; background: #f0e6f5; }
+    .artist-photo-rect { width: 60px; height: 60px; border-radius: 6px; object-fit: cover; }
+    .artist-name-popup { font-weight: bold; flex: 1; text-align: left; }
+
+    .btn-close-popup { background: #eee; color: #555; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+
+    .pagination{
+      margin:30px 0;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+
+    .pagination button{
+      padding:8px 14px;
+      border:none;
+      border-radius:8px;
+      background:#fff;
+      color:#8e44ad;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    .pagination button.active,
+    .pagination button:hover{
+      background:#8e44ad;
+      color:#fff;
+    }
+
+    .loading{ color:#fff; margin:30px; text-align: center; }
+    .error{ background:#fff; color:#e74c3c; padding:20px; border-radius:10px; margin:30px; text-align: center; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .genres-container {
+        grid-template-columns: 1fr;
+      }
+      .container {
+        grid-template-columns: 1fr;
+      }
+      .buttons-container {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .search-box {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+      .search-box input {
+        flex: 1;
+      }
+      .view-selector {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 5px;
+      }
+      .buttons-container button {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+      }
+      h1 {
+        margin-top: 160px;
+      }
+      .genre-card {
+        padding: 20px;
+      }
+      .genre-icon {
+        font-size: 2.5rem;
+      }
+      .genre-name {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="buttons-container">
+  <div class="search-box" id="searchBox">
+    <input type="text" id="searchInput" placeholder="Titre de la musique...">
+    <button class="btn-search" onclick="searchMusic()">OK</button>
+  </div>
+  <div class="view-selector">
+    <label><i class="fas fa-sort"></i> Classé par :</label>
+    <select id="viewModeSelect" onchange="changeViewMode()">
+      <option value="genre">🎵 Genre</option>
+      <option value="normal">📋 Listing normal</option>
+    </select>
+  </div>
+  <button id="backToGenresBtn" class="back-genre-btn" style="display: none;" onclick="showGenres()">🎵 Retour aux genres</button>
+  <button onclick="history.back()">🔙 Retour</button>
+  <button onclick="logout()">🚪 Déconnexion</button>
+</div>
+
+<h1 id="pageTitle">🎵 Playlist</h1>
+<div class="playlist-info" id="playlistInfo"></div>
+<div class="loading" id="loading">Chargement...</div>
+
+<!-- Grille des genres (mode genre) -->
+<div id="genresView" class="genres-container"></div>
+
+<!-- Grille des musiques (mode genre - vue des musiques d'un genre) -->
+<div id="musicView" class="container" style="display: none;"></div>
+
+<!-- Grille des musiques (mode normal - toutes les musiques) -->
+<div id="normalView" class="container" style="display: none;"></div>
+
+<div class="pagination" id="pagination"></div>
+
+<div id="artistPopup">
+  <div class="popup-content">
+    <h2 style="color:#8e44ad">Artistes</h2>
+    <div id="artistListContent" class="artist-list"></div>
+    <button class="btn-close-popup" onclick="closePopup()">Fermer</button>
+  </div>
+</div>
+
+<script>
+  let allSongs = [];
+  let currentGenre = null;
+  let filteredSongs = [];
+  let currentPage = 1;
+  let currentViewMode = "genre";
+  const itemsPerPage = 20;
+  const usernameCache = {};
+
+  function logout(){
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    window.location.href="/connection/connection.html";
+  }
+
+  function changeViewMode() {
+    const select = document.getElementById('viewModeSelect');
+    currentViewMode = select.value;
+
+    if (currentViewMode === "genre") {
+      // Mode genre : afficher les genres
+      showGenres();
+      loadGenres();
+    } else {
+      // Mode normal : afficher toutes les musiques
+      currentGenre = null;
+      filteredSongs = [...allSongs];
+      currentPage = 1;
+
+      document.getElementById("genresView").style.display = "none";
+      document.getElementById("musicView").style.display = "none";
+      document.getElementById("normalView").style.display = "grid";
+      document.getElementById("backToGenresBtn").style.display = "none";
+      document.getElementById("pageTitle").textContent = "🎵 Toutes les musiques";
+      document.getElementById("playlistInfo").textContent = filteredSongs.length + " morceau" + (filteredSongs.length > 1 ? "x" : "");
+      document.getElementById("searchInput").value = "";
+
+      renderNormalPage(currentPage);
+      renderNormalPagination();
+    }
+  }
+
+  async function fetchUsername(userId) {
+      if (usernameCache[userId]) return usernameCache[userId];
+      try {
+          const res = await fetch(`/api/users/${userId}`);
+          const data = await res.json();
+          const name = data.username || ('User #' + userId);
+          usernameCache[userId] = name;
+          return name;
+      } catch(e) {
+          return 'User #' + userId;
+      }
+  }
+
+  // Charger toutes les musiques
+  async function loadAllSongs() {
+      try {
+          const res = await fetch('/api/music/all');
+          const data = await res.json();
+
+          if (!data.success) throw new Error(data.error || "Erreur API");
+
+          allSongs = (data.data || []).map(song => ({
+              id: song.id,
+              titre: song.titre || "Sans titre",
+              lienYoutube: song.lienYoutube || null,
+              lienSpotify: song.lienSpotify || null,
+              urlImageSpotify: song.urlImageSpotify || null,
+              popularite: song.popularite !== undefined ? song.popularite : 0,
+              genreMusical: song.genreMusical || null,
+              note: song.note !== undefined && song.note !== null ? song.note : 0,
+              userId: song.userId
+          }));
+
+          const uniqueUserIds = [...new Set(allSongs.map(m => m.userId).filter(Boolean))];
+          await Promise.all(uniqueUserIds.map(uid => fetchUsername(uid)));
+
+          return true;
+      } catch(err) {
+          console.error('Erreur chargement musiques:', err);
+          return false;
+      }
+  }
+
+  // Charger et afficher les genres
+  async function loadGenres() {
+      if (currentViewMode !== "genre") return;
+
+      document.getElementById("loading").style.display = "flex";
+      document.getElementById("pageTitle").textContent = "🎵 Genres Musicaux";
+      document.getElementById("playlistInfo").textContent = "Chargement des genres...";
+
+      try {
+          const loaded = await loadAllSongs();
+          if (!loaded) throw new Error("Impossible de charger les musiques");
+
+          const genreCount = {};
+          allSongs.forEach(song => {
+              const genre = song.genreMusical;
+              if (genre && genre.trim() !== "") {
+                  genreCount[genre] = (genreCount[genre] || 0) + 1;
+              }
+          });
+
+          const noGenreCount = allSongs.filter(s => !s.genreMusical || s.genreMusical.trim() === "").length;
+          if (noGenreCount > 0) {
+              genreCount["Non classé"] = noGenreCount;
+          }
+
+          const genres = Object.keys(genreCount).sort();
+
+          if (genres.length === 0) {
+              document.getElementById("genresView").innerHTML = '<div class="error">Aucun genre trouvé. Commencez par encoder des musiques avec un genre.</div>';
+              document.getElementById("loading").style.display = "none";
+              return;
+          }
+
+          const genresContainer = document.getElementById("genresView");
+          genresContainer.innerHTML = "";
+
+          genres.forEach(genre => {
+              const card = document.createElement("div");
+              card.className = "genre-card";
+              card.onclick = () => showMusicByGenre(genre);
+
+              let icon = "🎵";
+              if (genre.toLowerCase().includes("pop")) icon = "🎤";
+              else if (genre.toLowerCase().includes("rock")) icon = "🎸";
+              else if (genre.toLowerCase().includes("hip-hop") || genre.toLowerCase().includes("rap")) icon = "🎧";
+              else if (genre.toLowerCase().includes("jazz")) icon = "🎷";
+              else if (genre.toLowerCase().includes("classique")) icon = "🎻";
+              else if (genre.toLowerCase().includes("electro") || genre.toLowerCase().includes("electronic")) icon = "⚡";
+              else if (genre.toLowerCase().includes("rnb") || genre.toLowerCase().includes("r&b")) icon = "💜";
+              else if (genre === "Non classé") icon = "📁";
+
+              card.innerHTML = `
+                  <div class="genre-icon">${icon}</div>
+                  <div class="genre-name">${escapeHtml(genre)}</div>
+                  <div class="genre-count">${genreCount[genre]} morceau${genreCount[genre] > 1 ? 'x' : ''}</div>
+              `;
+              genresContainer.appendChild(card);
+          });
+
+          document.getElementById("playlistInfo").textContent = genres.length + " genre" + (genres.length > 1 ? "s" : "") + " disponible" + (genres.length > 1 ? "s" : "");
+          document.getElementById("loading").style.display = "none";
+
+      } catch(err) {
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("genresView").innerHTML = `<div class="error">${err.message}</div>`;
+      }
+  }
+
+  function showMusicByGenre(genre) {
+      if (currentViewMode !== "genre") return;
+
+      currentGenre = genre;
+
+      if (genre === "Non classé") {
+          filteredSongs = allSongs.filter(song => !song.genreMusical || song.genreMusical.trim() === "");
+      } else {
+          filteredSongs = allSongs.filter(song => song.genreMusical === genre);
+      }
+
+      currentPage = 1;
+
+      document.getElementById("genresView").style.display = "none";
+      document.getElementById("normalView").style.display = "none";
+      document.getElementById("musicView").style.display = "grid";
+      document.getElementById("backToGenresBtn").style.display = "inline-block";
+      document.getElementById("pageTitle").textContent = `🎵 ${genre}`;
+      document.getElementById("playlistInfo").textContent = filteredSongs.length + " morceau" + (filteredSongs.length > 1 ? "x" : "");
+
+      document.getElementById("searchInput").value = "";
+
+      renderMusicPage(currentPage);
+      renderMusicPagination();
+  }
+
+  function showGenres() {
+      if (currentViewMode !== "genre") return;
+
+      currentGenre = null;
+      currentPage = 1;
+
+      document.getElementById("genresView").style.display = "grid";
+      document.getElementById("musicView").style.display = "none";
+      document.getElementById("normalView").style.display = "none";
+      document.getElementById("backToGenresBtn").style.display = "none";
+      document.getElementById("pageTitle").textContent = "🎵 Genres Musicaux";
+      document.getElementById("playlistInfo").textContent = document.querySelectorAll(".genre-card").length + " genre" + (document.querySelectorAll(".genre-card").length > 1 ? "s" : "") + " disponible" + (document.querySelectorAll(".genre-card").length > 1 ? "s" : "");
+      document.getElementById("searchInput").value = "";
+      document.getElementById("pagination").innerHTML = "";
+  }
+
+  function searchMusic() {
+      if (currentViewMode === "normal") {
+          const query = document.getElementById("searchInput").value.toLowerCase().trim();
+
+          if (query === "") {
+              filteredSongs = [...allSongs];
+          } else {
+              filteredSongs = allSongs.filter(song =>
+                  (song.titre || "").toLowerCase().includes(query)
+              );
+          }
+
+          currentPage = 1;
+          renderNormalPage(currentPage);
+          renderNormalPagination();
+          document.getElementById("playlistInfo").textContent = filteredSongs.length + " morceau" + (filteredSongs.length > 1 ? "x" : "");
+      } else if (currentViewMode === "genre" && currentGenre) {
+          const query = document.getElementById("searchInput").value.toLowerCase().trim();
+
+          if (query === "") {
+              if (currentGenre === "Non classé") {
+                  filteredSongs = allSongs.filter(song => !song.genreMusical || song.genreMusical.trim() === "");
+              } else {
+                  filteredSongs = allSongs.filter(song => song.genreMusical === currentGenre);
+              }
+          } else {
+              const genreFiltered = (currentGenre === "Non classé")
+                  ? allSongs.filter(song => !song.genreMusical || song.genreMusical.trim() === "")
+                  : allSongs.filter(song => song.genreMusical === currentGenre);
+
+              filteredSongs = genreFiltered.filter(song =>
+                  (song.titre || "").toLowerCase().includes(query)
+              );
+          }
+
+          currentPage = 1;
+          renderMusicPage(currentPage);
+          renderMusicPagination();
+          document.getElementById("playlistInfo").textContent = filteredSongs.length + " morceau" + (filteredSongs.length > 1 ? "x" : "");
+      }
+  }
+
+  function goToMusicDetail(musicId) {
+      window.location.href = `/menu/voir_morceau_encoder.html?musicId=${musicId}`;
+  }
+
+  function getYoutubeId(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+  }
+
+  function renderMusicCard(music) {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.addEventListener("click", (e) => {
+          if (e.target.closest('.btn-discover')) {
+              return;
+          }
+          goToMusicDetail(music.id);
+      });
+
+      let html = "";
+
+      const youtubeId = getYoutubeId(music.lienYoutube);
+      if (youtubeId) {
+          html += `<iframe class="youtube" src="https://www.youtube.com/embed/${youtubeId}" allowfullscreen></iframe>`;
+      }
+
+      if (music.lienSpotify && music.lienSpotify.includes('track/')) {
+          const embed = music.lienSpotify.replace("track/", "embed/track/");
+          html += `<iframe class="spotify" src="${embed}"></iframe>`;
+      }
+
+      html += `
+      <div class="info">
+          <div class="title">${escapeHtml(music.titre)}</div>
+          ${music.urlImageSpotify ? `<img src="${music.urlImageSpotify}" alt="cover">` : ""}
+      </div>`;
+
+      const encoderId = `encoder-${music.id}`;
+      html += `<div class="encoder-tag" id="${encoderId}">🎧 encodé par …</div>`;
+
+      if (music.lienSpotify) {
+          html += `<button class="btn-discover" data-track-url="${escapeHtml(music.lienSpotify)}">
+                      <i class="fa-solid fa-users"></i> Voir Artistes
+                   </button>`;
+      }
+
+      card.innerHTML = html;
+
+      if (music.userId && usernameCache[music.userId]) {
+          const el = card.querySelector(`#${encoderId}`);
+          if (el) el.textContent = "🎧 encodé par " + usernameCache[music.userId];
+      }
+
+      const btnDiscover = card.querySelector('.btn-discover');
+      if (btnDiscover) {
+          const trackUrl = btnDiscover.getAttribute('data-track-url');
+          btnDiscover.addEventListener('click', (e) => {
+              e.stopPropagation();
+              fetchArtists(trackUrl);
+          });
+      }
+
+      return card;
+  }
+
+  function renderMusicPage(page){
+      const container = document.getElementById("musicView");
+      container.innerHTML = "";
+      const start = (page - 1) * itemsPerPage;
+      const end   = start + itemsPerPage;
+
+      filteredSongs.slice(start, end).forEach(music => {
+          container.appendChild(renderMusicCard(music));
+      });
+  }
+
+  function renderNormalPage(page){
+      const container = document.getElementById("normalView");
+      container.innerHTML = "";
+      const start = (page - 1) * itemsPerPage;
+      const end   = start + itemsPerPage;
+
+      filteredSongs.slice(start, end).forEach(music => {
+          container.appendChild(renderMusicCard(music));
+      });
+  }
+
+  function renderMusicPagination(){
+      const pagination = document.getElementById("pagination");
+      pagination.innerHTML = "";
+      const total = Math.ceil(filteredSongs.length / itemsPerPage);
+      for (let i = 1; i <= total; i++) {
+          const btn = document.createElement("button");
+          btn.textContent = i;
+          if (i === currentPage) btn.classList.add("active");
+          btn.onclick = () => {
+              currentPage = i;
+              renderMusicPage(i);
+              renderMusicPagination();
+              window.scrollTo({top:0, behavior:"smooth"});
+          };
+          pagination.appendChild(btn);
+      }
+  }
+
+  function renderNormalPagination(){
+      const pagination = document.getElementById("pagination");
+      pagination.innerHTML = "";
+      const total = Math.ceil(filteredSongs.length / itemsPerPage);
+      for (let i = 1; i <= total; i++) {
+          const btn = document.createElement("button");
+          btn.textContent = i;
+          if (i === currentPage) btn.classList.add("active");
+          btn.onclick = () => {
+              currentPage = i;
+              renderNormalPage(i);
+              renderNormalPagination();
+              window.scrollTo({top:0, behavior:"smooth"});
+          };
+          pagination.appendChild(btn);
+      }
+  }
+
+  function escapeHtml(str) {
+      if (!str) return '';
+      return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+  }
+
+  async function fetchArtists(trackUrl) {
+      const listContainer = document.getElementById('artistListContent');
+      listContainer.innerHTML = '<div style="color:#8e44ad">Chargement...</div>';
+      document.getElementById('artistPopup').style.display = 'flex';
+
+      try {
+          const res  = await fetch(`/api/spotify/track/artists?url=${encodeURIComponent(trackUrl)}`);
+          const data = await res.json();
+          if (data.success && data.artists) {
+              listContainer.innerHTML = '';
+              data.artists.forEach(art => {
+                  const btn = document.createElement('a');
+                  btn.className = 'artist-btn-link';
+                  btn.href = `/menu/artiste_spotify_detail.html?lienSpotify=${encodeURIComponent(art.url)}`;
+                  btn.innerHTML = `
+                      <img src="${art.photoUrl || 'https://via.placeholder.com/150'}" class="artist-photo-rect">
+                      <div class="artist-name-popup">${escapeHtml(art.nom)}</div>
+                      <i class="fa fa-chevron-right" style="color:#8e44ad"></i>
+                  `;
+                  listContainer.appendChild(btn);
+              });
+          } else { listContainer.innerHTML = "Aucun artiste trouvé."; }
+      } catch(e) { listContainer.innerHTML = "Erreur serveur."; }
+  }
+
+  function closePopup() { document.getElementById('artistPopup').style.display = 'none'; }
+
+  // Initialisation
+  window.addEventListener("DOMContentLoaded", async () => {
+      await loadAllSongs();
+
+      // Initialiser en mode genre par défaut
+      currentViewMode = "genre";
+      document.getElementById('viewModeSelect').value = "genre";
+      await loadGenres();
+  });
+</script>
+
+</body>
+</html>

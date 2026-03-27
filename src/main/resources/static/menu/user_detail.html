@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Utilisateur - Détails & Préférences Musicales</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+    }
+
+    .container {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    /* ==================================== */
+    /* SECTION PROFIL                        */
+    /* ==================================== */
+    .profile-section {
+        background: white;
+        border-radius: 20px;
+        padding: clamp(20px, 4vw, 30px);
+        margin-bottom: 30px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: minmax(150px, auto) 1fr;
+        gap: clamp(20px, 4vw, 30px);
+        align-items: start;
+    }
+
+    .profile-photo {
+        width: min(200px, 25vw);
+        height: min(200px, 25vw);
+        border-radius: 20px;
+        object-fit: cover;
+        border: 5px solid #667eea;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .profile-photo.default {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: clamp(2rem, 8vw, 4rem);
+        font-weight: bold;
+    }
+
+    .profile-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: clamp(15px, 3vw, 20px);
+    }
+
+    .info-item {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border-left: 4px solid #667eea;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        word-break: break-word;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .role-badge.admin {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .role-badge.user {
+        background: #3498db;
+        color: white;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .status-badge.active {
+        background: #2ecc71;
+        color: white;
+    }
+
+    .status-badge.inactive {
+        background: #95a5a6;
+        color: white;
+    }
+
+    /* ==================================== */
+    /* VISIBILITÉ                            */
+    /* ==================================== */
+    .visibility-badge {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 5px;
+    }
+
+    .visibility-item {
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .visibility-item.visible {
+        background: #2ecc71;
+        color: white;
+    }
+
+    .visibility-item.hidden {
+        background: #e74c3c;
+        color: white;
+    }
+
+    /* ==================================== */
+    /* RÉSEAUX SOCIAUX                       */
+    /* ==================================== */
+    .reseaux-section {
+        margin-top: 20px;
+        padding: clamp(15px, 3vw, 20px);
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .reseaux-title {
+        font-size: 1rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+    }
+
+    .reseaux-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .reseau-link {
+        padding: 8px 15px;
+        background: white;
+        border-radius: 8px;
+        color: #333;
+        text-decoration: none;
+        font-size: 0.9rem;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .reseau-link:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: translateY(-2px);
+    }
+
+    /* ==================================== */
+    /* PRÉFÉRENCES MUSICALES                 */
+    /* ==================================== */
+    .favoris-section {
+        background: white;
+        border-radius: 20px;
+        padding: clamp(20px, 4vw, 30px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+
+    .favoris-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .favoris-header h2 {
+        color: #333;
+        font-size: clamp(1.2rem, 4vw, 1.5rem);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .favoris-count {
+        background: #667eea;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .favoris-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+        gap: 20px;
+    }
+
+    .favori-card {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s;
+    }
+
+    .favori-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+    }
+
+    .favori-cote {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .cote-10 { background: #2ecc71; color: white; }
+    .cote-9 { background: #27ae60; color: white; }
+    .cote-8 { background: #3498db; color: white; }
+    .cote-7 { background: #2980b9; color: white; }
+    .cote-6 { background: #f39c12; color: white; }
+    .cote-5 { background: #e67e22; color: white; }
+    .cote-4 { background: #d35400; color: white; }
+    .cote-3 { background: #e74c3c; color: white; }
+    .cote-2 { background: #c0392b; color: white; }
+    .cote-1 { background: #7f8c8d; color: white; }
+
+    .favori-genres {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 15px 0;
+    }
+
+    .genre-tag {
+        padding: 5px 12px;
+        background: white;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        color: #333;
+        border: 1px solid #e0e0e0;
+    }
+
+    .favori-date {
+        font-size: 0.8rem;
+        color: #999;
+        margin-top: 10px;
+    }
+
+    /* ==================================== */
+    /* MESSAGES                              */
+    /* ==================================== */
+    .loading {
+        text-align: center;
+        padding: 50px;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255,255,255,0.3);
+        border-top: 5px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .error-message {
+        background: #fee;
+        color: #e74c3c;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: 600;
+        border: 2px solid #e74c3c;
+        margin: 20px 0;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+        font-style: italic;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    /* ==================================== */
+    /* RESPONSIVE                            */
+    /* ==================================== */
+    @media (max-width: 768px) {
+        .profile-grid {
+            grid-template-columns: 1fr;
+            justify-items: center;
+        }
+
+        .profile-photo {
+            width: min(180px, 40vw);
+            height: min(180px, 40vw);
+        }
+    }
+
+    @media (max-width: 480px) {
+        body {
+            padding: 10px;
+        }
+
+        .profile-section,
+        .favoris-section {
+            padding: 15px;
+        }
+
+        .info-item {
+            padding: 12px;
+        }
+
+        .visibility-item {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        .reseau-link {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .favori-card {
+            padding: 15px;
+        }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- Section Profil -->
+  <div id="profileSection" class="profile-section" style="display: none;">
+    <div class="profile-grid">
+      <!-- Photo -->
+      <div id="profilePhotoContainer"></div>
+
+      <!-- Informations -->
+      <div class="profile-info" id="profileInfo"></div>
+    </div>
+
+    <!-- Réseaux sociaux -->
+    <div id="reseauxSection" class="reseaux-section" style="display: none;">
+      <div class="reseaux-title">🌐 Réseaux sociaux</div>
+      <div class="reseaux-list" id="reseauxList"></div>
+    </div>
+  </div>
+
+  <!-- Section Préférences Musicales -->
+  <div id="favorisSection" class="favoris-section" style="display: none;">
+    <div class="favoris-header">
+      <h2>
+        <span>🎵</span> Préférences Musicales
+      </h2>
+      <span class="favoris-count" id="favorisCount">0</span>
+    </div>
+    <div id="favorisContainer"></div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading" class="loading" style="display: none;">
+    <div class="loading-spinner"></div>
+    Chargement des données...
+  </div>
+
+  <!-- Message d'erreur -->
+  <div id="errorMessage" class="error-message" style="display: none;"></div>
+</div>
+
+<script>
+  const token = localStorage.getItem('accessToken');
+
+  if (!token) {
+      alert('Vous devez être connecté');
+      window.location.href = '/connection/connection.html';
+  }
+
+  // ================================================
+  // LIRE LE PARAMÈTRE userId DANS L'URL
+  // ================================================
+  function getUserIdFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('userId');
+  }
+
+  // ================================================
+  // FONCTIONS UTILITAIRES
+  // ================================================
+  function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('profileSection').style.display = 'none';
+      document.getElementById('favorisSection').style.display = 'none';
+      document.getElementById('errorMessage').style.display = 'none';
+  }
+
+  function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
+  }
+
+  function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      document.getElementById('profileSection').style.display = 'none';
+      document.getElementById('favorisSection').style.display = 'none';
+      hideLoading();
+  }
+
+  function formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('fr-FR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+      });
+  }
+
+  function getCoteClass(cote) {
+      if (cote >= 10) return 'cote-10';
+      if (cote >= 9) return 'cote-9';
+      if (cote >= 8) return 'cote-8';
+      if (cote >= 7) return 'cote-7';
+      if (cote >= 6) return 'cote-6';
+      if (cote >= 5) return 'cote-5';
+      if (cote >= 4) return 'cote-4';
+      if (cote >= 3) return 'cote-3';
+      if (cote >= 2) return 'cote-2';
+      return 'cote-1';
+  }
+
+  // ================================================
+  // AFFICHAGE DE LA VISIBILITÉ
+  // ================================================
+  function displayVisibility(donneeVisible) {
+      if (!donneeVisible || donneeVisible.length < 3) {
+          donneeVisible = "110";
+      }
+
+      const items = [];
+      const labels = ['Photo', 'Son', 'Réseaux'];
+
+      for (let i = 0; i < 3; i++) {
+          const isVisible = donneeVisible[i] === '1';
+          items.push(`
+              <div class="visibility-item ${isVisible ? 'visible' : 'hidden'}">
+                  ${isVisible ? '✓' : '✗'} ${labels[i]}
+              </div>
+          `);
+      }
+
+      return `<div class="visibility-badge">${items.join('')}</div>`;
+  }
+
+  // ================================================
+  // CHARGEMENT DU PROFIL UTILISATEUR
+  // ================================================
+  async function loadUserData() {
+      const userId = getUserIdFromUrl();
+
+      if (!userId) {
+          showError('ID utilisateur manquant dans l\'URL');
+          return;
+      }
+
+      showLoading();
+
+      try {
+          // Charger les infos utilisateur
+          const userResponse = await fetch(`/api/users/${userId}`, {
+              headers: {
+                  'Authorization': 'Bearer ' + token
+              }
+          });
+
+          if (!userResponse.ok) {
+              if (userResponse.status === 404) {
+                  throw new Error('Utilisateur non trouvé');
+              }
+              throw new Error('Erreur lors du chargement du profil');
+          }
+
+          const userData = await userResponse.json();
+
+          // Charger les préférences musicales
+          const favorisResponse = await fetch(`/api/music-favoris/users/${userId}`, {
+              headers: {
+                  'Authorization': 'Bearer ' + token
+              }
+          });
+
+          let favorisData = [];
+          if (favorisResponse.ok) {
+              favorisData = await favorisResponse.json();
+          }
+
+          // Afficher les données
+          displayUserProfile(userData);
+          displayMusicFavoris(favorisData);
+
+          document.getElementById('profileSection').style.display = 'block';
+          document.getElementById('favorisSection').style.display = 'block';
+          hideLoading();
+
+      } catch (error) {
+          console.error('Erreur:', error);
+          showError(error.message);
+      }
+  }
+
+  // ================================================
+  // AFFICHAGE DU PROFIL UTILISATEUR
+  // ================================================
+  function displayUserProfile(user) {
+      // Photo
+      const photoContainer = document.getElementById('profilePhotoContainer');
+      const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&size=200&background=667eea&color=fff`;
+
+      if (user.photoUrl && user.photoUrl !== '') {
+          photoContainer.innerHTML = `
+              <img class="profile-photo" src="${user.photoUrl}"
+                   alt="Photo de profil"
+                   onerror="this.src='${defaultAvatar}'">
+          `;
+      } else {
+          photoContainer.innerHTML = `
+              <div class="profile-photo default">
+                  ${user.username.charAt(0).toUpperCase()}
+              </div>
+          `;
+      }
+
+      // Informations
+      const infoContainer = document.getElementById('profileInfo');
+      const roleClass = user.role === 'ADMIN' ? 'admin' : 'user';
+      const statusClass = user.isActive ? 'active' : 'inactive';
+      const statusText = user.isActive ? 'Actif' : 'Inactif';
+
+      infoContainer.innerHTML = `
+          <div class="info-item">
+              <div class="info-label">ID Utilisateur</div>
+              <div class="info-value">#${user.id}</div>
+          </div>
+          <div class="info-item">
+              <div class="info-label">Nom d'utilisateur</div>
+              <div class="info-value">${user.username}</div>
+          </div>
+          <div class="info-item">
+              <div class="info-label">Email</div>
+              <div class="info-value">${user.email || 'Non renseigné'}</div>
+          </div>
+          <div class="info-item">
+              <div class="info-label">Téléphone</div>
+              <div class="info-value">${user.phoneNumber || 'Non renseigné'}</div>
+          </div>
+          <div class="info-item">
+              <div class="info-label">Rôle</div>
+              <div class="info-value">
+                  <span class="role-badge ${roleClass}">${user.role || 'USER'}</span>
+              </div>
+          </div>
+          <div class="info-item">
+              <div class="info-label">Statut</div>
+              <div class="info-value">
+                  <span class="status-badge ${statusClass}">${statusText}</span>
+              </div>
+          </div>
+          <div class="info-item">
+              <div class="info-label">Membre depuis</div>
+              <div class="info-value">${formatDate(user.createdAt)}</div>
+          </div>
+          <div class="info-item">
+              <div class="info-label">Visibilité</div>
+              <div class="info-value">
+                  ${displayVisibility(user.donneeVisible)}
+              </div>
+          </div>
+      `;
+
+      // Réseaux sociaux
+      if (user.listeReseaux && user.listeReseaux.trim() !== '') {
+          const reseaux = user.listeReseaux.split(';').filter(url => url.trim() !== '');
+          const reseauxList = document.getElementById('reseauxList');
+
+          reseauxList.innerHTML = reseaux.map(url => {
+              const cleanUrl = url.trim();
+              let displayName = cleanUrl.replace('https://', '').replace('http://', '').split('/')[0];
+              let icon = '🔗';
+
+              if (cleanUrl.includes('instagram')) icon = '📷';
+              else if (cleanUrl.includes('facebook')) icon = '📘';
+              else if (cleanUrl.includes('twitter') || cleanUrl.includes('x.com')) icon = '🐦';
+              else if (cleanUrl.includes('youtube')) icon = '▶';
+              else if (cleanUrl.includes('linkedin')) icon = '💼';
+              else if (cleanUrl.includes('tiktok')) icon = '🎵';
+              else if (cleanUrl.includes('snapchat')) icon = '👻';
+
+              return `
+                  <a href="${cleanUrl}" target="_blank" class="reseau-link">
+                      ${icon} ${displayName}
+                  </a>
+              `;
+          }).join('');
+
+          document.getElementById('reseauxSection').style.display = 'block';
+      } else {
+          document.getElementById('reseauxSection').style.display = 'none';
+      }
+  }
+
+  // ================================================
+  // AFFICHAGE DES PRÉFÉRENCES MUSICALES
+  // ================================================
+  function displayMusicFavoris(favoris) {
+      const container = document.getElementById('favorisContainer');
+      const countSpan = document.getElementById('favorisCount');
+
+      if (!favoris || favoris.length === 0) {
+          container.innerHTML = '<div class="no-data">Aucune préférence musicale enregistrée</div>';
+          countSpan.textContent = '0';
+          return;
+      }
+
+      countSpan.textContent = favoris.length;
+
+      // Trier par cote (décroissant)
+      const sortedFavoris = [...favoris].sort((a, b) => b.cotePreference - a.cotePreference);
+
+      container.innerHTML = `
+          <div class="favoris-grid">
+              ${sortedFavoris.map(favori => {
+                  const coteClass = getCoteClass(favori.cotePreference);
+                  const genres = favori.genres || [];
+
+                  return `
+                      <div class="favori-card">
+                          <div class="favori-cote ${coteClass}">
+                              ${favori.cotePreference}/10
+                          </div>
+                          <div class="favori-genres">
+                              ${genres.length > 0 ? genres.map(genre => `
+                                  <span class="genre-tag">${genre.name || genre.description || 'Genre'}</span>
+                              `).join('') : '<span class="genre-tag">Aucun genre</span>'}
+                          </div>
+                          <div class="favori-date">
+                              Créé le ${formatDate(favori.createdAt)}
+                          </div>
+                      </div>
+                  `;
+              }).join('')}
+          </div>
+      `;
+  }
+
+  // ================================================
+  // INITIALISATION
+  // ================================================
+  document.addEventListener('DOMContentLoaded', () => {
+      loadUserData();
+  });
+</script>
+</body>
+</html>

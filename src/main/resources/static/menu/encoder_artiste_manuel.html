@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Artist Onboarding Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sp-green: #1DB954;
+            --bg-dark: #0f0f0f;
+            --card-bg: #121212;
+            --card-hover: #282828;
+            --modal-bg: #181818;
+            --text-main: #ffffff;
+            --text-muted: #b3b3b3;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Circular Std', 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .search-box {
+            background: var(--card-bg);
+            padding: 30px 20px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        .search-box h1 {
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            margin: 0 0 10px 0;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            flex: 1 1 200px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            font-size: 16px;
+            outline: none;
+            background: #2a2a2a;
+            color: white;
+            min-width: 200px;
+        }
+
+        .btn-main {
+            padding: 12px 20px;
+            background: var(--sp-green);
+            color: black;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+        .btn-main:hover {
+            transform: scale(1.02);
+            background: #1ed760;
+        }
+
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .artist-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: 0.3s;
+        }
+        .artist-card:hover {
+            background: var(--card-hover);
+            border-color: #555;
+        }
+        .artist-card img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 6px;
+            object-fit: cover;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+        .artist-card h3 {
+            margin: 8px 0 3px 0;
+            font-size: 1.1rem;
+            word-break: break-word;
+        }
+        .artist-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        .modal-content {
+            background: var(--modal-bg);
+            padding: 25px 20px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+            border: 1px solid #333;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .det-img-large {
+            width: 100%;
+            max-width: 280px;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .info-group {
+            text-align: left;
+            background: #000;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid #222;
+        }
+        .info-label {
+            color: var(--sp-green);
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .info-value {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.9rem;
+            color: #eee;
+            word-break: break-all;
+        }
+
+        .social-container {
+            margin-top: 20px;
+        }
+        .reseau-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            background: #000;
+            padding: 10px;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+        .icon-box {
+            width: 40px;
+            height: 40px;
+            background: #181818;
+            color: var(--sp-green);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .reseau-item input {
+            flex: 1;
+            min-width: 150px;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+        .btn-circle {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .btn-plus { background: #1DB954; }
+        .btn-minus { background: #e91429; }
+
+        #apiLogs {
+            margin-top: 20px;
+            padding: 12px;
+            background: #000;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            text-align: left;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            color: #0f0;
+        }
+
+        .loader {
+            display: none;
+            margin: 20px auto;
+            border: 4px solid #333;
+            border-top: 4px solid var(--sp-green);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .final-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        .final-actions .btn-main {
+            flex: 1 1 auto;
+            padding: 12px 8px;
+            font-size: 0.8rem;
+            min-width: 120px;
+        }
+
+        .artist-name-tag {
+            display: inline-block;
+            background: #1DB954;
+            color: black;
+            font-weight: bold;
+            font-size: 1rem;
+            padding: 6px 16px;
+            border-radius: 50px;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            word-break: break-word;
+            max-width: 100%;
+        }
+        .search-social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #111;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background 0.2s, border-color 0.2s;
+            text-align: left;
+        }
+        .search-social-btn:hover {
+            background: #222;
+            border-color: #555;
+        }
+        .search-social-btn .icon {
+            font-size: 1.2rem;
+            width: 25px;
+            text-align: center;
+        }
+        .search-social-btn.insta .icon { color: #E1306C; }
+        .search-social-btn.fb .icon { color: #1877F2; }
+        .search-social-btn.tk .icon { color: #69C9D0; }
+        .search-social-btn.snap .icon { color: #FFFC00; }
+
+        .url-input-field {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #0a0a0a;
+            color: #ccc;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        .btn-validate {
+            width: 100%;
+            padding: 14px;
+            background: var(--sp-green);
+            color: black;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: background 0.2s;
+            margin-top: 4px;
+        }
+        .btn-validate:hover { background: #1ed760; }
+
+        .social-search-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .social-search-row .search-social-btn {
+            flex: 1 1 auto;
+            min-width: 120px;
+            margin-bottom: 0;
+            padding: 12px 10px;
+            font-size: 0.8rem;
+        }
+        .social-search-row .url-input-field {
+            flex: 2 1 200px;
+            margin: 0;
+            padding: 12px;
+            font-size: 0.8rem;
+        }
+
+        .btn-paste {
+            flex-shrink: 0;
+            padding: 10px;
+            background: #2a2a2a;
+            color: #ccc;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-paste:hover {
+            background: #1DB954;
+            color: black;
+            border-color: #1DB954;
+        }
+
+        .recap-url-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #000;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #222;
+            text-align: left;
+            flex-wrap: wrap;
+        }
+        .recap-url-item .recap-platform {
+            color: var(--sp-green);
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            min-width: 70px;
+        }
+        .recap-url-item .recap-url {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: #ccc;
+            word-break: break-all;
+            flex: 1;
+        }
+        .recap-url-item .recap-empty {
+            font-size: 0.75rem;
+            color: #555;
+            font-style: italic;
+        }
+
+        #popupOverlay {
+            display: none;
+            position: fixed;
+            z-index: 200;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 15px;
+        }
+        .popup-waiting-box {
+            background: #1a1a1a;
+            border-radius: 16px;
+            border: 1px solid #333;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+            max-width: 400px;
+            width: 100%;
+        }
+        .popup-waiting-box h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.1rem;
+        }
+        .popup-waiting-box p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin: 0 0 15px 0;
+        }
+        .popup-url-display {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.7rem;
+            color: #888;
+            word-break: break-all;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .popup-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .popup-btn-copy {
+            padding: 10px 18px;
+            background: var(--sp-green);
+            color: black;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .popup-btn-copy:hover { background: #1ed760; }
+        .popup-btn-close {
+            padding: 10px 18px;
+            background: #e91429;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .popup-btn-close:hover { background: #ff2d40; }
+
+        .copy-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1DB954;
+            color: black;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .copy-toast.show { opacity: 1; }
+
+        .btn-encoding {
+            background: #FFA500;
+            color: black;
+        }
+        .btn-encoding:hover {
+            background: #FFB347;
+        }
+
+        /* MEDIA QUERIES POUR MOBILE */
+        @media (max-width: 700px) {
+            .search-row {
+                flex-direction: column;
+            }
+
+            .search-row .btn-main,
+            .search-row input {
+                width: 100%;
+            }
+
+            .social-search-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .social-search-row .search-social-btn {
+                width: 100%;
+            }
+
+            .social-search-row .url-input-field {
+                width: 100%;
+            }
+
+            .btn-paste {
+                width: 100%;
+                justify-content: center;
+                margin-bottom: 5px;
+            }
+
+            .final-actions {
+                flex-direction: column;
+            }
+
+            .final-actions .btn-main {
+                width: 100%;
+            }
+
+            .modal-content {
+                padding: 20px 15px;
+            }
+
+            .det-img-large {
+                max-width: 220px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .search-box {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            .artist-name-tag {
+                font-size: 0.9rem;
+                padding: 5px 12px;
+            }
+
+            .reseau-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .reseau-item input {
+                width: 100%;
+            }
+
+            .btn-circle {
+                align-self: flex-end;
+            }
+
+            .popup-waiting-box {
+                padding: 20px 15px;
+            }
+
+            .popup-actions {
+                flex-direction: column;
+            }
+
+            .popup-btn-copy,
+            .popup-btn-close {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="search-box">
+    <h1>Artist Onboarding</h1>
+    <div class="search-row">
+        <a href="/menu/menu.html" class="btn-main">Menu Principal</a>
+        <input type="text" id="artistInput" placeholder="Rechercher sur Spotify...">
+        <button class="btn-main" onclick="searchArtists()">Chercher</button>
+    </div>
+</div>
+
+<div class="loader" id="loader"></div>
+<div id="results"></div>
+
+<div id="modalDetails" class="modal">
+    <div class="modal-content">
+        <img id="detImg" class="det-img-large">
+        <h2 id="detName" style="font-size: 1.8rem; margin-bottom: 15px;"></h2>
+        <div class="info-group"><div class="info-label">Email auto-généré</div><div id="detEmail" class="info-value"></div></div>
+        <div class="info-group"><div class="info-label">Lien Spotify</div><div id="detUrl" class="info-value"></div></div>
+        <div style="margin-top:25px; display:flex; gap:12px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn-main" style="background:#333; color:white;" onclick="closeAll()">Annuler</button>
+            <button class="btn-main" onclick="openSearchSocialModal()">Suivant</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalSocial" class="modal">
+    <div class="modal-content">
+        <h3>Réseaux Sociaux</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Raccourcis : fb, insta, tk, snap, yt...</p>
+        <div id="socialContainer"></div>
+        <button class="btn-main" style="margin-top:25px; width:100%" onclick="processEverything()">CRÉER LE PROFIL ARTISTE</button>
+    </div>
+</div>
+
+<div id="modalSearchSocial" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 10px;">Recherche des réseaux</h3>
+        <div class="artist-name-tag" id="searchSocialArtistName"></div>
+
+        <div class="social-search-row">
+            <button class="search-social-btn insta" onclick="openSocialSearch('instagram')">
+                <span class="icon"><i class="fab fa-instagram"></i></span> Instagram
+            </button>
+            <button class="btn-paste" onclick="pasteToField('urlInsta')"><i class="fas fa-clipboard"></i> Coller</button>
+            <input type="text" class="url-input-field" id="urlInsta" placeholder="URL Instagram...">
+        </div>
+        <div class="social-search-row">
+            <button class="search-social-btn fb" onclick="openSocialSearch('facebook')">
+                <span class="icon"><i class="fab fa-facebook"></i></span> Facebook
+            </button>
+            <button class="btn-paste" onclick="pasteToField('urlFb')"><i class="fas fa-clipboard"></i> Coller</button>
+            <input type="text" class="url-input-field" id="urlFb" placeholder="URL Facebook...">
+        </div>
+        <div class="social-search-row">
+            <button class="search-social-btn tk" onclick="openSocialSearch('tiktok')">
+                <span class="icon"><i class="fab fa-tiktok"></i></span> TikTok
+            </button>
+            <button class="btn-paste" onclick="pasteToField('urlTk')"><i class="fas fa-clipboard"></i> Coller</button>
+            <input type="text" class="url-input-field" id="urlTk" placeholder="URL TikTok...">
+        </div>
+        <div class="social-search-row">
+            <button class="search-social-btn snap" onclick="openSocialSearch('snapchat')">
+                <span class="icon"><i class="fab fa-snapchat"></i></span> Snapchat
+            </button>
+            <button class="btn-paste" onclick="pasteToField('urlSnap')"><i class="fas fa-clipboard"></i> Coller</button>
+            <input type="text" class="url-input-field" id="urlSnap" placeholder="URL Snapchat...">
+        </div>
+
+        <button class="btn-validate" onclick="confirmSocialUrls()" style="margin-top: 20px;">Valider →</button>
+    </div>
+</div>
+
+<div id="modalRecapUrls" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 20px;">Récap des liens</h3>
+        <div id="recapUrlsList"></div>
+        <div style="display:flex; gap:12px; margin-top:20px; flex-wrap: wrap;">
+            <button class="btn-main" style="background:#333; color:white; flex:1;" onclick="document.getElementById('modalRecapUrls').style.display='none'; document.getElementById('modalSearchSocial').style.display='flex';">Modifier</button>
+            <button class="btn-main" style="flex:1;" onclick="goToSocialEntry()">Confirmer →</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalFinal" class="modal">
+    <div class="modal-content">
+        <h2 id="finalTitle">Traitement en cours...</h2>
+        <img id="finalImg" class="det-img-large" style="max-width: 150px;">
+        <div id="apiLogs"></div>
+        <div id="finalData" style="display:none; margin-top:20px;">
+            <div class="info-group"><div class="info-label">Identifiants</div><div id="recapCreds" class="info-value"></div></div>
+            <div class="info-group"><div class="info-label">Rôle</div><div class="info-value">ARTISTE</div></div>
+            <div class="info-group"><div class="info-label">Réseaux (Compact)</div><div id="recapSocials" class="info-value" style="font-size:0.8rem;"></div></div>
+            <div class="final-actions">
+                <button class="btn-main btn-encoding" onclick="encodePreferences()" id="encodePrefBtn">🎵 Encoder préférence</button>
+                <button class="btn-main" style="background:white; color:black;" onclick="location.reload()">NOUVELLE INSCRIPTION</button>
+                <a href="/menu/menu.html" class="btn-main" style="background:#333; color:white;">MENU PRINCIPAL</a>
+                <a href="#" id="profilLink" class="btn-main" style="background:#1DB954; color:black;">VOIR LE PROFIL</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="popupOverlay">
+    <div class="popup-waiting-box">
+        <h3>🔍 Recherche en cours</h3>
+        <p>La fenêtre de recherche est ouverte.<br>Reviens ici quand tu as terminé.</p>
+        <div class="popup-url-display" id="popupUrlDisplay"></div>
+        <div class="popup-actions">
+            <button class="popup-btn-copy" onclick="copyPopupUrl()"><i class="fas fa-copy"></i> Copier le lien</button>
+            <button class="popup-btn-close" onclick="closePopup()"><i class="fas fa-times"></i> Fermer</button>
+        </div>
+    </div>
+</div>
+
+<div class="copy-toast" id="copyToast">Lien copié !</div>
+
+<script>
+    let currentArtist = null;
+    let finalSocialString = "";
+    let generatedPass = "";
+    let generatedPhone = "";
+    let currentPopupUrl = "";
+    let currentUserId = null;
+
+    const mapping = {
+        'fb':'facebook','facebook':'facebook','insta':'instagram','instagram':'instagram',
+        'tk':'tiktok','tiktok':'tiktok','tw':'twitter','twitter':'twitter',
+        'snap':'snapchat','snapchat':'snapchat','yt':'youtube','youtube':'youtube'
+    };
+
+    const icons = {
+        'facebook':'fab fa-facebook','instagram':'fab fa-instagram','tiktok':'fab fa-tiktok',
+        'twitter':'fab fa-twitter','snapchat':'fab fa-snapchat','youtube':'fab fa-youtube'
+    };
+
+    function log(msg) {
+        const logDiv = document.getElementById('apiLogs');
+        logDiv.innerHTML += `> ${msg}<br>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function generateRandomPhone() {
+        return "06" + Math.floor(10000000 + Math.random() * 90000000);
+    }
+
+    function convertToUrl(text) {
+        if (text.startsWith('http')) return text.trim();
+        const parts = text.trim().split(/\s+/);
+        if (parts.length >= 2) {
+            const platform = mapping[parts[0].toLowerCase()];
+            const user = parts.slice(1).join('');
+            if (platform === 'tiktok') return `https://tiktok.com/@${user}`;
+            if (platform === 'snapchat') return `https://snapchat.com/add/${user}`;
+            return `https://${platform || 'link'}.com/${user}`;
+        }
+        return text.trim();
+    }
+
+    function buildGoogleQuery(artistName, platform) {
+        const encoded = artistName.trim().replace(/\s+/g, '+');
+        return `https://www.google.com/search?q=${encoded}+${platform}`;
+    }
+
+    async function searchArtists() {
+        const nom = document.getElementById('artistInput').value;
+        if (!nom) return;
+        document.getElementById('loader').style.display = "block";
+        try {
+            const resp = await fetch(`/api/spotify/artiste/searchChoix?nom=${encodeURIComponent(nom)}`);
+            const data = await resp.json();
+            document.getElementById('loader').style.display = "none";
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = "";
+            if (data.success) {
+                data.resultats.forEach(art => {
+                    const card = document.createElement('div');
+                    card.className = 'artist-card';
+                    card.onclick = () => openDetails(art);
+                    card.innerHTML = `<img src="${art.photoUrl || ''}"><h3>${art.nom}</h3><p style="color:var(--text-muted)">Spotify Artist</p>`;
+                    resultsDiv.appendChild(card);
+                });
+            }
+        } catch (e) { document.getElementById('loader').style.display = "none"; }
+    }
+
+    function openDetails(art) {
+        currentArtist = art;
+        const slug = art.nom.trim().replace(/\s+/g, '_').toLowerCase();
+        generatedPass = slug + "_pass";
+        document.getElementById('detImg').src = art.photoUrl;
+        document.getElementById('detName').innerText = art.nom;
+        document.getElementById('detEmail').innerText = slug + "@moteka.com";
+        document.getElementById('detUrl').innerText = art.spotifyUrl;
+        document.getElementById('modalDetails').style.display = 'flex';
+    }
+
+    function openSearchSocialModal() {
+        closeAll();
+        document.getElementById('searchSocialArtistName').innerText = currentArtist.nom;
+        document.getElementById('urlInsta').value = '';
+        document.getElementById('urlFb').value = '';
+        document.getElementById('urlTk').value = '';
+        document.getElementById('urlSnap').value = '';
+        document.getElementById('modalSearchSocial').style.display = 'flex';
+    }
+
+    async function pasteToField(fieldId) {
+        try {
+            const text = await navigator.clipboard.readText();
+            document.getElementById(fieldId).value = text;
+            showToast('Collé !');
+        } catch (e) { showToast('Autoriser le presse-papier'); }
+    }
+
+    function confirmSocialUrls() {
+        const fields = [
+            { id: 'urlInsta', label: 'Instagram', icon: 'fab fa-instagram', color: '#E1306C' },
+            { id: 'urlFb',    label: 'Facebook',  icon: 'fab fa-facebook',  color: '#1877F2' },
+            { id: 'urlTk',    label: 'TikTok',    icon: 'fab fa-tiktok',    color: '#69C9D0' },
+            { id: 'urlSnap',  label: 'Snapchat',  icon: 'fab fa-snapchat',  color: '#FFFC00' },
+        ];
+        const recapDiv = document.getElementById('recapUrlsList');
+        recapDiv.innerHTML = '';
+        fields.forEach(f => {
+            const val = document.getElementById(f.id).value.trim();
+            const item = document.createElement('div');
+            item.className = 'recap-url-item';
+            item.innerHTML = `
+                <i class="${f.icon}" style="color:${f.color}; font-size:1.3rem; width:24px; text-align:center;"></i>
+                <span class="recap-platform">${f.label}</span>
+                ${val ? `<span class="recap-url">${val}</span>` : `<span class="recap-empty">Non renseigné</span>`}
+            `;
+            recapDiv.appendChild(item);
+        });
+        document.getElementById('modalSearchSocial').style.display = 'none';
+        document.getElementById('modalRecapUrls').style.display = 'flex';
+    }
+
+    function openSocialSearch(platform) {
+        const url = buildGoogleQuery(currentArtist.nom, platform);
+        currentPopupUrl = url;
+        document.getElementById('popupUrlDisplay').innerText = url;
+        document.getElementById('popupOverlay').style.display = 'flex';
+        const popupWin = window.open(url, 'socialSearch', 'width=1000,height=700');
+        const timer = setInterval(() => { if (popupWin && popupWin.closed) { clearInterval(timer); closePopup(); } }, 500);
+    }
+
+    function closePopup() { document.getElementById('popupOverlay').style.display = 'none'; }
+
+    function copyPopupUrl() {
+        navigator.clipboard.writeText(currentPopupUrl).then(() => showToast('Lien copié !'));
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('copyToast');
+        t.innerText = msg; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function goToSocialEntry() {
+        closeAll();
+        const fields = ['urlInsta', 'urlFb', 'urlTk', 'urlSnap'];
+        const container = document.getElementById('socialContainer');
+        container.innerHTML = '';
+        let added = false;
+        fields.forEach(id => {
+            const val = document.getElementById(id).value.trim();
+            if (val) { addSocialFieldWithValue(val); added = true; }
+        });
+        if (!added) addSocialField();
+        document.getElementById('modalSocial').style.display = 'flex';
+    }
+
+    function addSocialField() {
+        const div = document.createElement('div');
+        div.className = 'reseau-item';
+        div.innerHTML = `
+            <div class="icon-box"><i class="fas fa-link"></i></div>
+            <input type="text" class="social-input" placeholder="ex: insta mon_pseudo" oninput="updateIcon(this)" style="flex:1; padding:8px; border:none; background:transparent; color:white; outline:none;">
+            <button class="btn-circle btn-plus" onclick="addSocialField()"><i class="fas fa-plus"></i></button>
+            <button class="btn-circle btn-minus" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+        `;
+        document.getElementById('socialContainer').appendChild(div);
+    }
+
+    function addSocialFieldWithValue(url) {
+        const div = document.createElement('div');
+        div.className = 'reseau-item';
+        div.innerHTML = `
+            <div class="icon-box"><i class="fas fa-link"></i></div>
+            <input type="text" class="social-input" value="${url}" oninput="updateIcon(this)" style="flex:1; padding:8px; border:none; background:transparent; color:white; outline:none;">
+            <button class="btn-circle btn-plus" onclick="addSocialField()"><i class="fas fa-plus"></i></button>
+            <button class="btn-circle btn-minus" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+        `;
+        document.getElementById('socialContainer').appendChild(div);
+        updateIcon(div.querySelector('input'));
+    }
+
+    function updateIcon(input) {
+        const val = input.value.trim().split(/\s+/)[0].toLowerCase();
+        const iconI = input.parentElement.querySelector('.icon-box i');
+        const platform = mapping[val];
+        iconI.className = platform && icons[platform] ? icons[platform] : 'fas fa-link';
+    }
+
+    async function encodePreferences() {
+        if (!currentUserId) {
+            showToast('ID utilisateur non disponible');
+            return;
+        }
+
+        const encodeBtn = document.getElementById('encodePrefBtn');
+        const originalText = encodeBtn.innerText;
+        encodeBtn.innerText = '⏳ Encodage...';
+        encodeBtn.disabled = true;
+
+        try {
+            log("Début de l'encodage des préférences...");
+            const response = await fetch(`/api/users/${currentUserId}/auto-tag-preferences`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                log(`✅ Encodage réussi !`);
+                log(`Genres attribués: ${data.genres_attribues ? JSON.stringify(data.genres_attribues) : 'Aucun'}`);
+                showToast('Préférences encodées avec succès!');
+            } else {
+                log(`❌ Erreur: ${data.error || 'Erreur inconnue'}`);
+                showToast('Erreur lors de l\'encodage');
+            }
+        } catch (error) {
+            log(`❌ Erreur réseau: ${error.message}`);
+            showToast('Erreur de connexion');
+        } finally {
+            encodeBtn.innerText = originalText;
+            encodeBtn.disabled = false;
+        }
+    }
+
+    async function processEverything() {
+        const inputs = document.querySelectorAll('.social-input');
+        finalSocialString = Array.from(inputs).map(i => i.value.trim()).filter(v => v).map(v => convertToUrl(v)).join(';');
+        generatedPhone = generateRandomPhone();
+        closeAll();
+        document.getElementById('modalFinal').style.display = 'flex';
+        document.getElementById('finalImg').src = currentArtist.photoUrl;
+
+        try {
+            log("Inscription...");
+            let formData = new FormData();
+            formData.append("username", currentArtist.nom);
+            formData.append("email", document.getElementById('detEmail').innerText);
+            formData.append("password", generatedPass);
+            formData.append("phoneNumber", generatedPhone);
+
+            const regResp = await fetch('/api/users/register', { method: 'POST', body: formData });
+            const regData = await regResp.json();
+            const userId = regData.id;
+            currentUserId = userId;
+
+            log("Activation..."); await fetch(`/api/users/${userId}/activate`, { method: 'PUT' });
+            log("Photo..."); await fetch(`/api/users/${userId}/photo-url?photoUrl=${encodeURIComponent(currentArtist.photoUrl)}`, { method: 'PUT' });
+            log("Spotify..."); await fetch(`/api/users/spotify/${userId}?spotifyLink=${encodeURIComponent(currentArtist.spotifyUrl)}`, { method: 'PUT' });
+            log("Rôle..."); await fetch(`/api/users/${userId}/role?role=ARTISTE`, { method: 'PUT' });
+            log("Réseaux..."); await fetch(`/api/users/${userId}/listeReseaux?listeReseaux=${encodeURIComponent(finalSocialString)}`, { method: 'PUT' });
+
+            log("Sync genres...");
+            try {
+                await fetch(`/api/users/${userId}/sync-genres-spotify`, { method: 'POST' });
+                log("Synchro Spotify terminée.");
+                log("Lancement de l'auto-encodage...");
+                await encodePreferences();
+            } catch(e){ log(`Erreur Sync/Encodage: ${e.message}`); }
+
+            log("TERMINÉ !");
+            document.getElementById('finalTitle').innerText = "Artiste Enregistré !";
+            document.getElementById('recapCreds').innerHTML = `Email: ${regData.email}<br>Pass: ${generatedPass}<br>Phone: ${generatedPhone}`;
+            document.getElementById('recapSocials').innerText = finalSocialString || "Aucun";
+            document.getElementById('profilLink').href = `/menu/profil_artist.html?userId=${userId}`;
+            document.getElementById('finalData').style.display = 'block';
+        } catch (e) { log(`ERREUR: ${e.message}`); }
+    }
+
+    function closeAll() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moteka - Conversion AIF vers Dropbox | Upload et Transfert</title>
+  <meta name="description" content="Interface de conversion des fichiers AIF vers Dropbox pour Moteka. Transfert sécurisé vers le dossier Live.">
+
+  <style>
+    /* Reset */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        position: relative;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* Container principal */
+    .main-container {
+        width: 100%;
+        max-width: 800px;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Header */
+    .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 30px;
+        color: white;
+        text-align: center;
+    }
+
+    .header h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        letter-spacing: -0.5px;
+    }
+
+    .header p {
+        font-size: 1rem;
+        opacity: 0.9;
+        font-weight: 400;
+    }
+
+    /* Contenu */
+    .content {
+        padding: 40px 30px;
+    }
+
+    /* Section de protection par mot de passe */
+    .password-section {
+        margin-bottom: 30px;
+        padding: 25px;
+        background: #f8f9ff;
+        border-radius: 16px;
+        border: 2px solid #e0e7ff;
+    }
+
+    .password-section h2 {
+        font-size: 1.3rem;
+        color: #333;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .password-section h2 i {
+        color: #667eea;
+    }
+
+    .password-input-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .password-input {
+        flex: 1;
+        padding: 14px 20px;
+        border: 2px solid #e0e7ff;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s;
+    }
+
+    .password-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .password-btn {
+        padding: 14px 25px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        white-space: nowrap;
+    }
+
+    .password-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Section d'upload (cachée par défaut) */
+    .upload-section {
+        display: none;
+    }
+
+    .upload-section.active {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .upload-box {
+        border: 3px dashed #d1d5db;
+        border-radius: 20px;
+        padding: 50px 30px;
+        text-align: center;
+        background: #f9fafb;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 20px;
+    }
+
+    .upload-box:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+    }
+
+    .upload-box.dragover {
+        border-color: #667eea;
+        background: #eef2ff;
+        transform: scale(1.02);
+    }
+
+    .upload-icon {
+        font-size: 3.5rem;
+        color: #667eea;
+        margin-bottom: 20px;
+    }
+
+    .upload-title {
+        font-size: 1.5rem;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .upload-subtitle {
+        color: #6b7280;
+        margin-bottom: 20px;
+        font-size: 1rem;
+    }
+
+    .upload-btn {
+        display: inline-block;
+        padding: 14px 35px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    /* File info */
+    .file-info {
+        display: none;
+        margin-top: 20px;
+        padding: 20px;
+        background: #f0f9ff;
+        border-radius: 12px;
+        border: 2px solid #e0f2fe;
+    }
+
+    .file-info.active {
+        display: block;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .file-info h3 {
+        font-size: 1.1rem;
+        color: #0369a1;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .file-details {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .file-detail {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .file-label {
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+
+    .file-value {
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+        display: none;
+        margin-top: 20px;
+        padding: 20px;
+        background: #f8f9ff;
+        border-radius: 12px;
+        border: 2px solid #e0e7ff;
+    }
+
+    .progress-container.active {
+        display: block;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .progress-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .progress-percentage {
+        font-weight: 700;
+        color: #667eea;
+        font-size: 1.2rem;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 12px;
+        background: #e5e7eb;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        width: 0%;
+        border-radius: 6px;
+        transition: width 0.3s ease;
+    }
+
+    .progress-details {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+
+    /* Bouton de conversion */
+    .convert-btn {
+        width: 100%;
+        padding: 18px 30px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .convert-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    .convert-btn:disabled {
+        background: #d1d5db;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Loader */
+    .loader {
+        display: none;
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .loader.active {
+        display: block;
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #e0e7ff;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .loader-text {
+        color: #667eea;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    /* Résultat */
+    .result {
+        display: none;
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .result.active {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .result-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+    }
+
+    .result.success .result-icon {
+        color: #10b981;
+    }
+
+    .result.error .result-icon {
+        color: #ef4444;
+    }
+
+    .result h3 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .result p {
+        color: #6b7280;
+        margin-bottom: 25px;
+        line-height: 1.6;
+    }
+
+    .result-btn {
+        display: inline-block;
+        padding: 14px 35px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+
+    .result-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Alerte */
+    .alert {
+        display: none;
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .alert.active {
+        display: block;
+    }
+
+    .alert.error {
+        background: #fef2f2;
+        border: 2px solid #fecaca;
+        color: #dc2626;
+    }
+
+    .alert.info {
+        background: #eff6ff;
+        border: 2px solid #dbeafe;
+        color: #2563eb;
+    }
+
+    /* Footer */
+    .footer {
+        padding: 20px 30px;
+        background: #f9fafb;
+        border-top: 1px solid #e5e7eb;
+        text-align: center;
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .main-container {
+            max-width: 100%;
+            border-radius: 20px;
+        }
+
+        .header {
+            padding: 30px 20px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .password-section {
+            padding: 20px;
+        }
+
+        .password-input-group {
+            flex-direction: column;
+        }
+
+        .upload-box {
+            padding: 40px 20px;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+        }
+
+        .upload-title {
+            font-size: 1.3rem;
+        }
+
+        .file-details {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .convert-btn {
+            padding: 16px 20px;
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        body {
+            padding: 15px;
+        }
+
+        .header {
+            padding: 25px 15px;
+        }
+
+        .header h1 {
+            font-size: 1.6rem;
+        }
+
+        .content {
+            padding: 25px 15px;
+        }
+
+        .upload-box {
+            padding: 30px 15px;
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+        }
+
+        .upload-title {
+            font-size: 1.2rem;
+        }
+
+        .password-btn,
+        .upload-btn,
+        .convert-btn,
+        .result-btn {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .header {
+            padding: 20px 12px;
+        }
+
+        .header h1 {
+            font-size: 1.4rem;
+        }
+
+        .content {
+            padding: 20px 12px;
+        }
+
+        .upload-box {
+            padding: 25px 12px;
+        }
+    }
+  </style>
+
+  <!-- Font Awesome pour les icônes -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="main-container">
+  <div class="header">
+    <h1><i class="fas fa-file-audio"></i> Conversion AIF</h1>
+    <p>Transfert sécurisé vers Dropbox - Dossier Live</p>
+  </div>
+
+  <div class="content">
+    <!-- Section de protection par mot de passe -->
+    <div class="password-section" id="passwordSection">
+      <h2><i class="fas fa-lock"></i> Accès sécurisé</h2>
+      <div class="password-input-group">
+        <input type="password"
+               class="password-input"
+               id="passwordInput"
+               placeholder="Entrez le mot de passe"
+               aria-label="Mot de passe d'accès">
+        <button class="password-btn" id="passwordBtn">
+          <i class="fas fa-key"></i> Valider
+        </button>
+      </div>
+    </div>
+
+    <!-- Section d'upload (cachée par défaut) -->
+    <div class="upload-section" id="uploadSection">
+      <!-- Alerte d'erreur -->
+      <div class="alert error" id="errorAlert"></div>
+
+      <!-- Alerte d'info -->
+      <div class="alert info" id="infoAlert"></div>
+
+      <!-- Zone de drag & drop -->
+      <div class="upload-box" id="uploadBox">
+        <div class="upload-icon">
+          <i class="fas fa-cloud-upload-alt"></i>
+        </div>
+        <h3 class="upload-title">Déposez votre fichier AIF ici</h3>
+        <p class="upload-subtitle">ou cliquez pour sélectionner</p>
+        <button class="upload-btn" id="selectFileBtn">
+          <i class="fas fa-folder-open"></i> Choisir un fichier
+        </button>
+        <input type="file"
+               class="file-input"
+               id="fileInput"
+               accept=".aif,.aiff"
+               aria-label="Sélectionner un fichier AIF">
+        <p class="upload-subtitle" style="margin-top: 15px; font-size: 0.9rem;">
+          <i class="fas fa-info-circle"></i> Fichiers .aif/.aiff jusqu'à 2 Go
+        </p>
+      </div>
+
+      <!-- Info fichier sélectionné -->
+      <div class="file-info" id="fileInfo">
+        <h3><i class="fas fa-file-audio"></i> Fichier sélectionné</h3>
+        <div class="file-details">
+          <div class="file-detail">
+            <span class="file-label">Nom du fichier:</span>
+            <span class="file-value" id="fileName">-</span>
+          </div>
+          <div class="file-detail">
+            <span class="file-label">Taille:</span>
+            <span class="file-value" id="fileSize">-</span>
+          </div>
+          <div class="file-detail">
+            <span class="file-label">Type:</span>
+            <span class="file-value" id="fileType">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barre de progression -->
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-header">
+          <div class="progress-title">
+            <i class="fas fa-upload"></i> Upload en cours
+          </div>
+          <div class="progress-percentage" id="progressPercentage">0%</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-details">
+          <span id="uploadedSize">0 Mo</span>
+          <span id="totalSize">0 Mo</span>
+        </div>
+      </div>
+
+      <!-- Bouton de conversion -->
+      <button class="convert-btn" id="convertBtn" disabled>
+        <i class="fas fa-sync-alt"></i> Convertir et Transférer vers Dropbox
+      </button>
+    </div>
+
+    <!-- Loader -->
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <p class="loader-text">Conversion en cours...</p>
+      <p style="color: #6b7280; margin-top: 10px; font-size: 0.9rem;">
+        Cette opération peut prendre quelques minutes pour les gros fichiers
+      </p>
+    </div>
+
+    <!-- Résultat -->
+    <div class="result" id="result">
+      <div class="result-icon">
+        <i class="fas" id="resultIcon"></i>
+      </div>
+      <h3 id="resultTitle">Titre du résultat</h3>
+      <p id="resultMessage">Message du résultat</p>
+      <button class="result-btn" id="newConvertBtn">
+        <i class="fas fa-redo"></i> Nouvelle conversion
+      </button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p><i class="fas fa-shield-alt"></i> Moteka - Conversion sécurisée © 2024</p>
+  </div>
+</div>
+
+<script>
+  // Éléments DOM
+  const passwordSection = document.getElementById('passwordSection');
+  const uploadSection = document.getElementById('uploadSection');
+  const passwordInput = document.getElementById('passwordInput');
+  const passwordBtn = document.getElementById('passwordBtn');
+  const uploadBox = document.getElementById('uploadBox');
+  const fileInput = document.getElementById('fileInput');
+  const selectFileBtn = document.getElementById('selectFileBtn');
+  const fileInfo = document.getElementById('fileInfo');
+  const fileName = document.getElementById('fileName');
+  const fileSize = document.getElementById('fileSize');
+  const fileType = document.getElementById('fileType');
+  const progressContainer = document.getElementById('progressContainer');
+  const progressFill = document.getElementById('progressFill');
+  const progressPercentage = document.getElementById('progressPercentage');
+  const uploadedSize = document.getElementById('uploadedSize');
+  const totalSize = document.getElementById('totalSize');
+  const convertBtn = document.getElementById('convertBtn');
+  const loader = document.getElementById('loader');
+  const result = document.getElementById('result');
+  const resultIcon = document.getElementById('resultIcon');
+  const resultTitle = document.getElementById('resultTitle');
+  const resultMessage = document.getElementById('resultMessage');
+  const newConvertBtn = document.getElementById('newConvertBtn');
+  const errorAlert = document.getElementById('errorAlert');
+  const infoAlert = document.getElementById('infoAlert');
+
+  // Variables
+  let selectedFile = null;
+  let xhr = null; // Pour pouvoir annuler l'upload
+  const PASSWORD = 'ttmk'; // Mot de passe d'accès
+  const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2 Go en bytes
+
+  // Vérifier si déjà authentifié
+  if (sessionStorage.getItem('conversionAuthenticated') === 'true') {
+      showUploadSection();
+  }
+
+  // Gestionnaire pour le bouton de validation du mot de passe
+  passwordBtn.addEventListener('click', validatePassword);
+  passwordInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+          validatePassword();
+      }
+  });
+
+  // Gestionnaire pour sélectionner un fichier
+  selectFileBtn.addEventListener('click', () => fileInput.click());
+  uploadBox.addEventListener('click', () => fileInput.click());
+
+  // Gestionnaire pour le drag & drop
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      uploadBox.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+  }
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+      uploadBox.addEventListener(eventName, highlight, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+      uploadBox.addEventListener(eventName, unhighlight, false);
+  });
+
+  function highlight() {
+      uploadBox.classList.add('dragover');
+  }
+
+  function unhighlight() {
+      uploadBox.classList.remove('dragover');
+  }
+
+  uploadBox.addEventListener('drop', handleDrop, false);
+
+  // Gestionnaire pour la sélection de fichier via input
+  fileInput.addEventListener('change', handleFileSelect);
+
+  // Gestionnaire pour le bouton de conversion
+  convertBtn.addEventListener('click', uploadAndConvert);
+
+  // Gestionnaire pour nouvelle conversion
+  newConvertBtn.addEventListener('click', resetForm);
+
+  // Fonctions
+  function validatePassword() {
+      const enteredPassword = passwordInput.value.trim();
+
+      if (enteredPassword === PASSWORD) {
+          sessionStorage.setItem('conversionAuthenticated', 'true');
+          showUploadSection();
+          showAlert('info', 'Accès autorisé. Vous pouvez maintenant uploader vos fichiers AIF jusqu\'à 2 Go.');
+      } else {
+          showAlert('error', 'Mot de passe incorrect. Veuillez réessayer.');
+          passwordInput.value = '';
+          passwordInput.focus();
+      }
+  }
+
+  function showUploadSection() {
+      passwordSection.style.display = 'none';
+      uploadSection.classList.add('active');
+      hideAlert('error');
+      hideAlert('info');
+  }
+
+  function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const file = dt.files[0];
+      handleFile(file);
+  }
+
+  function handleFileSelect() {
+      const file = fileInput.files[0];
+      handleFile(file);
+  }
+
+  function handleFile(file) {
+      if (!file) return;
+
+      // Vérifier l'extension .aif
+      const fileNameLower = file.name.toLowerCase();
+      if (!fileNameLower.endsWith('.aif') && !fileNameLower.endsWith('.aiff')) {
+          showAlert('error', 'Seuls les fichiers .aif ou .aiff sont acceptés.');
+          resetFileSelection();
+          return;
+      }
+
+      // Vérifier la taille (max 2GB)
+      if (file.size > MAX_FILE_SIZE) {
+          showAlert('error', 'Le fichier est trop volumineux. Taille maximum: 2 Go.');
+          resetFileSelection();
+          return;
+      }
+
+      selectedFile = file;
+      updateFileInfo(file);
+      fileInfo.classList.add('active');
+      convertBtn.disabled = false;
+      hideAlert('error');
+  }
+
+  function updateFileInfo(file) {
+      fileName.textContent = file.name;
+      fileSize.textContent = formatFileSize(file.size);
+      fileType.textContent = file.type || 'audio/aiff';
+
+      // Mettre à jour la taille totale dans la barre de progression
+      totalSize.textContent = formatFileSize(file.size);
+  }
+
+  function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  function resetFileSelection() {
+      selectedFile = null;
+      fileInput.value = '';
+      fileInfo.classList.remove('active');
+      progressContainer.classList.remove('active');
+      convertBtn.disabled = true;
+
+      // Réinitialiser la barre de progression
+      progressFill.style.width = '0%';
+      progressPercentage.textContent = '0%';
+      uploadedSize.textContent = '0 Mo';
+  }
+
+  async function uploadAndConvert() {
+      if (!selectedFile) return;
+
+      // Désactiver le bouton
+      convertBtn.disabled = true;
+      convertBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Préparation...';
+
+      // Cacher l'info fichier et afficher la barre de progression
+      fileInfo.classList.remove('active');
+      progressContainer.classList.add('active');
+
+      try {
+          // Créer FormData
+          const formData = new FormData();
+          formData.append('file', selectedFile);
+          formData.append('dossierDropbox', 'live');
+
+          // Créer XMLHttpRequest pour suivre la progression
+          xhr = new XMLHttpRequest();
+
+          // Configurer les événements de progression
+          xhr.upload.addEventListener('progress', function(e) {
+              if (e.lengthComputable) {
+                  const percentComplete = (e.loaded / e.total) * 100;
+                  updateProgressBar(percentComplete, e.loaded, e.total);
+              }
+          });
+
+          xhr.addEventListener('load', function() {
+              handleUploadResponse(xhr);
+          });
+
+          xhr.addEventListener('error', function() {
+              showResult('error', 'Erreur réseau', 'Impossible de se connecter au serveur. Vérifiez votre connexion.');
+              progressContainer.classList.remove('active');
+              loader.classList.remove('active');
+          });
+
+          xhr.addEventListener('abort', function() {
+              showResult('error', 'Upload annulé', 'L\'upload a été annulé.');
+              progressContainer.classList.remove('active');
+              loader.classList.remove('active');
+          });
+
+          // Configurer et envoyer la requête
+          xhr.open('POST', '/api/conversion/upload-and-convert');
+          xhr.send(formData);
+
+          // Une fois que l'upload commence, afficher le loader
+          setTimeout(() => {
+              progressContainer.classList.remove('active');
+              loader.classList.add('active');
+              convertBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement en cours...';
+          }, 500);
+
+      } catch (error) {
+          showResult('error', 'Erreur', 'Une erreur est survenue lors de l\'upload.');
+          console.error('Erreur:', error);
+          progressContainer.classList.remove('active');
+          loader.classList.remove('active');
+      }
+  }
+
+  function handleUploadResponse(xhr) {
+      // Cacher le loader
+      loader.classList.remove('active');
+
+      // Gérer la réponse
+      if (xhr.status >= 200 && xhr.status < 300) {
+          const message = xhr.responseText;
+          showResult('success', 'Conversion réussie !', message);
+      } else {
+          let errorMessage = 'Erreur lors de la conversion';
+          try {
+              errorMessage = xhr.responseText || `Erreur ${xhr.status}: ${xhr.statusText}`;
+          } catch (e) {
+              errorMessage = `Erreur ${xhr.status}: ${xhr.statusText}`;
+          }
+          showResult('error', 'Échec de la conversion', errorMessage);
+      }
+  }
+
+  function updateProgressBar(percent, loaded, total) {
+      const percentRounded = Math.round(percent);
+      progressFill.style.width = percent + '%';
+      progressPercentage.textContent = percentRounded + '%';
+      uploadedSize.textContent = formatFileSize(loaded);
+      totalSize.textContent = formatFileSize(total);
+  }
+
+  function showResult(type, title, message) {
+      result.classList.add('active');
+
+      if (type === 'success') {
+          result.classList.add('success');
+          result.classList.remove('error');
+          resultIcon.className = 'fas fa-check-circle';
+      } else {
+          result.classList.add('error');
+          result.classList.remove('success');
+          resultIcon.className = 'fas fa-exclamation-circle';
+      }
+
+      resultTitle.textContent = title;
+      resultMessage.textContent = message;
+  }
+
+  function resetForm() {
+      result.classList.remove('active');
+      uploadSection.classList.add('active');
+      resetFileSelection();
+      convertBtn.disabled = true;
+      convertBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Convertir et Transférer vers Dropbox';
+  }
+
+  function showAlert(type, message) {
+      if (type === 'error') {
+          errorAlert.textContent = message;
+          errorAlert.classList.add('active');
+          infoAlert.classList.remove('active');
+      } else {
+          infoAlert.textContent = message;
+          infoAlert.classList.add('active');
+          errorAlert.classList.remove('active');
+      }
+
+      // Auto-hide après 5 secondes pour les alertes info
+      if (type === 'info') {
+          setTimeout(() => {
+              hideAlert('info');
+          }, 5000);
+      }
+  }
+
+  function hideAlert(type) {
+      if (type === 'error') {
+          errorAlert.classList.remove('active');
+      } else {
+          infoAlert.classList.remove('active');
+      }
+  }
+
+  // Permettre l'accès direct si password dans l'URL (pour testing)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('password') === PASSWORD) {
+      sessionStorage.setItem('conversionAuthenticated', 'true');
+      showUploadSection();
+      showAlert('info', 'Accès autorisé via URL.');
+  }
+
+  // Ajouter un bouton d'annulation (optionnel)
+  window.addEventListener('beforeunload', function(e) {
+      if (xhr && xhr.readyState !== XMLHttpRequest.DONE) {
+          const message = 'L\'upload est en cours. Voulez-vous vraiment quitter?';
+          e.returnValue = message;
+          return message;
+      }
+  });
+</script>
+</body>
+</html>

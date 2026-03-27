@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Édition Profil Artiste</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sp-green: #1DB954;
+            --bg-dark:  #0f0f0f;
+            --card-bg:  #181818;
+            --card-hover: #282828;
+            --text-main: #ffffff;
+            --text-muted: #b3b3b3;
+            --accent:   #1ed760;
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Circular Std', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            padding: clamp(16px, 4vw, 40px);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* ── PROFILE HEADER ── */
+        .profile-header {
+            background: var(--card-bg);
+            padding: clamp(16px, 4vw, 30px);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: clamp(16px, 3vw, 30px);
+            border: 1px solid #333;
+        }
+
+        #currentPhoto {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            aspect-ratio: 16/9;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #333;
+            margin-bottom: 16px;
+        }
+
+        .profile-info { text-align: center; width: 100%; }
+        .profile-info h1 {
+            margin-bottom: 15px;
+            font-size: clamp(1.4rem, 5vw, 2rem);
+        }
+
+        .spotify-field-wrap {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 15px;
+        }
+        .spotify-field-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            display: block;
+            text-align: left;
+        }
+
+        #currentSpotifyUrlField {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 1px solid var(--sp-green);
+            color: var(--sp-green);
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: clamp(.75rem, 2vw, .9rem);
+            word-break: break-all;
+        }
+
+        /* ── GENRE SECTION ── */
+        .genre-section {
+            background: var(--card-bg);
+            padding: clamp(16px, 4vw, 30px);
+            border-radius: 12px;
+            margin-bottom: clamp(16px, 3vw, 30px);
+            border: 1px solid #333;
+        }
+
+        .genre-section h3 {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 14px;
+        }
+
+        .genre-select-wrap {
+            width: 100%;
+        }
+
+        .genre-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        #genreSelect {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: white;
+            outline: none;
+            font-size: clamp(.8rem, 2vw, 1rem);
+            cursor: pointer;
+        }
+
+        #genreSelect option {
+            background: #2a2a2a;
+            color: white;
+        }
+
+        /* ── SEARCH SECTION ── */
+        .search-section {
+            background: var(--card-bg);
+            padding: clamp(16px, 4vw, 30px);
+            border-radius: 12px;
+            margin-bottom: clamp(16px, 3vw, 30px);
+            border: 1px solid #333;
+        }
+
+        .search-section h3 {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 14px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: white;
+            outline: none;
+            font-size: clamp(.8rem, 2vw, 1rem);
+            width: 100%;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 50px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            font-size: clamp(.78rem, 2vw, .9rem);
+            white-space: nowrap;
+        }
+        .btn-green  { background: var(--sp-green); color: black; }
+        .btn-green:hover { background: var(--accent); }
+        .btn-outline { background: transparent; color: white; border: 1px solid #444; margin-top: 10px; }
+        .btn-outline:hover { background: #333; }
+        .btn-cancel {
+            background: #555; color: white; border: 1px solid #777;
+            margin-top: 10px; width: 100%;
+        }
+        .btn-cancel:hover { background: #666; }
+
+        /* ── SPOTIFY RESULTS ── */
+        #spotifyResults {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(clamp(130px, 25vw, 180px), 1fr));
+            gap: clamp(10px, 2vw, 20px);
+            margin-top: 20px;
+        }
+
+        .spotify-card {
+            background: #222;
+            padding: clamp(10px, 2vw, 15px);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+        }
+        .spotify-card:hover { background: #282828; }
+        .spotify-card img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        .spotify-card span {
+            font-size: clamp(.72rem, 1.8vw, .85rem);
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ── SOCIAL SECTION ── */
+        .social-section {
+            background: var(--card-bg);
+            padding: clamp(16px, 4vw, 30px);
+            border-radius: 12px;
+            border: 1px solid #333;
+            width: 100%;
+        }
+
+        .social-section h3 {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 18px;
+        }
+
+        /* ── SOCIAL ROW ── */
+        .social-search-row {
+            display: flex;
+            align-items: stretch;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            flex-shrink: 0;
+            width: clamp(110px, 28vw, 140px);
+            padding: 11px 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #111;
+            color: white;
+            font-size: clamp(.72rem, 1.8vw, .85rem);
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .search-social-btn:hover { background: #222; border-color: #555; }
+        .search-social-btn .icon { font-size: 1.1rem; width: 20px; text-align: center; flex-shrink: 0; }
+        .search-social-btn.insta .icon { color: #E1306C; }
+        .search-social-btn.fb    .icon { color: #1877F2; }
+        .search-social-btn.tk    .icon { color: #69C9D0; }
+        .search-social-btn.snap  .icon { color: #FFFC00; }
+
+        .btn-paste {
+            flex-shrink: 0;
+            padding: 10px 10px;
+            background: #2a2a2a;
+            color: #ccc;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-size: clamp(.7rem, 1.8vw, .78rem);
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-paste:hover { background: #1DB954; color: black; border-color: #1DB954; }
+
+        .url-input-field {
+            flex: 1;
+            min-width: 0;
+            padding: 11px 10px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #0a0a0a;
+            color: #ccc;
+            font-size: clamp(.72rem, 1.8vw, .82rem);
+            outline: none;
+        }
+
+        /* Sur mobile : input passe en dessous */
+        @media (max-width: 480px) {
+            .social-search-row { flex-wrap: wrap; }
+            .search-social-btn { width: calc(60% - 4px); }
+            .btn-paste         { width: calc(40% - 4px); justify-content: center; }
+            .url-input-field   { width: 100%; flex: none; }
+        }
+
+        /* ── LOADER ── */
+        .loader {
+            display: none;
+            margin: 20px auto;
+            border: 4px solid #333;
+            border-top: 4px solid var(--sp-green);
+            border-radius: 50%;
+            width: 30px; height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #statusLog {
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: clamp(.75rem, 2vw, .85rem);
+            color: #0f0;
+            text-align: center;
+        }
+
+        /* ── FINAL ACTIONS ── */
+        .final-actions {
+            display: none;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .final-actions .btn { flex: 1; min-width: 120px; }
+
+        /* ── OVERLAY POPUP ── */
+        #popupOverlay {
+            display: none;
+            position: fixed;
+            z-index: 200;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .popup-waiting-box {
+            background: #1a1a1a;
+            border-radius: 12px;
+            border: 1px solid #333;
+            padding: clamp(20px, 5vw, 30px) clamp(16px, 5vw, 40px);
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+            max-width: 400px;
+            width: 100%;
+        }
+        .popup-waiting-box h3 { margin: 0 0 10px; font-size: clamp(.95rem, 2.5vw, 1.1rem); }
+        .popup-waiting-box p  { color: var(--text-muted); font-size: clamp(.75rem, 2vw, .85rem); margin: 0 0 20px; }
+        .popup-url-display {
+            background: #0a0a0a; border: 1px solid #333; border-radius: 6px;
+            padding: 10px 12px; font-family: monospace;
+            font-size: clamp(.62rem, 1.6vw, .75rem);
+            color: #888; word-break: break-all; margin-bottom: 20px; text-align: left;
+        }
+        .popup-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .popup-btn-copy {
+            padding: 10px 18px; background: var(--sp-green); color: black;
+            border: none; border-radius: 6px; font-weight: bold; cursor: pointer;
+            font-size: clamp(.75rem, 2vw, .85rem); transition: background 0.2s;
+        }
+        .popup-btn-copy:hover { background: #1ed760; }
+        .popup-btn-close {
+            padding: 10px 18px; background: #e91429; color: white;
+            border: none; border-radius: 6px; font-weight: bold; cursor: pointer;
+            font-size: clamp(.75rem, 2vw, .85rem); transition: background 0.2s;
+        }
+        .popup-btn-close:hover { background: #ff2d40; }
+
+        /* ── TOAST ── */
+        .copy-toast {
+            position: fixed; bottom: 24px; left: 50%;
+            transform: translateX(-50%);
+            background: #1DB954; color: black;
+            padding: 10px 22px; border-radius: 50px;
+            font-weight: bold; font-size: clamp(.8rem, 2vw, .9rem);
+            z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+            white-space: nowrap;
+        }
+        .copy-toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<!-- OVERLAY BLOQUANT -->
+<div id="popupOverlay">
+    <div class="popup-waiting-box">
+        <h3>🔍 Recherche en cours</h3>
+        <p>La fenêtre de recherche est ouverte.<br>Reviens ici quand tu as terminé.</p>
+        <div class="popup-url-display" id="popupUrlDisplay"></div>
+        <div class="popup-actions">
+            <button class="popup-btn-copy" onclick="copyPopupUrl()"><i class="fas fa-copy"></i> Copier</button>
+            <button class="popup-btn-close" onclick="closePopup()"><i class="fas fa-times"></i> Fermer</button>
+        </div>
+    </div>
+</div>
+
+<div class="copy-toast" id="copyToast">Lien copié !</div>
+
+<div class="container">
+    <div class="profile-header" id="profileDisplay">
+        <img id="currentPhoto" src="" alt="Photo Artiste">
+        <div class="profile-info">
+            <h1 id="currentUsername">Chargement...</h1>
+            <div class="spotify-field-wrap">
+                <label class="spotify-field-label">Lien Spotify</label>
+                <input type="text" id="currentSpotifyUrlField" readonly value="Chargement...">
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION GENRE MUSICAL -->
+    <div class="genre-section">
+        <h3>Genre Musical</h3>
+        <div class="genre-select-wrap">
+            <label class="genre-label">Sélectionner le genre musical principal</label>
+            <select id="genreSelect">
+                <option value="">Chargement des genres...</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="search-section" id="searchSection">
+        <h3>Chercher un Artiste Spotify</h3>
+        <div class="search-box">
+            <input type="text" id="spotifySearchInput" placeholder="Nom de l'artiste...">
+            <button class="btn btn-green" onclick="searchSpotify()">Chercher</button>
+        </div>
+        <div class="loader" id="spotifyLoader"></div>
+        <div id="spotifyResults"></div>
+    </div>
+
+    <div class="social-section">
+        <h3>Réseaux Sociaux</h3>
+        <div id="socialContainer"></div>
+
+        <div id="actionButtons">
+            <button class="btn btn-green" style="width:100%; margin-top:25px;" onclick="saveAllChanges()">ENREGISTRER LES MODIFICATIONS</button>
+            <button class="btn btn-cancel" onclick="cancelEdit()">ANNULER</button>
+        </div>
+
+        <div id="statusLog"></div>
+
+        <div class="final-actions" id="finalActions">
+            <a href="/menu/menu.html" class="btn btn-green">MENU</a>
+            <a id="viewProfileBtn" href="#" class="btn btn-green">VOIR PROFIL</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId    = urlParams.get('userId');
+
+    let selectedSpotifyUrl = '';
+    let selectedPhotoUrl   = '';
+    let currentArtistName  = '';
+    let currentPopupUrl    = '';
+    let selectedGenreId    = null;
+    let genresList         = [];
+
+    if (userId) {
+      loadUserProfile();
+      loadGenres();
+      document.getElementById('viewProfileBtn').href = `/menu/profil_artist.html?userId=${userId}`;
+    }
+
+    async function loadGenres() {
+      try {
+        const response = await fetch('/api/music-genres');
+        const genres = await response.json();
+        genresList = genres;
+
+        const select = document.getElementById('genreSelect');
+        select.innerHTML = '<option value="">-- Sélectionner un genre --</option>';
+
+        genres.forEach(genre => {
+          const option = document.createElement('option');
+          option.value = genre.id;
+          option.textContent = genre.description;
+          select.appendChild(option);
+        });
+
+        select.addEventListener('change', async (e) => {
+          const newGenreId = e.target.value ? parseInt(e.target.value) : null;
+          if (newGenreId !== null) {
+            selectedGenreId = newGenreId;
+            await saveGenreToServer(selectedGenreId);
+          }
+        });
+
+      } catch (error) {
+        console.error('Erreur lors du chargement des genres:', error);
+        const select = document.getElementById('genreSelect');
+        select.innerHTML = '<option value="">Erreur de chargement</option>';
+      }
+    }
+
+    async function saveGenreToServer(genreId) {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        showToast('❌ Non connecté', true);
+        return;
+      }
+
+      try {
+        // 1. Récupérer tous les MusicFavoris de l'artiste
+        const favorisResponse = await fetch(`/api/music-favoris/users/${userId}`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (!favorisResponse.ok) {
+          throw new Error('Erreur lors de la récupération des favoris');
+        }
+
+        const favorisList = await favorisResponse.json();
+
+        // 2. Chercher un MusicFavoris avec cotePreference = 9
+        const existingFavori = favorisList.find(f => f.cotePreference === 9);
+
+        // 3. Si un favori existe, le supprimer
+        if (existingFavori) {
+          const deleteResponse = await fetch(`/api/music-favoris/${existingFavori.id}/users/${userId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+
+          if (!deleteResponse.ok) {
+            console.warn('Erreur lors de la suppression du favori existant');
+          }
+        }
+
+        // 4. Créer un nouveau MusicFavoris avec cote 9 et le genre sélectionné
+        const createResponse = await fetch(`/api/music-favoris/users/${userId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({
+            cotePreference: 9,
+            genreIds: [genreId]
+          })
+        });
+
+        if (!createResponse.ok) {
+          throw new Error('Erreur lors de la création du favori');
+        }
+
+        showToast('✅ Genre musical mis à jour !');
+
+      } catch (error) {
+        console.error('Erreur saveGenreToServer:', error);
+        showToast('❌ Erreur lors de la sauvegarde du genre', true);
+      }
+    }
+
+    async function loadUserProfile() {
+      try {
+        const resp = await fetch(`/api/users/${userId}`);
+        const user = await resp.json();
+        currentArtistName  = user.username;
+        selectedPhotoUrl   = user.photoUrl;
+        selectedSpotifyUrl = user.lien_spotify;
+
+        updateUI(user.username, user.photoUrl, user.lien_spotify);
+
+        const container = document.getElementById('socialContainer');
+        container.innerHTML = '';
+
+        let instagramUrl = '', facebookUrl = '', tiktokUrl = '', snapchatUrl = '';
+
+        if (user.listeReseaux && user.listeReseaux.trim() !== '') {
+          user.listeReseaux.split(';').forEach(url => {
+            if (url.includes('instagram'))  instagramUrl = url.trim();
+            else if (url.includes('facebook')) facebookUrl = url.trim();
+            else if (url.includes('tiktok'))   tiktokUrl   = url.trim();
+            else if (url.includes('snapchat')) snapchatUrl = url.trim();
+          });
+        }
+
+        addSocialRow(instagramUrl, 'instagram');
+        addSocialRow(facebookUrl,  'facebook');
+        addSocialRow(tiktokUrl,    'tiktok');
+        addSocialRow(snapchatUrl,  'snapchat');
+
+        // Charger le genre associé à l'artiste (cote 9)
+        await loadArtistGenre(userId);
+
+      } catch(e) { console.error('Erreur', e); }
+    }
+
+    async function loadArtistGenre(userId) {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+
+      try {
+        const response = await fetch(`/api/music-favoris/users/${userId}`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (response.ok) {
+          const favorisList = await response.json();
+          const favoriWithCote9 = favorisList.find(f => f.cotePreference === 9);
+
+          if (favoriWithCote9 && favoriWithCote9.genres && favoriWithCote9.genres.length > 0) {
+            selectedGenreId = favoriWithCote9.genres[0].id;
+
+            const select = document.getElementById('genreSelect');
+            if (select) {
+              select.value = selectedGenreId;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement du genre de l\'artiste:', error);
+      }
+    }
+
+    function updateUI(name, photo, spotify) {
+      document.getElementById('currentPhoto').src             = photo || '';
+      document.getElementById('currentUsername').innerText    = name;
+      document.getElementById('currentSpotifyUrlField').value = spotify || 'Aucun lien';
+    }
+
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('copyToast');
+      t.innerText = msg;
+      t.style.background = isError ? '#e91429' : '#1DB954';
+      t.style.color = 'white';
+      t.classList.add('show');
+      setTimeout(() => {
+        t.classList.remove('show');
+        t.style.background = '#1DB954';
+      }, 3000);
+    }
+
+    async function searchSpotify() {
+      const query = document.getElementById('spotifySearchInput').value;
+      if (!query) return;
+      document.getElementById('spotifyLoader').style.display = 'block';
+      document.getElementById('spotifyResults').innerHTML    = '';
+
+      try {
+        const resp = await fetch(`/api/spotify/artiste/searchChoix?nom=${encodeURIComponent(query)}`);
+        const data = await resp.json();
+        document.getElementById('spotifyLoader').style.display = 'none';
+
+        if (data.success && data.resultats) {
+          data.resultats.forEach(art => {
+            const card = document.createElement('div');
+            card.className = 'spotify-card';
+            card.innerHTML = `<img src="${art.photoUrl}"><span>${art.nom}</span>`;
+            card.onclick = () => {
+              currentArtistName  = art.nom;
+              selectedPhotoUrl   = art.photoUrl;
+              selectedSpotifyUrl = art.spotifyUrl;
+              updateUI(art.nom, art.photoUrl, art.spotifyUrl);
+              document.getElementById('searchSection').style.display = 'none';
+            };
+            document.getElementById('spotifyResults').appendChild(card);
+          });
+        }
+      } catch(e) { document.getElementById('spotifyLoader').style.display = 'none'; }
+    }
+
+    function buildGoogleQuery(artistName, platform) {
+      return `https://www.google.com/search?q=${artistName.trim().replace(/\s+/g,'+')}+${platform}`;
+    }
+
+    function openSocialSearch(platform) {
+      const url = buildGoogleQuery(currentArtistName, platform);
+      currentPopupUrl = url;
+      document.getElementById('popupUrlDisplay').innerText = url;
+      document.getElementById('popupOverlay').style.display = 'flex';
+
+      const popup = window.open(url, 'socialSearch', 'width=1000,height=700,toolbar=1,location=1,scrollbars=1,resizable=1');
+      const timer = setInterval(() => { if (popup && popup.closed) { clearInterval(timer); closePopup(); } }, 500);
+    }
+
+    function closePopup() { document.getElementById('popupOverlay').style.display = 'none'; }
+
+    function copyPopupUrl() {
+      navigator.clipboard.writeText(currentPopupUrl).then(() => showToast('Lien copié !')).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = currentPopupUrl;
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        showToast('Lien copié !');
+      });
+    }
+
+    async function pasteToField(fieldId) {
+      try {
+        document.getElementById(fieldId).value = await navigator.clipboard.readText();
+        showToast('Collé !');
+      } catch(e) { showToast('Autoriser le presse-papier dans le navigateur'); }
+    }
+
+    function addSocialRow(existingValue = '', defaultPlatform = '') {
+      const rowId   = 'row_' + Math.random().toString(36).substr(2, 9);
+      const fieldId = 'field_' + rowId;
+      const row     = document.createElement('div');
+      row.className = 'social-search-row';
+      row.id        = rowId;
+
+      const config = {
+        instagram: { icon:'fab fa-instagram', cls:'insta', label:'Instagram' },
+        facebook:  { icon:'fab fa-facebook',  cls:'fb',    label:'Facebook' },
+        tiktok:    { icon:'fab fa-tiktok',    cls:'tk',    label:'TikTok' },
+        snapchat:  { icon:'fab fa-snapchat',  cls:'snap',  label:'Snapchat' },
+      };
+
+      const { icon, cls, label } = config[defaultPlatform] || { icon:'fas fa-link', cls:'', label: defaultPlatform };
+
+      row.innerHTML = `
+        <button class="search-social-btn ${cls}" onclick="openSocialSearch('${defaultPlatform}')">
+          <span class="icon"><i class="${icon}"></i></span> ${label}
+        </button>
+        <button class="btn-paste" onclick="pasteToField('${fieldId}')"><i class="fas fa-clipboard"></i> Coller</button>
+        <input type="text" class="url-input-field" id="${fieldId}" value="${existingValue.replace(/"/g,'&quot;')}" placeholder="URL ${label}...">
+      `;
+
+      document.getElementById('socialContainer').appendChild(row);
+    }
+
+    function cancelEdit() {
+      if (confirm("Aucune modification n'a été faite. Retour au menu ?")) {
+        window.location.href = '/menu/menu.html';
+      }
+    }
+
+    async function saveAllChanges() {
+      const log = document.getElementById('statusLog');
+      log.innerHTML = 'Sauvegarde en cours…<br>';
+
+      try {
+        const socialString = Array.from(document.querySelectorAll('.url-input-field'))
+          .map(i => i.value.trim()).filter(u => u).join(';');
+
+        await fetch(`/api/users/${userId}/photo-url?photoUrl=${encodeURIComponent(selectedPhotoUrl)}`,       { method:'PUT' });
+        await fetch(`/api/users/spotify/${userId}?spotifyLink=${encodeURIComponent(selectedSpotifyUrl)}`,    { method:'PUT' });
+        await fetch(`/api/users/${userId}/listeReseaux?listeReseaux=${encodeURIComponent(socialString)}`,    { method:'PUT' });
+
+        log.innerHTML = "<strong style='color:var(--sp-green)'>PROFIL MIS À JOUR AVEC SUCCÈS !</strong>";
+        document.getElementById('actionButtons').style.display = 'none';
+        document.getElementById('finalActions').style.display  = 'flex';
+
+      } catch(e) {
+        console.error(e);
+        log.innerHTML = `<span style="color:red">ERREUR LORS DE LA SAUVEGARDE</span>`;
+      }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Recherche & Encodage Musical</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sp: #1DB954;
+            --sp2: #1ed760;
+            --bg: #060606;
+            --card-bg: #121212;
+            --text: #ffffff;
+            --muted: #a7a7a7;
+            --border: rgba(255,255,255,0.08);
+            --nav-h: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding-top: var(--nav-h);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .fixed-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-h);
+            z-index: 1000;
+            background: rgba(6,6,6,0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+        }
+
+        .nav-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--sp);
+        }
+
+        .nav-menu-btn {
+            height: 44px;
+            background: var(--sp);
+            color: black;
+            padding: 0 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Conteneur principal */
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Carte principale */
+        .main-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            padding: 30px;
+        }
+
+        .main-card h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .main-card p {
+            color: var(--muted);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Groupes de formulaire */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+        }
+
+        .form-label i {
+            color: var(--sp);
+            font-size: 0.9rem;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: #0a0a0a;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 14px 20px;
+            color: white;
+            font-size: 0.95rem;
+            font-family: 'Syne', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--sp);
+        }
+
+        .search-input:read-only {
+            opacity: 0.8;
+            cursor: default;
+            background: #0a0a0a;
+        }
+
+        /* Double colonne pour genre et note */
+        .double-col {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .double-col .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        select {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 14px 20px;
+            color: white;
+            font-size: 0.95rem;
+            font-family: 'Syne', sans-serif;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--sp);
+        }
+
+        select option {
+            background: #0a0a0a;
+            color: white;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 14px 20px;
+            color: white;
+            font-size: 0.95rem;
+            font-family: 'Syne', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--sp);
+        }
+
+        /* Supprimer les flèches sur input number */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 0.5;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Syne', sans-serif;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--sp);
+            color: black;
+        }
+
+        .btn-primary:hover {
+            background: var(--sp2);
+            transform: scale(1.02);
+        }
+
+        /* Bouton YouTube rouge */
+        .btn-youtube {
+            background: #FF0000;
+            color: white;
+        }
+
+        .btn-youtube:hover {
+            background: #ff3333;
+            transform: scale(1.02);
+        }
+
+        .btn-secondary {
+            background: #2a2a2a;
+            color: white;
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #3a3a3a;
+            transform: scale(1.02);
+        }
+
+        .btn-validate {
+            width: 100%;
+            background: var(--sp);
+            color: black;
+            justify-content: center;
+            padding: 16px;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        .btn-validate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-view {
+            width: 100%;
+            background: var(--sp);
+            color: black;
+            justify-content: center;
+            padding: 14px;
+            font-size: 0.95rem;
+            margin-top: 15px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-view:hover {
+            background: var(--sp2);
+            transform: scale(1.02);
+        }
+
+        /* Zone de texte non éditable */
+        .readonly-field {
+            background: #0a0a0a;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 14px 20px;
+            width: 100%;
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-family: 'DM Mono', monospace;
+            outline: none;
+            cursor: text;
+            word-break: break-all;
+        }
+
+        /* Ligne des boutons d'action */
+        .action-row {
+            display: flex;
+            gap: 12px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .action-row .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* Résultats et logs */
+        .result-card {
+            margin-top: 25px;
+            padding: 20px;
+            background: #0a0a0a;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+        }
+
+        .result-title {
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-title i {
+            color: var(--sp);
+        }
+
+        .result-content {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--muted);
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        .spotify-result {
+            background: rgba(29,185,84,0.1);
+            border: 1px solid rgba(29,185,84,0.3);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 10px 0;
+        }
+
+        .spotify-result a {
+            color: var(--sp);
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .spotify-result a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #ff5555;
+        }
+
+        .success-message {
+            color: var(--sp);
+        }
+
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-top-color: var(--sp);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--sp);
+            color: black;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            :root {
+                --nav-h: 60px;
+            }
+
+            .fixed-nav {
+                padding: 0 20px;
+            }
+
+            .nav-title {
+                font-size: 1rem;
+            }
+
+            .nav-menu-btn {
+                padding: 0 16px;
+                font-size: 0.8rem;
+            }
+
+            .nav-menu-btn span {
+                display: none;
+            }
+
+            .nav-menu-btn i {
+                font-size: 1rem;
+            }
+
+            .container {
+                padding: 20px 16px;
+            }
+
+            .main-card {
+                padding: 20px;
+            }
+
+            .main-card h2 {
+                font-size: 1.3rem;
+            }
+
+            .search-row {
+                flex-direction: column;
+            }
+
+            .search-row .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .action-row {
+                flex-direction: column;
+            }
+
+            .action-row .btn {
+                width: 100%;
+            }
+
+            .double-col {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .double-col .form-group {
+                width: 100%;
+            }
+
+            .btn {
+                padding: 12px 20px;
+            }
+
+            .readonly-field {
+                font-size: 0.8rem;
+                padding: 12px 16px;
+            }
+
+            select, input[type="number"] {
+                padding: 12px 16px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .main-card {
+                padding: 16px;
+            }
+
+            .form-label {
+                font-size: 0.8rem;
+            }
+
+            .btn {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="fixed-nav">
+    <div class="nav-title">🎵 ENCODEUR MUSICAL</div>
+    <a href="menu.html" class="nav-menu-btn">
+        <i class="fa fa-arrow-left"></i> <span>MENU</span>
+    </a>
+</nav>
+
+<div class="container">
+    <div class="main-card">
+        <h2>🔍 Recherche & Encodage</h2>
+        <p>Recherchez un morceau, collez le lien YouTube et validez</p>
+
+        <!-- Zone de recherche -->
+        <div class="form-group">
+            <div class="form-label">
+                <i class="fa fa-music"></i> Music recherché
+            </div>
+            <div class="search-row">
+                <input type="text" id="searchQuery" class="search-input" placeholder="Ex: xzibit snoop dogg bitch please" value="">
+                <button class="btn btn-youtube" id="searchGoogleBtn">
+                    <i class="fab fa-youtube"></i> Rechercher
+                </button>
+            </div>
+        </div>
+
+        <!-- Zone de lien YouTube -->
+        <div class="form-group">
+            <div class="form-label">
+                <i class="fab fa-youtube"></i> Lien trouvé
+            </div>
+            <input type="text" id="youtubeLink" class="readonly-field" readonly placeholder="Le lien YouTube apparaîtra ici...">
+            <div class="action-row">
+                <button class="btn btn-secondary" id="pasteBtn">
+                    <i class="fas fa-clipboard"></i> Coller
+                </button>
+            </div>
+            <div class="form-label" style="margin-top: 8px; font-size: 0.7rem;">
+                <i class="fa fa-info-circle"></i> Copiez un lien YouTube depuis votre navigateur, puis cliquez sur "Coller"
+            </div>
+        </div>
+
+        <!-- Genre musical et Note - Double colonne -->
+        <div class="double-col">
+            <div class="form-group">
+                <div class="form-label">
+                    <i class="fa fa-tag"></i> Genre musical
+                </div>
+                <select id="genreSelect">
+                    <option value="">-- Sélectionner un genre --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">
+                    <i class="fa fa-star"></i> Note (0-10)
+                </div>
+                <input type="number" id="noteInput" min="0" max="10" step="1" value="0" placeholder="Note de 0 à 10">
+            </div>
+        </div>
+
+        <!-- Bouton Valider -->
+        <button class="btn btn-validate" id="validateBtn">
+            <i class="fas fa-check-circle"></i> Valider et encoder
+        </button>
+
+        <!-- Zone de résultat -->
+        <div id="resultCard" class="result-card">
+            <div class="result-title">
+                <i class="fa fa-spotify"></i> Résultat
+            </div>
+            <div id="resultContent" class="result-content"></div>
+            <!-- Le bouton "voir le son" apparaîtra ici après encodage réussi -->
+            <div id="viewButtonContainer" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast">Lien copié !</div>
+
+<script>
+    let currentUserId = null;
+    let currentSpotifyTrack = null;
+    let isFromSpotifyParam = false;
+    let lastCreatedMusicId = null;
+    let genresList = [];
+
+    // Charger les genres musicaux
+    async function loadGenres() {
+        try {
+            const response = await fetch('/api/music-genres');
+            const genres = await response.json();
+            genresList = genres;
+
+            const select = document.getElementById('genreSelect');
+            select.innerHTML = '<option value="">-- Sélectionner un genre --</option>';
+
+            genres.forEach(genre => {
+                const option = document.createElement('option');
+                option.value = genre.id;
+                option.textContent = genre.description;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Erreur lors du chargement des genres:', error);
+            const select = document.getElementById('genreSelect');
+            select.innerHTML = '<option value="">Erreur de chargement</option>';
+        }
+    }
+
+    // Récupérer l'utilisateur connecté
+    async function getCurrentUser() {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            showToast('❌ Non connecté. Veuillez vous connecter.', true);
+            return null;
+        }
+        try {
+            const res = await fetch('/api/users/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!res.ok) throw new Error('Token invalide');
+            const data = await res.json();
+            return data.id;
+        } catch (e) {
+            console.error('Erreur récupération utilisateur:', e);
+            showToast('❌ Erreur de connexion', true);
+            return null;
+        }
+    }
+
+    // Afficher un toast
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.style.background = isError ? '#e91429' : 'var(--sp)';
+        toast.style.color = 'white';
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+            toast.style.background = 'var(--sp)';
+            toast.style.color = 'black';
+        }, 3000);
+    }
+
+    // Copier le presse-papier
+    async function pasteFromClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            const youtubeInput = document.getElementById('youtubeLink');
+            youtubeInput.value = text;
+            showToast('✅ Lien collé !');
+        } catch (e) {
+            showToast('❌ Autorisez le presse-papier dans le navigateur', true);
+        }
+    }
+
+    // Ouvrir la recherche YouTube directement
+    function openYoutubeSearch() {
+        let query = document.getElementById('searchQuery').value.trim();
+        if (!query) {
+            showToast('❌ Entrez un nom de morceau ou artiste', true);
+            return;
+        }
+        const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+        window.open(searchUrl, '_blank');
+        showToast('🔍 Recherche YouTube ouverte');
+    }
+
+    // Récupérer les informations du morceau à partir du lien Spotify
+    async function fetchTrackFromSpotifyUrl(spotifyUrl) {
+        try {
+            const res = await fetch(`/api/spotify/track/summary?url=${encodeURIComponent(spotifyUrl)}`);
+            const data = await res.json();
+            if (data.success) {
+                return {
+                    success: true,
+                    query: data.summary || data.artistes + " " + data.titre,
+                    titre: data.titre,
+                    artiste: data.artistes
+                };
+            } else {
+                return { success: false, error: data.error || 'Erreur lors de la récupération' };
+            }
+        } catch (e) {
+            return { success: false, error: e.message };
+        }
+    }
+
+    // Rechercher le morceau sur Spotify
+    async function searchSpotifyTrack(query) {
+        try {
+            const res = await fetch(`/api/spotify/artiste/searchTrack?titre=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            if (data.success && data.resultats && data.resultats.length > 0) {
+                const firstTrack = data.resultats[0];
+                return {
+                    success: true,
+                    spotifyUrl: firstTrack.spotifyUrl,
+                    titre: firstTrack.titre,
+                    artiste: firstTrack.artiste,
+                    photoUrl: firstTrack.photoUrl
+                };
+            } else {
+                return { success: false, error: 'Aucun morceau trouvé sur Spotify' };
+            }
+        } catch (e) {
+            return { success: false, error: e.message };
+        }
+    }
+
+    // Créer la musique avec genre et note
+    async function createMusic(spotifyUrl, youtubeUrl, userId, genreMusical, note) {
+        try {
+            const body = {
+                lienSpotify: spotifyUrl,
+                lienYoutube: youtubeUrl,
+                userId: userId,
+                genreMusical: genreMusical || "",
+                note: note !== undefined && note !== null ? note : 0
+            };
+
+            const response = await fetch('/api/music', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await response.json();
+            return data;
+        } catch (e) {
+            return { success: false, error: e.message };
+        }
+    }
+
+    // Afficher le résultat avec le bouton "voir le son"
+    function showResult(trackInfo, creationResult, genreMusical, note) {
+        const resultCard = document.getElementById('resultCard');
+        const resultContent = document.getElementById('resultContent');
+        const viewButtonContainer = document.getElementById('viewButtonContainer');
+
+        let html = '';
+
+        if (trackInfo && trackInfo.success) {
+            html += `
+                <div class="spotify-result">
+                    <div><strong>🎵 Morceau trouvé :</strong></div>
+                    <div>${trackInfo.titre} - ${trackInfo.artiste}</div>
+                    <div><strong>🔗 Lien Spotify :</strong> <a href="${trackInfo.spotifyUrl}" target="_blank">${trackInfo.spotifyUrl}</a></div>
+                    ${trackInfo.photoUrl ? `<div><img src="${trackInfo.photoUrl}" style="width: 60px; height: 60px; border-radius: 8px; margin-top: 8px;"></div>` : ''}
+                </div>
+            `;
+        }
+
+        if (creationResult) {
+            if (creationResult.success) {
+                lastCreatedMusicId = creationResult.id;
+                html += `
+                    <div class="success-message" style="margin-top: 12px;">
+                        <strong>✅ Encodage réussi !</strong><br>
+                        ID: ${creationResult.id}<br>
+                        Titre: ${creationResult.titre || 'N/A'}<br>
+                        ${genreMusical ? `<span style="color: var(--sp);">🎵 Genre: ${genreMusical}</span><br>` : ''}
+                        ${note !== undefined && note !== null && note !== 0 ? `<span style="color: var(--sp);">⭐ Note: ${note}/10</span><br>` : ''}
+                        <a href="${document.getElementById('youtubeLink').value}" target="_blank" style="color: var(--sp);">Voir sur YouTube</a>
+                    </div>
+                `;
+
+                // Afficher le bouton "voir le son"
+                viewButtonContainer.style.display = 'block';
+                viewButtonContainer.innerHTML = `
+                    <a href="/menu/voir_morceau_encoder.html?musicId=${creationResult.id}" class="btn btn-view">
+                        <i class="fas fa-eye"></i> Voir le son
+                    </a>
+                `;
+            } else {
+                lastCreatedMusicId = null;
+                viewButtonContainer.style.display = 'none';
+                html += `
+                    <div class="error-message" style="margin-top: 12px;">
+                        <strong>❌ Erreur :</strong> ${creationResult.error || 'Échec de l\'encodage'}
+                    </div>
+                `;
+            }
+        }
+
+        resultContent.innerHTML = html;
+        resultCard.classList.add('show');
+    }
+
+    // Fonction principale de validation
+    async function validateAndEncode() {
+        const query = document.getElementById('searchQuery').value.trim();
+        const youtubeUrl = document.getElementById('youtubeLink').value.trim();
+        const validateBtn = document.getElementById('validateBtn');
+
+        // Récupérer le genre et la note
+        const genreSelect = document.getElementById('genreSelect');
+        const selectedGenreId = genreSelect.value;
+        const selectedGenreName = selectedGenreId ? genresList.find(g => g.id == selectedGenreId)?.description || "" : "";
+
+        let noteInput = document.getElementById('noteInput').value;
+        let note = noteInput !== "" ? parseInt(noteInput) : 0;
+        if (isNaN(note)) note = 0;
+        if (note < 0) note = 0;
+        if (note > 10) note = 10;
+
+        if (!query) {
+            showToast('❌ Veuillez entrer un nom de morceau à rechercher', true);
+            return;
+        }
+
+        if (!youtubeUrl) {
+            showToast('❌ Veuillez coller un lien YouTube', true);
+            return;
+        }
+
+        if (!currentUserId) {
+            showToast('❌ Utilisateur non connecté', true);
+            return;
+        }
+
+        // Désactiver le bouton pendant le traitement
+        validateBtn.disabled = true;
+        validateBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Recherche Spotify...';
+
+        try {
+            // 1. Rechercher le morceau sur Spotify
+            const spotifyResult = await searchSpotifyTrack(query);
+
+            if (!spotifyResult.success) {
+                showToast(`❌ ${spotifyResult.error}`, true);
+                showResult(null, { success: false, error: spotifyResult.error }, selectedGenreName, note);
+                validateBtn.disabled = false;
+                validateBtn.innerHTML = '<i class="fas fa-check-circle"></i> Valider et encoder';
+                return;
+            }
+
+            validateBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Encodage en cours...';
+
+            // 2. Créer la musique avec genre et note
+            const creationResult = await createMusic(
+                spotifyResult.spotifyUrl,
+                youtubeUrl,
+                currentUserId,
+                selectedGenreName,
+                note
+            );
+
+            // 3. Afficher les résultats
+            showResult(spotifyResult, creationResult, selectedGenreName, note);
+
+            if (creationResult.success) {
+                showToast('✅ Encodage réussi !');
+            } else {
+                showToast(`❌ ${creationResult.error || 'Échec de l\'encodage'}`, true);
+            }
+
+        } catch (error) {
+            console.error('Erreur:', error);
+            showToast(`❌ Erreur: ${error.message}`, true);
+            showResult(null, { success: false, error: error.message }, selectedGenreName, note);
+        } finally {
+            validateBtn.disabled = false;
+            validateBtn.innerHTML = '<i class="fas fa-check-circle"></i> Valider et encoder';
+        }
+    }
+
+    // Surveiller le presse-papier automatiquement (optionnel)
+    async function watchClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text && (text.includes('youtube.com') || text.includes('youtu.be'))) {
+                document.getElementById('youtubeLink').value = text;
+                showToast('📋 Lien détecté et collé automatiquement !');
+            }
+        } catch (e) {
+            // Pas d'autorisation, on ignore
+        }
+    }
+
+    // Gestion du paramètre lienSpotify dans l'URL
+    async function handleSpotifyParam() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const spotifyLink = urlParams.get('lienSpotify');
+
+        if (spotifyLink && spotifyLink.trim() !== '') {
+            isFromSpotifyParam = true;
+            const searchInput = document.getElementById('searchQuery');
+            searchInput.readOnly = true;
+            searchInput.value = 'Chargement...';
+
+            const result = await fetchTrackFromSpotifyUrl(spotifyLink);
+
+            if (result.success) {
+                searchInput.value = result.query;
+                showToast(`✅ Morceau chargé : ${result.query}`);
+            } else {
+                searchInput.readOnly = false;
+                searchInput.value = '';
+                showToast(`❌ Erreur: ${result.error}`, true);
+                isFromSpotifyParam = false;
+            }
+        }
+    }
+
+    // Événements au chargement
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Charger les genres
+        await loadGenres();
+
+        currentUserId = await getCurrentUser();
+
+        // Si pas connecté, désactiver les boutons
+        if (!currentUserId) {
+            const btns = [document.getElementById('searchGoogleBtn'), document.getElementById('pasteBtn'), document.getElementById('validateBtn')];
+            btns.forEach(btn => { if (btn) btn.disabled = true; });
+            document.getElementById('resultContent').innerHTML = '<div class="error-message">⚠️ Veuillez vous connecter pour utiliser cette fonctionnalité.</div>';
+            document.getElementById('resultCard').classList.add('show');
+        }
+
+        // Traiter le paramètre lienSpotify
+        await handleSpotifyParam();
+
+        // Événements
+        document.getElementById('searchGoogleBtn').addEventListener('click', openYoutubeSearch);
+        document.getElementById('pasteBtn').addEventListener('click', pasteFromClipboard);
+        document.getElementById('validateBtn').addEventListener('click', validateAndEncode);
+
+        // Tentative de lecture du presse-papier au chargement (si autorisé)
+        setTimeout(() => watchClipboard(), 500);
+    });
+
+    // Écouter l'événement de copie pour détecter un lien YouTube (optionnel)
+    document.addEventListener('copy', async () => {
+        setTimeout(() => watchClipboard(), 200);
+    });
+</script>
+</body>
+</html>
